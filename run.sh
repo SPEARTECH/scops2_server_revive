@@ -187,6 +187,7 @@ $PYTHON tools/ubigs_router_wm_server.py \
     --log-file logs/router_wm_40005.log \
     --ct34-profile "$CT34_PROFILE" \
     --user-db state/users.json \
+    --login-boot-delay 0.5 \
     --fixed-rsa-key-file state/shared_router_rsa.json &
 
 # Pers Proxy/44001
