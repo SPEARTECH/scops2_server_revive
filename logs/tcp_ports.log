@@ -1,0 +1,25 @@
+TCP logger listening
+  bind:  0.0.0.0
+  ports: 44000, 6667, 6668, 27900, 27901, 28910, 29900, 29901, 29920
+  log:   logs/tcp_ports.log
+  ctrl+c to stop
+TCP logger listening
+  bind:  0.0.0.0
+  ports: 44000, 6667, 6668, 27900, 27901, 28910, 29900, 29901, 29920
+  log:   logs/tcp_ports.log
+  ctrl+c to stop
+TCP logger listening
+  bind:  0.0.0.0
+  ports: 44000, 6667, 6668, 27900, 27901, 28910, 29900, 29901, 29920
+  log:   logs/tcp_ports.log
+  ctrl+c to stop
+TCP logger listening
+  bind:  0.0.0.0
+  ports: 44000, 6667, 6668, 27900, 27901, 28910, 29900, 29901, 29920
+  log:   logs/tcp_ports.log
+  ctrl+c to stop
+TCP logger listening
+  bind:  0.0.0.0
+  ports: 44000, 6667, 6668, 27900, 27901, 28910, 29900, 29901, 29920
+  log:   logs/tcp_ports.log
+  ctrl+c to stop

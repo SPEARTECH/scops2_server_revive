@@ -1,0 +1,40 @@
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 45000, 45001
+  reply-mode: srp_nat
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_45000_reply.log
+  ctrl+c to stop
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 45000, 45001
+  reply-mode: srp_nat
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_45000_reply.log
+  ctrl+c to stop
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 45000, 45001
+  reply-mode: srp_nat
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_45000_reply.log
+  ctrl+c to stop
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 45000, 45001
+  reply-mode: srp_nat
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_45000_reply.log
+  ctrl+c to stop
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 45000, 45001
+  reply-mode: srp_nat
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_45000_reply.log
+  ctrl+c to stop

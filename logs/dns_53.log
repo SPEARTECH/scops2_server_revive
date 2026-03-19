@@ -1,0 +1,5 @@
+ERROR: failed to bind 0.0.0.0:53: [Errno 13] Permission denied
+ERROR: failed to bind 0.0.0.0:53: [Errno 98] Address already in use
+ERROR: failed to bind 0.0.0.0:53: [Errno 98] Address already in use
+ERROR: failed to bind 0.0.0.0:53: [Errno 98] Address already in use
+ERROR: failed to bind 0.0.0.0:53: [Errno 98] Address already in use

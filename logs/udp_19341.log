@@ -1,0 +1,25 @@
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 19341
+  log:  logs/udp_19341.log
+  ctrl+c to stop
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 19341
+  log:  logs/udp_19341.log
+  ctrl+c to stop
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 19341
+  log:  logs/udp_19341.log
+  ctrl+c to stop
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 19341
+  log:  logs/udp_19341.log
+  ctrl+c to stop
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 19341
+  log:  logs/udp_19341.log
+  ctrl+c to stop

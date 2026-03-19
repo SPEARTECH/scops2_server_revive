@@ -1,0 +1,28 @@
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs/gs_http_80.log
+  ctrl+c to stop
+[2026-03-19 02:23:02.711] HTTP 149.86.227.60:51762  GET /?
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs/gs_http_80.log
+  ctrl+c to stop
+[2026-03-19 02:26:54.116] HTTP 24.68.110.227:55984  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=noname
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'noname'
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs/gs_http_80.log
+  ctrl+c to stop
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs/gs_http_80.log
+  ctrl+c to stop

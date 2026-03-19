@@ -1,0 +1,55 @@
+[2026-03-19 02:14:15.952] ROUTER fixed-rsa loaded from state/shared_router_rsa.json
+Ubisoft GS Router listening
+  build-marker: router_fallback_gate_v2
+  bind: 0.0.0.0:40000
+  wm:   172.210.68.184:40005
+  joinwait-format: u32le
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44001
+[2026-03-19 02:18:37.159] ROUTER fixed-rsa loaded from state/shared_router_rsa.json
+Ubisoft GS Router listening
+  build-marker: router_fallback_gate_v2
+  bind: 0.0.0.0:40000
+  wm:   172.210.68.184:40005
+  joinwait-format: u32le
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44001
+[2026-03-19 02:26:44.150] ROUTER fixed-rsa loaded from state/shared_router_rsa.json
+Ubisoft GS Router listening
+  build-marker: router_fallback_gate_v2
+  bind: 0.0.0.0:40000
+  wm:   172.210.68.184:40005
+  joinwait-format: u32le
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44001
+[2026-03-19 02:29:53.111] ROUTER fixed-rsa loaded from state/shared_router_rsa.json
+Ubisoft GS Router listening
+  build-marker: router_fallback_gate_v2
+  bind: 0.0.0.0:40000
+  wm:   172.210.68.184:40005
+  joinwait-format: u32le
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44001
+[2026-03-19 02:32:23.258] ROUTER fixed-rsa loaded from state/shared_router_rsa.json
+Ubisoft GS Router listening
+  build-marker: router_fallback_gate_v2
+  bind: 0.0.0.0:40000
+  wm:   172.210.68.184:40005
+  joinwait-format: u32le
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44001

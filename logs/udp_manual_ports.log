@@ -1,0 +1,25 @@
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 3658, 4400, 41006, 10070, 10071, 10072, 10073, 10074, 10075, 10076, 10077, 10078, 10079, 10080
+  log:  logs/udp_manual_ports.log
+  ctrl+c to stop
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 3658, 4400, 41006, 10070, 10071, 10072, 10073, 10074, 10075, 10076, 10077, 10078, 10079, 10080
+  log:  logs/udp_manual_ports.log
+  ctrl+c to stop
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 3658, 4400, 41006, 10070, 10071, 10072, 10073, 10074, 10075, 10076, 10077, 10078, 10079, 10080
+  log:  logs/udp_manual_ports.log
+  ctrl+c to stop
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 3658, 4400, 41006, 10070, 10071, 10072, 10073, 10074, 10075, 10076, 10077, 10078, 10079, 10080
+  log:  logs/udp_manual_ports.log
+  ctrl+c to stop
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 3658, 4400, 41006, 10070, 10071, 10072, 10073, 10074, 10075, 10076, 10077, 10078, 10079, 10080
+  log:  logs/udp_manual_ports.log
+  ctrl+c to stop

@@ -1,0 +1,55 @@
+[2026-03-19 02:14:15.950] ROUTER_WM fixed-rsa loaded from state/shared_router_rsa.json
+[2026-03-19 02:14:15.982] ROUTER_WM pre-built boot_ke1 len=284
+Ubisoft GS Router WM listening
+  bind:  0.0.0.0:40005
+  proxy: 172.210.68.184:44002
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  login-boot-delay: 0.0s
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44002
+[2026-03-19 02:18:37.158] ROUTER_WM fixed-rsa loaded from state/shared_router_rsa.json
+[2026-03-19 02:18:37.165] ROUTER_WM pre-built boot_ke1 len=284
+Ubisoft GS Router WM listening
+  bind:  0.0.0.0:40005
+  proxy: 172.210.68.184:44002
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  login-boot-delay: 0.0s
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44002
+[2026-03-19 02:26:44.146] ROUTER_WM fixed-rsa loaded from state/shared_router_rsa.json
+[2026-03-19 02:26:44.154] ROUTER_WM pre-built boot_ke1 len=284
+Ubisoft GS Router WM listening
+  bind:  0.0.0.0:40005
+  proxy: 172.210.68.184:44002
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  login-boot-delay: 0.0s
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44002
+[2026-03-19 02:29:53.111] ROUTER_WM fixed-rsa loaded from state/shared_router_rsa.json
+[2026-03-19 02:29:53.117] ROUTER_WM pre-built boot_ke1 len=284
+Ubisoft GS Router WM listening
+  bind:  0.0.0.0:40005
+  proxy: 172.210.68.184:44002
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  login-boot-delay: 0.0s
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44002
+[2026-03-19 02:32:23.256] ROUTER_WM fixed-rsa loaded from state/shared_router_rsa.json
+[2026-03-19 02:32:23.263] ROUTER_WM pre-built boot_ke1 len=284
+Ubisoft GS Router WM listening
+  bind:  0.0.0.0:40005
+  proxy: 172.210.68.184:44002
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  login-boot-delay: 0.0s
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=172.210.68.184:44002

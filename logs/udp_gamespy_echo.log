@@ -1,0 +1,40 @@
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 27900, 27901, 28910, 29900, 29901, 29920
+  reply-mode: echo
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_gamespy_echo.log
+  ctrl+c to stop
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 27900, 27901, 28910, 29900, 29901, 29920
+  reply-mode: echo
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_gamespy_echo.log
+  ctrl+c to stop
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 27900, 27901, 28910, 29900, 29901, 29920
+  reply-mode: echo
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_gamespy_echo.log
+  ctrl+c to stop
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 27900, 27901, 28910, 29900, 29901, 29920
+  reply-mode: echo
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_gamespy_echo.log
+  ctrl+c to stop
+UDP reply server listening
+  bind: 0.0.0.0
+  ports: 27900, 27901, 28910, 29900, 29901, 29920
+  reply-mode: echo
+  alt-reply: enabled interval=50ms
+  scct12-extra: disabled
+  log:  logs/udp_gamespy_echo.log
+  ctrl+c to stop
