@@ -1,3 +1,10 @@
+## stand up server & login
+# create lightsail ubuntu instance  ($12/mo)
+# download ssh key and set permissions
+# (windows) icacls <pem path> /inheritance:r
+# (windows) icacls <pem path> /grant:r "$($env:USERNAME):R"
+# 
+## setup server environment
 # replace ip in gsinit_diag_weblocal.php
 # create pat token
 # allow for repos and all perms
@@ -7,7 +14,8 @@
 # git add .
 # git commit -m "message"
 # git push 
-
+#
+## setup server stack
 sudo systemctl stop systemd-resolved
 sudo systemctl disable systemd-resolved
 sudo apt-get install --update
@@ -23,7 +31,7 @@ sudo chmod 655 run.sh
 
 
 
-# Kill everything and restart clean
+## Kill everything and restart clean example
 # sudo pkill -f ubigs_router
 # sudo pkill -f gs_http_server
 # sudo pkill -f dns_override
@@ -32,4 +40,6 @@ sudo chmod 655 run.sh
 # sudo pkill -f tcp_log
 # sudo pkill -f s_server
 # sleep 1
-sudo env "PATH=$PWD/venv/bin:$PATH" ./run.sh
+#
+## run server
+# sudo env "PATH=$PWD/venv/bin:$PATH" ./run.sh
