@@ -1,6 +1,13 @@
 # replace ip in gsinit_diag_weblocal.php
 # create pat token
 # allow for repos and all perms
+# git clone <repo>
+# enter username when prompted
+# enter PAT for password when prompted
+# git add .
+# git commit -m "message"
+# git push 
+
 sudo systemctl stop systemd-resolved
 sudo systemctl disable systemd-resolved
 sudo apt-get install --update
