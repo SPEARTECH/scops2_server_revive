@@ -1,0 +1,32 @@
+[ req ]
+default_bits = 1024
+prompt = no
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+
+[ req_distinguished_name ]
+CN = gate1.us.dnas.playstation.org
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = gate1.us.dnas.playstation.org
+
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir = E:/GAMING/SCOPS2_RE/tools/certs/ca
+database = E:/GAMING/SCOPS2_RE/tools/certs/ca/index.txt
+new_certs_dir = E:/GAMING/SCOPS2_RE/tools/certs/ca/newcerts
+serial = E:/GAMING/SCOPS2_RE/tools/certs/ca/serial
+default_md = sha1
+policy = policy_any
+x509_extensions = v3_req
+
+[ policy_any ]
+commonName = supplied

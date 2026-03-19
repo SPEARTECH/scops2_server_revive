@@ -1,0 +1,23 @@
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir = E:/GAMING/SCOPS2_RE/tools/certs/ca_test
+database = E:/GAMING/SCOPS2_RE/tools/certs/ca_test/index.txt
+new_certs_dir = E:/GAMING/SCOPS2_RE/tools/certs/ca_test/newcerts
+serial = E:/GAMING/SCOPS2_RE/tools/certs/ca_test/serial
+default_md = sha1
+policy = policy_any
+x509_extensions = v3_req
+
+[ policy_any ]
+commonName = supplied
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = gate1.us.dnas.playstation.org
+DNS.2 = *.dnas.playstation.org
