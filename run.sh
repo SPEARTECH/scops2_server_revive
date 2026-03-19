@@ -188,6 +188,7 @@ $PYTHON tools/ubigs_router_wm_server.py \
     --ct34-profile "$CT34_PROFILE" \
     --user-db state/users.json \
     --login-boot-delay 0.5 \
+    --idle-timeout 30 \
     --fixed-rsa-key-file state/shared_router_rsa.json &
 
 # Pers Proxy/44001

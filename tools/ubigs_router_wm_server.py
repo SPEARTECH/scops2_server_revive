@@ -1016,12 +1016,14 @@ def main(argv: list[str] | None = None) -> int:
             # overhead (~20-50ms) makes any thread-based timing approach unreliable.
             # Sending here wins the race and causes the game to bundle KE2+LOGINWAITMODULE.
             pre_ke1_sent = False
-            if args._boot_ke1_bytes is not None:
+            if args._boot_ke1_bytes is not None and args.login_boot_delay <= 0:
                 try:
                     conn.sendall(args._boot_ke1_bytes)
                     pre_ke1_sent = True
                 except Exception:
                     pass
+
+                
             th = threading.Thread(target=client_thread, args=(conn, addr, args), kwargs={"log_fp": log_fp, "pre_ke1_sent": pre_ke1_sent}, daemon=True)
             th.start()
     except KeyboardInterrupt:
