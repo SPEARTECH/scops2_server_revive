@@ -700,7 +700,7 @@ def handle_message(
 
 def handle_joinwaitmodule(msg, *, wait_module: tuple[str, int], joinwait_format: str,
                           ct34_enable: bool = False, ct34_mode: str = "a",
-                          ct34_base: str = "persistantdata", ct34_host: str = "192.168.0.213",
+                          ct34_base: str = "persistantdata", ct34_host: str = "3.238.21.103",
                           ct34_port: int = 44001, ct34_id: int = 1,
                           ct34_num_a: int = 0, ct34_num_b: int = 0,
                           log_fp: TextIO | None = None):
@@ -1132,7 +1132,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Ubisoft GS router service")
     ap.add_argument("--bind", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=40000)
-    ap.add_argument("--wm-ip", default="192.168.0.213", help="Router wait-module IP to return")
+    ap.add_argument("--wm-ip", default="3.238.21.103", help="Router wait-module IP to return")
     ap.add_argument("--wm-port", type=int, default=40005, help="Router wait-module port to return")
     ap.add_argument(
         "--joinwait-format",
@@ -1180,7 +1180,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ct34-enable", action="store_true", help="Enable experimental PROXY_HANDLER(0xCC) response builder")
     ap.add_argument("--ct34-mode", default="a", choices=["a", "b", "c"], help="ct34 payload variant mode")
     ap.add_argument("--ct34-base", default="persistantdata", help="ct34 module name/base token")
-    ap.add_argument("--ct34-host", default="192.168.0.213", help="ct34 proxy host in response")
+    ap.add_argument("--ct34-host", default="3.238.21.103", help="ct34 proxy host in response")
     ap.add_argument("--ct34-port", type=int, default=44001, help="ct34 proxy port in response")
     ap.add_argument("--ct34-id", type=int, default=1, help="ct34 proxy id in response")
     ap.add_argument("--ct34-num-a", type=int, default=0, help="ct34 numeric slot A")

@@ -8,7 +8,7 @@
 # replace ip in gsinit_diag_weblocal.php
 # create pat token
 # allow for repos and all perms
-# git clone <repo>
+# git clone <scops2_server_revive repo url>
 # enter username when prompted
 # enter PAT for password when prompted
 # git add .
@@ -22,12 +22,12 @@ sudo apt-get install --update
 sudo apt-get install --upgrade
 sudo apt-get install python3-pip
 sudo apt install python3.12-venv
+cd scops2_server_revive
 python3 -m venv venv
 cd venv/bin
 source activate
 cd ../..
 python3 -m pip install -r requirements.txt
-cd scops2_server_revive
 sudo chmod 655 run.sh
 
 
