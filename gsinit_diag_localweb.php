@@ -1,10 +1,10 @@
 [Servers]
 RouterIP0=3.238.21.103
 RouterPort0=40000
-RouterLauncherPort0=40005
+RouterLauncherPort0=40000
 RouterIP1=3.238.21.103
 RouterPort1=40000
-RouterLauncherPort1=40005
+RouterLauncherPort1=40000
 IRCIP0=3.238.21.103
 IRCPort0=6668
 ProxyIP0=3.238.21.103

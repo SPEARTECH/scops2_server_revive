@@ -3,7 +3,7 @@ set -e
 
 # ─── Configuration ───────────────────────────────────────────────
 BIND_IP="0.0.0.0"
-HOST_IP="3.238.21.103"
+HOST_IP="172.210.68.184"
 TLS_CERT_CN="gate1.us.dnas.playstation.org"
 UPSTREAM_DNS="8.8.8.8:53"
 GSINIT_FILE="gsinit_diag_localweb.php"
@@ -165,30 +165,20 @@ $PYTHON tools/udp_reply_server.py \
     --max-bytes 512 --reply-mode echo \
     --log-file logs/udp_gamespy_echo.log &
 
-# GS Router/40000
+# GS Router/40000 (unified: handles both Router AND WM connections)
 $PYTHON tools/ubigs_router_server.py \
     --bind "$BIND_IP" --port 40000 \
-    --wm-ip "$HOST_IP" --wm-port 40005 \
+    --wm-ip "$HOST_IP" --wm-port 40000 \
+    --wm-proxy-port 44002 \
     --joinwait-format "$JOINWAIT_FORMAT" \
     --keyex2-mode "$KEYEX2_MODE" \
+    --wm-keyex2-mode "$WM_KEYEX2_MODE" \
     --post-ke2-push "$POST_KE2_PUSH" \
     --log-file logs/router_40000.log \
     --save-rx-dir captures/tcp/router_rx \
     --save-tx-dir captures/tcp/router_tx \
     --ct34-profile "$CT34_PROFILE" \
-    --fixed-rsa-key-file state/shared_router_rsa.json &
-
-# GS Router WM/40005
-$PYTHON tools/ubigs_router_wm_server.py \
-    --bind "$BIND_IP" --port 40005 \
-    --proxy-ip "$HOST_IP" --proxy-port 44002 \
-    --keyex2-mode "$WM_KEYEX2_MODE" \
-    --post-ke2-push "$WM_POST_KE2_PUSH" \
-    --log-file logs/router_wm_40005.log \
-    --ct34-profile "$CT34_PROFILE" \
     --user-db state/users.json \
-    --login-boot-delay 0.5 \
-    --idle-timeout 30 \
     --fixed-rsa-key-file state/shared_router_rsa.json &
 
 # Pers Proxy/44001
@@ -213,8 +203,7 @@ echo ""
 echo "  DNS:            $BIND_IP:53"
 echo "  HTTP:           $BIND_IP:80"
 echo "  TLS/DNAS:       $BIND_IP:443"
-echo "  Router:         $BIND_IP:40000"
-echo "  Router WM:      $BIND_IP:40005"
+echo "  Router+WM:      $BIND_IP:40000 (unified)"
 echo "  Pers Proxy:     $BIND_IP:44001"
 echo "  Pers Proxy WM:  $BIND_IP:44002"
 echo "  NAT Probe:      $BIND_IP:45000 (UDP)"

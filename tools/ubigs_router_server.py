@@ -700,7 +700,7 @@ def handle_message(
 
 def handle_joinwaitmodule(msg, *, wait_module: tuple[str, int], joinwait_format: str,
                           ct34_enable: bool = False, ct34_mode: str = "a",
-                          ct34_base: str = "persistantdata", ct34_host: str = "3.238.21.103",
+                          ct34_base: str = "persistantdata", ct34_host: str = "192.168.0.213",
                           ct34_port: int = 44001, ct34_id: int = 1,
                           ct34_num_a: int = 0, ct34_num_b: int = 0,
                           log_fp: TextIO | None = None):
@@ -1132,7 +1132,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Ubisoft GS router service")
     ap.add_argument("--bind", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=40000)
-    ap.add_argument("--wm-ip", default="3.238.21.103", help="Router wait-module IP to return")
+    ap.add_argument("--wm-ip", default="192.168.0.213", help="Router wait-module IP to return")
     ap.add_argument("--wm-port", type=int, default=40005, help="Router wait-module port to return")
     ap.add_argument(
         "--joinwait-format",
@@ -1180,13 +1180,18 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ct34-enable", action="store_true", help="Enable experimental PROXY_HANDLER(0xCC) response builder")
     ap.add_argument("--ct34-mode", default="a", choices=["a", "b", "c"], help="ct34 payload variant mode")
     ap.add_argument("--ct34-base", default="persistantdata", help="ct34 module name/base token")
-    ap.add_argument("--ct34-host", default="3.238.21.103", help="ct34 proxy host in response")
+    ap.add_argument("--ct34-host", default="192.168.0.213", help="ct34 proxy host in response")
     ap.add_argument("--ct34-port", type=int, default=44001, help="ct34 proxy port in response")
     ap.add_argument("--ct34-id", type=int, default=1, help="ct34 proxy id in response")
     ap.add_argument("--ct34-num-a", type=int, default=0, help="ct34 numeric slot A")
     ap.add_argument("--ct34-num-b", type=int, default=0, help="ct34 numeric slot B")
     ap.add_argument("--login-boot-delay", type=float, default=0.0,
                     help="If > 0, send a server-first JOINWAITMODULE after this many seconds of silence on connect (Login flow fix).")
+    ap.add_argument("--wm-proxy-port", type=int, default=44002,
+                    help="Proxy port for WM connections when running unified on same port.")
+    ap.add_argument("--wm-keyex2-mode", default="echo-client",
+                    choices=["random", "echo-client", "echo-raw", "echo-exact"],
+                    help="KEY_EXCHANGE(2) mode for WM connections.")
     args = ap.parse_args(argv)
 
     if str(args.ct34_profile).strip().lower() == "ct_ps2":
@@ -1249,11 +1254,100 @@ def main(argv: list[str] | None = None) -> int:
         log_fp=log_fp,
     )
 
+    # --- Unified port: handle both Router and WM connections ---
+    # Import WM client_thread for WM connections on the same port.
+    # The game connects twice to this port:
+    #   1st connection: Router (game sends KE1 first)
+    #   2nd connection: WM (game waits for server KE1)
+    # We detect which by waiting briefly: if data arrives, it's router;
+    # if silent, it's WM and we send the pre-built server KE1.
+    wm_client_thread = None
+    wm_boot_ke1_bytes = None
+    try:
+        import ubigs_router_wm_server as _wm_mod
+        wm_client_thread = _wm_mod.client_thread
+
+        # Build WM args namespace from router args
+        import copy as _copy
+        wm_args = _copy.deepcopy(args)
+        wm_args.port = args.port  # same port
+        wm_args.proxy_ip = args.wm_ip
+        wm_args.proxy_port = int(getattr(args, 'wm_proxy_port', 44002))
+        wm_args.save_rx_dir = "captures/tcp/router_wm_rx"
+        wm_args.save_tx_dir = "captures/tcp/router_wm_tx"
+        wm_args.login_boot_delay = 0.5
+        # ct34 for WM uses proxy port (44002), not router proxy port (44001)
+        if str(args.ct34_profile).strip().lower() == "ct_ps2":
+            wm_args.ct34_enable = True
+            wm_args.ct34_mode = "a"
+            wm_args.ct34_base = "persistantdata"
+            wm_args.ct34_host = str(args.wm_ip)
+            wm_args.ct34_port = int(getattr(args, 'wm_proxy_port', 44002))
+            wm_args.ct34_id = 1
+            wm_args.ct34_num_a = 0
+            wm_args.ct34_num_b = 0
+        wm_args.keyex2_mode = str(getattr(args, 'wm_keyex2_mode', args.keyex2_mode))
+        wm_args.post_ke2_push = "off"
+        wm_args._post_ke2_replay_frames = []
+        # Build pre-KE1 for WM connections
+        if args._fixed_rsa is not None:
+            try:
+                wm_boot_ke1_bytes = _wm_mod._build_boot_ke1(fixed_rsa=args._fixed_rsa)
+                log_line(f"[{now_ts()}] ROUTER unified: pre-built WM boot_ke1 len={len(wm_boot_ke1_bytes)}", log_fp=log_fp)
+            except Exception as e:
+                log_line(f"[{now_ts()}] ROUTER unified: WM boot_ke1 build error: {e}", log_fp=log_fp)
+        wm_args._boot_ke1_bytes = wm_boot_ke1_bytes
+        log_line(f"[{now_ts()}] ROUTER unified: WM handler loaded, same port {args.port}", log_fp=log_fp)
+    except Exception as e:
+        log_line(f"[{now_ts()}] ROUTER unified: WM import failed ({e}), WM connections won't work on this port", log_fp=log_fp)
+
+    import select as _select_mod
+
     try:
         while True:
             conn, addr = sock.accept()
-            th = threading.Thread(target=client_thread, args=(conn, addr, args), kwargs={"log_fp": log_fp}, daemon=True)
-            th.start()
+
+            # Detect router vs WM: wait 200ms for data
+            # Router: game sends KE1 immediately (~5ms)
+            # WM: game waits for server-first KE1 (silent)
+            _rlist, _, _ = _select_mod.select([conn], [], [], 0.2)
+
+            if _rlist:
+                # Data arrived quickly → Router connection (game sent KE1 first)
+                th = threading.Thread(
+                    target=client_thread,
+                    args=(conn, addr, args),
+                    kwargs={"log_fp": log_fp},
+                    daemon=True,
+                )
+                th.start()
+            elif wm_client_thread is not None:
+                # Silent → WM connection (game waiting for server KE1)
+                # Send pre-built boot KE1 immediately
+                pre_ke1_sent = False
+                if wm_boot_ke1_bytes is not None:
+                    try:
+                        conn.sendall(wm_boot_ke1_bytes)
+                        pre_ke1_sent = True
+                    except Exception:
+                        pass
+                log_line(f"[{now_ts()}] ROUTER unified: WM connection from {addr[0]}:{addr[1]} pre_ke1={'yes' if pre_ke1_sent else 'no'}", log_fp=log_fp)
+                th = threading.Thread(
+                    target=wm_client_thread,
+                    args=(conn, addr, wm_args),
+                    kwargs={"log_fp": log_fp, "pre_ke1_sent": pre_ke1_sent},
+                    daemon=True,
+                )
+                th.start()
+            else:
+                # No WM handler available, treat as router
+                th = threading.Thread(
+                    target=client_thread,
+                    args=(conn, addr, args),
+                    kwargs={"log_fp": log_fp},
+                    daemon=True,
+                )
+                th.start()
     except KeyboardInterrupt:
         return 0
     finally:
