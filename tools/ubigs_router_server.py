@@ -16,6 +16,7 @@ We implement just enough to progress:
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import pathlib
@@ -1309,19 +1310,37 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as e:
         log_line(f"[{now_ts()}] ROUTER unified: WM import failed ({e}), WM connections won't work on this port", log_fp=log_fp)
 
-    import select as _select_mod
+    # Per-IP connection counter for Router vs WM detection.
+    # Game flow: 1st connection = Router (game sends KE1 first),
+    #            2nd connection from same IP = WM (server sends KE1 first).
+    # Timing-based select() was unreliable through TCP proxies.
+    _ip_conn_count: dict[str, int] = {}
+    _ip_conn_lock = threading.Lock()
+
+    # Expire stale entries after 5 minutes (in case game disconnects without WM)
+    _IP_CONN_EXPIRE = 300
+
+    def _ip_conn_increment(ip: str) -> int:
+        """Increment and return connection count for this IP (1=first, 2=second, etc.)."""
+        with _ip_conn_lock:
+            _ip_conn_count[ip] = _ip_conn_count.get(ip, 0) + 1
+            return _ip_conn_count[ip]
+
+    def _ip_conn_reset(ip: str):
+        """Reset counter for this IP (called after WM connection handled)."""
+        with _ip_conn_lock:
+            _ip_conn_count.pop(ip, None)
 
     try:
         while True:
             conn, addr = sock.accept()
+            client_ip = addr[0]
+            conn_num = _ip_conn_increment(client_ip)
 
-            # Detect router vs WM: wait 200ms for data
-            # Router: game sends KE1 immediately (~5ms)
-            # WM: game waits for server-first KE1 (silent)
-            _rlist, _, _ = _select_mod.select([conn], [], [], 0.2)
+            log_line(f"[{now_ts()}] ROUTER unified: connection #{conn_num} from {addr[0]}:{addr[1]}", log_fp=log_fp)
 
-            if _rlist:
-                # Data arrived quickly → Router connection (game sent KE1 first)
+            if conn_num == 1 or wm_client_thread is None:
+                # 1st connection (or no WM handler) → Router
                 th = threading.Thread(
                     target=client_thread,
                     args=(conn, addr, args),
@@ -1329,9 +1348,12 @@ def main(argv: list[str] | None = None) -> int:
                     daemon=True,
                 )
                 th.start()
-            elif wm_client_thread is not None:
-                # Silent → WM connection (game waiting for server KE1)
-                # Send pre-built boot KE1 immediately
+            else:
+                # 2nd+ connection from same IP → WM
+                # Reset counter so next pair of connections works fresh
+                _ip_conn_reset(client_ip)
+
+                # Send pre-built boot KE1 immediately (server-first for WM)
                 pre_ke1_sent = False
                 if wm_boot_ke1_bytes is not None:
                     try:
@@ -1344,15 +1366,6 @@ def main(argv: list[str] | None = None) -> int:
                     target=wm_client_thread,
                     args=(conn, addr, wm_args),
                     kwargs={"log_fp": log_fp, "pre_ke1_sent": pre_ke1_sent},
-                    daemon=True,
-                )
-                th.start()
-            else:
-                # No WM handler available, treat as router
-                th = threading.Thread(
-                    target=client_thread,
-                    args=(conn, addr, args),
-                    kwargs={"log_fp": log_fp},
                     daemon=True,
                 )
                 th.start()
@@ -1373,6 +1386,15 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+
+
+
+
+
+
+
 
 
 
