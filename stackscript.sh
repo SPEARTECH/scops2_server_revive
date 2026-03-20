@@ -27,6 +27,7 @@ cd venv/bin
 source activate
 cd ../..
 python3 -m pip install -r requirements.txt
+cd scops2_server_revive
 sudo chmod 655 run.sh
 
 
