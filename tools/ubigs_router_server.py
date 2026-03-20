@@ -16,7 +16,6 @@ We implement just enough to progress:
 from __future__ import annotations
 
 import argparse
-import copy
 import json
 import os
 import pathlib
@@ -1267,28 +1266,37 @@ def main(argv: list[str] | None = None) -> int:
         import ubigs_router_wm_server as _wm_mod
         wm_client_thread = _wm_mod.client_thread
 
-        # Build WM args namespace from router args
-        import copy as _copy
-        wm_args = _copy.deepcopy(args)
-        wm_args.port = args.port  # same port
-        wm_args.proxy_ip = args.wm_ip
-        wm_args.proxy_port = int(getattr(args, 'wm_proxy_port', 44002))
-        wm_args.save_rx_dir = "captures/tcp/router_wm_rx"
-        wm_args.save_tx_dir = "captures/tcp/router_wm_tx"
-        wm_args.login_boot_delay = 0.5
-        # ct34 for WM uses proxy port (44002), not router proxy port (44001)
-        if str(args.ct34_profile).strip().lower() == "ct_ps2":
-            wm_args.ct34_enable = True
-            wm_args.ct34_mode = "a"
-            wm_args.ct34_base = "persistantdata"
-            wm_args.ct34_host = str(args.wm_ip)
-            wm_args.ct34_port = int(getattr(args, 'wm_proxy_port', 44002))
-            wm_args.ct34_id = 1
-            wm_args.ct34_num_a = 0
-            wm_args.ct34_num_b = 0
-        wm_args.keyex2_mode = str(getattr(args, 'wm_keyex2_mode', args.keyex2_mode))
-        wm_args.post_ke2_push = "off"
-        wm_args._post_ke2_replay_frames = []
+        # Build WM args namespace manually (can't deepcopy args because
+        # UserDB contains a threading.Lock which is not picklable).
+        _wm_proxy_port = int(getattr(args, 'wm_proxy_port', 44002))
+        _wm_ke2_mode = str(getattr(args, 'wm_keyex2_mode', args.keyex2_mode))
+        _ct34_is_ps2 = str(args.ct34_profile).strip().lower() == "ct_ps2"
+        wm_args = argparse.Namespace(
+            port=args.port,
+            proxy_ip=args.wm_ip,
+            proxy_port=_wm_proxy_port,
+            save_rx_dir="captures/tcp/router_wm_rx",
+            save_tx_dir="captures/tcp/router_wm_tx",
+            login_boot_delay=0.5,
+            idle_timeout=getattr(args, 'idle_timeout', 2.0),
+            dump_max=getattr(args, 'dump_max', 256),
+            keyex2_mode=_wm_ke2_mode,
+            post_ke2_push="off",
+            post_ke2_replay_files=None,
+            ct34_enable=_ct34_is_ps2,
+            ct34_mode="a" if _ct34_is_ps2 else getattr(args, 'ct34_mode', 'a'),
+            ct34_base="persistantdata" if _ct34_is_ps2 else getattr(args, 'ct34_base', 'persistantdata'),
+            ct34_host=str(args.wm_ip) if _ct34_is_ps2 else getattr(args, 'ct34_host', ''),
+            ct34_port=_wm_proxy_port if _ct34_is_ps2 else getattr(args, 'ct34_port', 44002),
+            ct34_id=1,
+            ct34_num_a=0,
+            ct34_num_b=0,
+            # Share references (thread-safe objects, no copy needed)
+            _fixed_rsa=args._fixed_rsa,
+            _userdb=getattr(args, '_userdb', None),
+            _post_ke2_replay_frames=[],
+            _boot_ke1_bytes=None,  # set below
+        )
         # Build pre-KE1 for WM connections
         if args._fixed_rsa is not None:
             try:
@@ -1365,15 +1373,6 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-
-
-
-
-
-
-
-
 
 
 

@@ -3,7 +3,7 @@ set -e
 
 # ─── Configuration ───────────────────────────────────────────────
 BIND_IP="0.0.0.0"
-HOST_IP="172.210.68.184"
+HOST_IP="3.238.21.103"
 TLS_CERT_CN="gate1.us.dnas.playstation.org"
 UPSTREAM_DNS="8.8.8.8:53"
 GSINIT_FILE="gsinit_diag_localweb.php"
