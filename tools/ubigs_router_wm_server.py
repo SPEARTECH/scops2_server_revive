@@ -127,10 +127,11 @@ class LobbyState:
 _lobby_state = LobbyState()
 
 
-def _build_lobby_msg_frame(dl_list, b5=0x14):
+def _build_lobby_msg_frame(dl_list, b5=0x24):
     """Build a raw LOBBY_MSG frame with GS property for broadcasting.
 
-    Uses b5=0x14 (R->P) by default, matching the WM server push convention.
+    Uses b5=0x24 (S->P) by default — lobby server pushes come from the
+    Server entity (2) to the Player entity (4).
     """
     ensure_ubigs_importable()
     import gsm
@@ -1239,9 +1240,14 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                 for i, extra in enumerate(extras):
                     out = bytes(extra)
                     if (not keep_push_b5) and str(args.post_ke2_push).strip().lower() != "ct-replay" and len(out) >= 6:
-                        b = bytearray(out)
-                        b[5] = 0x14
-                        out = bytes(b)
+                        # Preserve b5 for LOBBY_MSG frames — lobby server pushes
+                        # use S→P (0x24), not R→P (0x14)
+                        ensure_ubigs_importable()
+                        import gsm as _gsm_mod
+                        if out[4] != _gsm_mod.MESSAGE_TYPE.LOBBY_MSG.value:
+                            b = bytearray(out)
+                            b[5] = 0x14
+                            out = bytes(b)
                     save_blob(args.save_tx_dir,
                               f"{file_ts()}_{safe_slug(local_ip)}_{local_port}_to_{safe_slug(src_ip)}_{src_port}_push{i}.bin",
                               out)
