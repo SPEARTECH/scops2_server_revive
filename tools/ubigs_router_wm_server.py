@@ -66,14 +66,17 @@ class LobbyState:
 
     def __init__(self):
         self.lock = threading.Lock()
-        # room_id -> {"raw_sub_data": list, "owner_key": str, "room_name": str}
+        # room_id -> {"room": Room, "owner_key": str}
         self.rooms = {}
-        self.sessions = {}       # session_key -> {"conn": socket, "username": str}
+        # session_key -> {"conn": socket, "username": str, "source": str}
+        # Multiple sessions per player (WM conn + lobby server conn) are fine;
+        # they have different session keys (different src ports).
+        self.sessions = {}
         self._next_room_id = 100
 
-    def register_session(self, key, conn, username):
+    def register_session(self, key, conn, username, source="unknown"):
         with self.lock:
-            self.sessions[key] = {"conn": conn, "username": username}
+            self.sessions[key] = {"conn": conn, "username": username, "source": source}
 
     def unregister_session(self, key):
         with self.lock:
@@ -82,20 +85,13 @@ class LobbyState:
             removed = []
             for rid in to_remove:
                 removed.append(self.rooms.pop(rid))
-            return removed  # list of {"raw_sub_data": ..., "owner_key": ..., "room_name": ...}
+            return removed  # list of {"room": Room, "owner_key": str}
 
-    def create_room(self, raw_sub_data, owner_key, room_name="Unknown"):
-        """Store the raw CREATE_ROOM sub_data list from the game verbatim."""
+    def create_room(self, room, owner_key):
+        """Store a Room object built from CREATE_ROOM data."""
         with self.lock:
-            room_id = self._next_room_id
-            self._next_room_id += 1
-            self.rooms[room_id] = {
-                "raw_sub_data": raw_sub_data,
-                "owner_key": owner_key,
-                "room_name": room_name,
-                "room_id": room_id,
-            }
-            return room_id
+            self.rooms[room.group_id] = {"room": room, "owner_key": owner_key}
+            return room
 
     def remove_room_by_owner(self, owner_key):
         with self.lock:
@@ -106,9 +102,15 @@ class LobbyState:
             return removed
 
     def get_rooms(self):
-        """Return list of stored room dicts."""
+        """Return list of Room objects."""
         with self.lock:
-            return list(self.rooms.values())
+            return [info["room"] for info in self.rooms.values()]
+
+    def next_room_id(self):
+        with self.lock:
+            rid = self._next_room_id
+            self._next_room_id += 1
+            return rid
 
     def broadcast(self, frame_bytes, exclude_key=None, log_fp=None):
         """Send frame bytes to all registered lobby sessions except exclude_key."""
@@ -652,6 +654,16 @@ def handle_message(
             )
         except Exception:
             pass
+        # Register this lobby-server connection for room broadcasting.
+        # This is the connection that handles CREATE_ROOM / NEW_GROUP traffic,
+        # separate from the WM login connection.
+        sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+        if conn is not None:
+            _lobby_state.register_session(sk, conn, clt.username or "unknown", source="LOBBYSERVERLOGIN")
+            log_line(
+                f"[{now_ts()}] ROUTER_WM LOBBY session registered (lobby-server conn): {sk} user={clt.username}",
+                log_fp=log_fp,
+            )
         return gsm.LobbyServerLoginResponse(msg)
 
     if msg.header.type == gsm.MESSAGE_TYPE.LOGINWAITMODULE:
@@ -794,20 +806,20 @@ def handle_message(
             resp = gsm.JoinLobbyResponse(msg)
             resp._player_joined = True  # Signal to client_thread for disconnect tracking
 
-            # Register this lobby session for room broadcasting
+            # Register/update this lobby session for room broadcasting
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
             if conn is not None:
-                _lobby_state.register_session(sk, conn, clt.username or "unknown")
+                _lobby_state.register_session(sk, conn, clt.username or "unknown", source="JOIN_LOBBY")
                 log_line(
-                    f"[{now_ts()}] ROUTER_WM LOBBY session registered: {sk} user={clt.username}",
+                    f"[{now_ts()}] ROUTER_WM LOBBY session registered (JOIN_LOBBY): {sk} user={clt.username}",
                     log_fp=log_fp,
                 )
 
             # Push existing rooms as NEW_GROUP notifications to the new player
             existing_rooms = _lobby_state.get_rooms()
             extras = []
-            for room_info in existing_rooms:
-                new_group_dl = [str(54), room_info["raw_sub_data"]]
+            for room in existing_rooms:
+                new_group_dl = [str(54), room.to_list()]
                 frame = _build_lobby_msg_frame(new_group_dl)
                 extras.append(frame)
 
@@ -821,9 +833,10 @@ def handle_message(
 
         if lobby_subtype == 12:
             # LOBBY_MSG.CREATE_ROOM — player creating a game room
-            # Strategy: store the raw sub_data from the game verbatim and relay
-            # it as NEW_GROUP (54) to other lobby sessions.  The game knows its
-            # own format best — we just parrot it back.
+            # CREATE_ROOM DL: ['12', [lobby_id, username, game_name, max_players,
+            #                         game_mode, flags, binary_blob, '', numeric_id,
+            #                         version, empty_bytes]]
+            # We build a Room object and broadcast its to_list() as NEW_GROUP (54).
 
             # Log raw DL for debugging
             try:
@@ -831,61 +844,101 @@ def handle_message(
             except Exception:
                 pass
 
-            # Extract the raw sub_data list from DL[1]
-            raw_sub_data = []
-            room_name = "Unknown"
+            from group import Room
+
+            # Parse fields from CREATE_ROOM sub_data
             username = clt.username or "unknown"
+            room_name = "Unknown"
+            sub_data = []
             try:
                 if msg.dl and len(msg.dl.lst) > 1:
-                    sub_data = msg.dl.lst[1]
-                    if hasattr(sub_data, 'lst'):
-                        raw_sub_data = list(sub_data.lst)
-                    elif isinstance(sub_data, list):
-                        raw_sub_data = list(sub_data)
+                    sd = msg.dl.lst[1]
+                    if hasattr(sd, 'lst'):
+                        sub_data = list(sd.lst)
+                    elif isinstance(sd, list):
+                        sub_data = list(sd)
                     else:
-                        raw_sub_data = [sub_data]
-                    # Username is at index 1 in CREATE_ROOM sub_data
-                    if len(raw_sub_data) > 1 and isinstance(raw_sub_data[1], str):
-                        username = raw_sub_data[1]
-                    # Room name is embedded in the binary blob at index 6
-                    if len(raw_sub_data) > 6 and isinstance(raw_sub_data[6], (bytes, bytearray)):
-                        blob = raw_sub_data[6]
-                        # Try to extract room name from blob (null-terminated strings)
-                        try:
-                            # Skip initial bytes, find readable name after header bytes
-                            nulls = [i for i, b in enumerate(blob) if b == 0]
-                            if len(nulls) >= 2:
-                                # Room name is between first and second null regions
-                                name_start = nulls[0] + 1
-                                name_end = nulls[1] if len(nulls) > 1 else len(blob)
-                                for ni in range(len(nulls)):
-                                    candidate = blob[nulls[ni]+1:]
-                                    null_pos = candidate.find(b'\x00')
-                                    if null_pos > 0:
-                                        candidate_str = candidate[:null_pos].decode('ascii', errors='ignore')
-                                        if candidate_str and candidate_str.isprintable() and len(candidate_str) > 1:
-                                            room_name = candidate_str
-                                            break
-                        except Exception:
-                            pass
+                        sub_data = [sd]
             except Exception as e:
                 log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM parse error: {e}", log_fp=log_fp)
 
-            sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            # Map CREATE_ROOM fields to Room fields:
+            #   sub_data[0] = lobby_id (parent)     -> room.parent_id
+            #   sub_data[1] = username               -> room.master
+            #   sub_data[2] = game_name              -> room.allowed_games
+            #   sub_data[3] = max_players            -> room.max_players
+            #   sub_data[4] = game_mode              -> room.event_id
+            #   sub_data[5] = flags                  -> room.config
+            #   sub_data[6] = binary blob (room name + IPs) -> room.info
+            #   sub_data[7] = ''
+            #   sub_data[8] = numeric_id
+            #   sub_data[9] = version                -> room.game_version
+            #   sub_data[10] = empty bytes
+            parent_id = 1
+            game_mode = 0
+            info_blob = b''
+            max_players = 8
+            config = 0
+            allowed_games = ""
+            game_version = ""
 
-            room_id = _lobby_state.create_room(
-                raw_sub_data=raw_sub_data,
-                owner_key=sk,
-                room_name=room_name,
-            )
+            if len(sub_data) > 0:
+                try: parent_id = int(sub_data[0])
+                except: pass
+            if len(sub_data) > 1 and isinstance(sub_data[1], str):
+                username = sub_data[1]
+            if len(sub_data) > 2:
+                allowed_games = str(sub_data[2])
+            if len(sub_data) > 3:
+                try: max_players = int(sub_data[3])
+                except: pass
+            if len(sub_data) > 4:
+                try: game_mode = int(sub_data[4])
+                except: pass
+            if len(sub_data) > 5:
+                try: config = int(sub_data[5])
+                except: pass
+            if len(sub_data) > 6 and isinstance(sub_data[6], (bytes, bytearray)):
+                info_blob = bytes(sub_data[6])
+                # Extract room name from binary blob (null-terminated string after header)
+                try:
+                    nulls = [i for i, b in enumerate(info_blob) if b == 0]
+                    for ni in range(len(nulls)):
+                        candidate = info_blob[nulls[ni]+1:]
+                        null_pos = candidate.find(b'\x00')
+                        if null_pos > 0:
+                            cs = candidate[:null_pos].decode('ascii', errors='ignore')
+                            if cs and cs.isprintable() and len(cs) > 1 and not cs.startswith('CAU'):
+                                room_name = cs
+                                break
+                except Exception:
+                    pass
+            if len(sub_data) > 9:
+                game_version = str(sub_data[9])
+
+            # Build Room object with proper fields
+            rid = _lobby_state.next_room_id()
+            room = Room(id=rid, name=room_name, master=username, game_mode=game_mode)
+            room.parent_id = parent_id
+            room.config = config
+            room.allowed_games = allowed_games
+            room.info = info_blob
+            room.max_players = max_players
+            room.nb_players = 1
+            room.game_version = game_version
+
+            sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            _lobby_state.create_room(room=room, owner_key=sk)
 
             log_line(
-                f"[{now_ts()}] ROUTER_WM LOBBY_MSG CREATE_ROOM name={room_name!r} master={username!r} room_id={room_id}",
+                f"[{now_ts()}] ROUTER_WM LOBBY_MSG CREATE_ROOM name={room_name!r} master={username!r} "
+                f"room_id={rid} parent={parent_id} max={max_players} mode={game_mode} info_len={len(info_blob)}",
                 log_fp=log_fp,
             )
 
-            # Build NEW_GROUP notification relaying the game's raw sub_data
-            new_group_frame = _build_lobby_msg_frame([str(54), raw_sub_data])
+            # Build NEW_GROUP notification using Room.to_list() format
+            new_group_frame = _build_lobby_msg_frame([str(54), room.to_list()])
+            log_line(f"[{now_ts()}] ROUTER_WM NEW_GROUP frame hex: {new_group_frame.hex()}", log_fp=log_fp)
             _lobby_state.broadcast(new_group_frame, exclude_key=sk, log_fp=log_fp)
 
             # Respond with GSSUCCESS to the creator
@@ -902,11 +955,12 @@ def handle_message(
             # LOBBY_MSG.GROUP_LEAVE — player leaving a room/lobby
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
             removed = _lobby_state.remove_room_by_owner(sk)
-            for room_info in removed:
-                remove_frame = _build_lobby_msg_frame([str(55), [str(room_info["room_id"])]])
+            for room_entry in removed:
+                room = room_entry["room"]
+                remove_frame = _build_lobby_msg_frame([str(55), [str(room.group_id)]])
                 _lobby_state.broadcast(remove_frame, log_fp=log_fp)
                 log_line(
-                    f"[{now_ts()}] ROUTER_WM LOBBY room removed (GROUP_LEAVE): id={room_info['room_id']} name={room_info['room_name']}",
+                    f"[{now_ts()}] ROUTER_WM LOBBY room removed (GROUP_LEAVE): id={room.group_id} name={room.group_name}",
                     log_fp=log_fp,
                 )
             try:
@@ -1211,11 +1265,12 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
         _sk = f"{src_ip}:{src_port}"
         removed_rooms = _lobby_state.unregister_session(_sk)
         if removed_rooms:
-            for room_info in removed_rooms:
-                remove_frame = _build_lobby_msg_frame([str(55), [str(room_info["room_id"])]])
+            for room_entry in removed_rooms:
+                room = room_entry["room"]
+                remove_frame = _build_lobby_msg_frame([str(55), [str(room.group_id)]])
                 _lobby_state.broadcast(remove_frame, log_fp=log_fp)
                 log_line(
-                    f"[{now_ts()}] ROUTER_WM LOBBY room removed on disconnect: id={room_info['room_id']} name={room_info['room_name']}",
+                    f"[{now_ts()}] ROUTER_WM LOBBY room removed on disconnect: id={room.group_id} name={room.group_name}",
                     log_fp=log_fp,
                 )
         try:
