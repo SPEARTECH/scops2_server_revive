@@ -60,6 +60,99 @@ def lobby_player_count():
         return _lobby_player_count
 
 
+# ─── Shared Lobby State (room tracking + broadcasting) ────────────
+class LobbyState:
+    """Thread-safe shared state for lobby room broadcasting between sessions."""
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.rooms = {}          # room_id -> {"room": Room, "owner_key": str}
+        self.sessions = {}       # session_key -> {"conn": socket, "username": str}
+        self._next_room_id = 100
+
+    def register_session(self, key, conn, username):
+        with self.lock:
+            self.sessions[key] = {"conn": conn, "username": username}
+
+    def unregister_session(self, key):
+        with self.lock:
+            self.sessions.pop(key, None)
+            to_remove = [rid for rid, info in self.rooms.items() if info["owner_key"] == key]
+            removed = []
+            for rid in to_remove:
+                removed.append(self.rooms.pop(rid)["room"])
+            return removed
+
+    def create_room(self, name, master, game_mode, info_bytes, owner_key, parent_id=1):
+        from group import Room
+        with self.lock:
+            room_id = self._next_room_id
+            self._next_room_id += 1
+            room = Room(id=room_id, name=name, master=master, game_mode=game_mode)
+            room.nb_players = 1
+            room.max_players = 8
+            room.info = info_bytes if info_bytes else b''
+            room.parent_id = parent_id
+            self.rooms[room_id] = {"room": room, "owner_key": owner_key}
+            return room
+
+    def remove_room_by_owner(self, owner_key):
+        with self.lock:
+            to_remove = [rid for rid, info in self.rooms.items() if info["owner_key"] == owner_key]
+            removed = []
+            for rid in to_remove:
+                removed.append(self.rooms.pop(rid)["room"])
+            return removed
+
+    def get_rooms(self):
+        with self.lock:
+            return [info["room"] for info in self.rooms.values()]
+
+    def broadcast(self, frame_bytes, exclude_key=None, log_fp=None):
+        """Send frame bytes to all registered lobby sessions except exclude_key."""
+        with self.lock:
+            targets = [(k, s) for k, s in self.sessions.items() if k != exclude_key]
+        for key, session in targets:
+            try:
+                session["conn"].sendall(frame_bytes)
+                log_line(f"[{now_ts()}] LOBBY_BROADCAST -> {key} len={len(frame_bytes)}", log_fp=log_fp)
+            except Exception as e:
+                log_line(f"[{now_ts()}] LOBBY_BROADCAST -> {key} FAILED: {e}", log_fp=log_fp)
+
+
+_lobby_state = LobbyState()
+
+
+def _build_lobby_msg_frame(dl_list, b5=0x14):
+    """Build a raw LOBBY_MSG frame with GS property for broadcasting.
+
+    Uses b5=0x14 (R->P) by default, matching the WM server push convention.
+    """
+    ensure_ubigs_importable()
+    import gsm
+    from data import List
+
+    # Create a fake request so GSMResponse can build the frame
+    fake_hdr = bytes([0, 0, 6, 0, gsm.MESSAGE_TYPE.LOBBY_MSG.value, 0x82])
+
+    class _Fake:
+        pass
+
+    fake_msg = _Fake()
+    fake_msg.header = gsm.GSMessageHeader(fake_hdr)
+    fake_msg.dl = None
+
+    res = gsm.GSMResponse(fake_msg)
+    res.header.property = gsm.PROPERTY.GS
+    res.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+    res.dl = List(dl_list)
+
+    out = bytearray(bytes(res))
+    if len(out) >= 6:
+        out[5] = b5  # Force b5 for broadcast
+    return bytes(out)
+
+
 def _load_or_create_fixed_rsa_keypair(path: str, *, log_fp: TextIO | None):
     """Load or create a persistent RSA keypair shared across router processes."""
     ensure_ubigs_importable()
@@ -224,6 +317,8 @@ def handle_message(
     post_ke2_replay_frames: list[bytes],
     fixed_rsa: tuple | None,
     userdb=None,
+    conn: socket.socket | None = None,
+    session_key: str | None = None,
 ):
     import gsm
     import pkc
@@ -694,7 +789,114 @@ def handle_message(
             )
             resp = gsm.JoinLobbyResponse(msg)
             resp._player_joined = True  # Signal to client_thread for disconnect tracking
+
+            # Register this lobby session for room broadcasting
+            sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            if conn is not None:
+                _lobby_state.register_session(sk, conn, clt.username or "unknown")
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM LOBBY session registered: {sk} user={clt.username}",
+                    log_fp=log_fp,
+                )
+
+            # Push existing rooms as NEW_GROUP notifications to the new player
+            existing_rooms = _lobby_state.get_rooms()
+            extras = []
+            for room in existing_rooms:
+                new_group_dl = [str(54), room.to_list()]
+                frame = _build_lobby_msg_frame(new_group_dl)
+                extras.append(frame)
+
+            if extras:
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM LOBBY pushing {len(extras)} existing room(s) to new player",
+                    log_fp=log_fp,
+                )
+                return (resp, extras)
             return resp
+
+        if lobby_subtype == 12:
+            # LOBBY_MSG.CREATE_ROOM — player creating a game room
+            # Parse room info from DL
+            room_name = "Unknown"
+            game_mode = 0
+            info_bytes = b''
+            try:
+                if msg.dl and len(msg.dl.lst) > 1:
+                    sub_data = msg.dl.lst[1]
+                    if hasattr(sub_data, 'lst'):
+                        sub_data = sub_data.lst
+                    if isinstance(sub_data, list):
+                        if len(sub_data) > 0:
+                            room_name = str(sub_data[0])
+                        if len(sub_data) > 1:
+                            try:
+                                game_mode = int(sub_data[1])
+                            except (ValueError, TypeError):
+                                pass
+                        # Capture info bytes if present
+                        for field in sub_data:
+                            if isinstance(field, (bytes, bytearray)):
+                                info_bytes = bytes(field)
+                                break
+            except Exception as e:
+                log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM parse error: {e}", log_fp=log_fp)
+
+            # Log raw DL for debugging
+            try:
+                log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM raw DL: {msg.dl.lst}", log_fp=log_fp)
+            except Exception:
+                pass
+
+            username = clt.username or "unknown"
+            sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+
+            room = _lobby_state.create_room(
+                name=room_name,
+                master=username,
+                game_mode=game_mode,
+                info_bytes=info_bytes,
+                owner_key=sk,
+            )
+
+            log_line(
+                f"[{now_ts()}] ROUTER_WM LOBBY_MSG CREATE_ROOM name={room_name!r} master={username!r} room_id={room.group_id}",
+                log_fp=log_fp,
+            )
+
+            # Build NEW_GROUP notification and broadcast to all other lobby sessions
+            new_group_frame = _build_lobby_msg_frame([str(54), room.to_list()])
+            _lobby_state.broadcast(new_group_frame, exclude_key=sk, log_fp=log_fp)
+
+            # Respond with GSSUCCESS to the creator
+            try:
+                return gsm.LobbyMsgResponse(msg)
+            except Exception:
+                res = gsm.GSMResponse(msg)
+                res.header.property = gsm.PROPERTY.GS
+                res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+                res.dl = List([])
+                return res
+
+        if lobby_subtype == 8:
+            # LOBBY_MSG.GROUP_LEAVE — player leaving a room/lobby
+            sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            removed = _lobby_state.remove_room_by_owner(sk) if hasattr(_lobby_state, 'remove_room_by_owner') else []
+            for room in removed:
+                remove_frame = _build_lobby_msg_frame([str(55), [str(room.group_id)]])
+                _lobby_state.broadcast(remove_frame, log_fp=log_fp)
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM LOBBY room removed (GROUP_LEAVE): id={room.group_id} name={room.group_name}",
+                    log_fp=log_fp,
+                )
+            try:
+                return gsm.LobbyMsgResponse(msg)
+            except Exception:
+                res = gsm.GSMResponse(msg)
+                res.header.property = gsm.PROPERTY.GS
+                res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+                res.dl = List([])
+                return res
 
         # Handle other lobby subtypes
         try:
@@ -920,6 +1122,8 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                         post_ke2_replay_frames=args._post_ke2_replay_frames,
                         fixed_rsa=args._fixed_rsa,
                         userdb=args._userdb,
+                        conn=conn,
+                        session_key=f"{src_ip}:{src_port}",
                     )
                     if isinstance(handled, tuple):
                         res, extras = handled
@@ -983,6 +1187,17 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
         if _joined_lobby:
             count = lobby_player_leave()
             log_line(f"[{now_ts()}] ROUTER_WM {src_ip}:{src_port} left lobby, players_now={count}", log_fp=log_fp)
+        # Clean up lobby session and broadcast room removal
+        _sk = f"{src_ip}:{src_port}"
+        removed_rooms = _lobby_state.unregister_session(_sk)
+        if removed_rooms:
+            for room in removed_rooms:
+                remove_frame = _build_lobby_msg_frame([str(55), [str(room.group_id)]])
+                _lobby_state.broadcast(remove_frame, log_fp=log_fp)
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM LOBBY room removed on disconnect: id={room.group_id} name={room.group_name}",
+                    log_fp=log_fp,
+                )
         try:
             conn.close()
         except Exception:
