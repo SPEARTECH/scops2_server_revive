@@ -973,6 +973,57 @@ def handle_message(
                 res.dl = List([])
                 return res
 
+        if lobby_subtype == 109:
+            # LOBBY_MSG subtype 109 — room list request (Find Game)
+            # DL: ['109', ['SPLINTERCELL3PS2US']]
+            # Game sends this on Connection 1 (P->R) when navigating to Find Game.
+            # Respond with GSSUCCESS + GROUP_INFO push containing current rooms.
+            game_filter = ""
+            try:
+                if msg.dl and len(msg.dl.lst) > 1:
+                    sd = msg.dl.lst[1]
+                    if hasattr(sd, 'lst') and sd.lst:
+                        game_filter = str(sd.lst[0])
+                    elif isinstance(sd, list) and sd:
+                        game_filter = str(sd[0])
+                    elif isinstance(sd, str):
+                        game_filter = sd
+            except Exception:
+                pass
+
+            existing_rooms = _lobby_state.get_rooms()
+            if game_filter:
+                existing_rooms = [r for r in existing_rooms
+                                  if not r.allowed_games or r.allowed_games == game_filter]
+
+            log_line(
+                f"[{now_ts()}] ROUTER_WM LOBBY_MSG FIND_GAME game={game_filter!r} rooms={len(existing_rooms)}",
+                log_fp=log_fp,
+            )
+
+            # Build primary GSSUCCESS response
+            primary_res = gsm.GSMResponse(msg)
+            primary_res.header.property = gsm.PROPERTY.GS
+            primary_res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+
+            if existing_rooms:
+                # Build GROUP_INFO response with rooms
+                from group import Room as _RoomCls
+                room_lists = [r.to_list() for r in existing_rooms]
+                group_info = gsm.GSMResponse(msg)
+                group_info.header.property = gsm.PROPERTY.GS
+                group_info.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                group_info.dl = List([
+                    str(53),  # GROUP_INFO
+                    ["1", str(0x100), ["1"], room_lists]
+                ])
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM FIND_GAME pushing {len(existing_rooms)} room(s) via GROUP_INFO",
+                    log_fp=log_fp,
+                )
+                return (primary_res, [group_info])
+            return primary_res
+
         # Handle other lobby subtypes
         try:
             return gsm.LobbyMsgResponse(msg)
