@@ -442,6 +442,106 @@ def handle_message(
             return (res, extras)
         return None
 
+    if msg.header.type == gsm.MESSAGE_TYPE.LOGIN:
+        # Game sends LOGIN on WM just like on Router.
+        # Must respond with proper GSSUCCESS(LOGIN) so game proceeds to LOGINWAITMODULE.
+        username = None
+        password = None
+        try:
+            if msg.dl is not None and getattr(msg.dl, "lst", None):
+                lst = msg.dl.lst
+                username = lst[0] if len(lst) >= 1 and isinstance(lst[0], str) else None
+                password = lst[1] if len(lst) >= 2 and isinstance(lst[1], str) else None
+        except Exception:
+            pass
+        if username:
+            clt.username = username
+
+        # Validate against userdb
+        login_ok = True
+        login_encrypted_unparsed = (
+            msg.header.property == gsm.PROPERTY.GS_ENCRYPT and msg.dl is None
+        )
+        if userdb is not None and not login_encrypted_unparsed:
+            if username is None:
+                login_ok = False
+            elif userdb.get_user(username) is None:
+                login_ok = False
+            elif password is not None and not userdb.check_password(username=username, password=password):
+                login_ok = False
+
+        if login_ok:
+            log_line(f"[{now_ts()}] ROUTER_WM LOGIN OK: user={username!r}", log_fp=log_fp)
+        else:
+            log_line(f"[{now_ts()}] ROUTER_WM LOGIN REJECT: user={username!r}", log_fp=log_fp)
+            fail_res = gsm.GSMResponse(msg)
+            fail_res.header = copy.deepcopy(msg.header)
+            fail_res.header.property = gsm.PROPERTY.GS
+            fail_res.header.type = gsm.MESSAGE_TYPE.GSFAIL
+            fail_res.dl = List([b'\x66'])
+            return fail_res
+
+        # Build GSSUCCESS(LOGIN) + ct34 bootstrap extras
+        login_extras = []
+        if ct34_enable:
+            def _mk_ph_14(dl):
+                r = gsm.GSMResponse(msg)
+                r.header = copy.deepcopy(msg.header)
+                r.header.property = gsm.PROPERTY.GS
+                r.header.type = gsm.MESSAGE_TYPE.PROXY_HANDLER
+                r.header.sender = gsm.SENDER_RECEIVER.R
+                r.header.receiver = gsm.SENDER_RECEIVER.P
+                r.dl = dl
+                return r
+
+            def _mk_gs_14(sub):
+                r = gsm.GSMResponse(msg)
+                r.header = copy.deepcopy(msg.header)
+                r.header.property = gsm.PROPERTY.GS
+                r.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+                r.header.sender = gsm.SENDER_RECEIVER.R
+                r.header.receiver = gsm.SENDER_RECEIVER.P
+                r.dl = List([sub])
+                return r
+
+            # ct34 with WM proxy info (44002)
+            ct34_r = _mk_ph_14(List(
+                _build_ct34_dl(
+                    mode=str(ct34_mode).strip().lower(),
+                    base=str(ct34_base),
+                    host=str(ct34_host),
+                    port=int(ct34_port),
+                    proxy_id=int(ct34_id),
+                    num_a=int(ct34_num_a),
+                    num_b=int(ct34_num_b),
+                )
+            ))
+            r_ph_c8 = _mk_ph_14(List([b'\xC8', ['persistantdata', '0', '0']]))
+            r_ph_c9 = _mk_ph_14(List([b'\xC9', ['persistantdata', '0', '0']]))
+            r_ph_lwm = _mk_ph_14(List([b'\x4D', [b'\x4D', ['1']]]))
+            r_gs_c8 = _mk_gs_14(b'\xC8')
+            r_gs_c9 = _mk_gs_14(b'\xC9')
+            r_gs_lwm = _mk_gs_14(b'\x4D')
+            push_loginfriends_14 = bytes.fromhex("000006004e14")
+
+            login_extras.append(ct34_r)
+            login_extras.append(r_ph_c8)
+            login_extras.append(r_ph_c9)
+            login_extras.append(r_ph_lwm)
+            login_extras.append(r_gs_c8)
+            login_extras.append(r_gs_c9)
+            login_extras.append(push_loginfriends_14)
+            login_extras.append(r_gs_lwm)
+            log_line(f"[{now_ts()}] ROUTER_WM LOGIN: appended ct34+bootstrap proxy={ct34_host}:{ct34_port} b5=0x14", log_fp=log_fp)
+
+        login_res = gsm.GSMResponse(msg)
+        login_res.header = copy.deepcopy(msg.header)
+        login_res.header.property = gsm.PROPERTY.GS
+        login_res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+        login_res.dl = List([b'\x66'])  # 0x66 = LOGIN type
+        log_line(f"[{now_ts()}] ROUTER_WM LOGIN: total extras={len(login_extras)}", log_fp=log_fp)
+        return (login_res, login_extras)
+
     if msg.header.type == gsm.MESSAGE_TYPE.LOBBYSERVERLOGIN:
         # Game connected to lobby server and sent LOBBYSERVERLOGIN
         # DL: ['username', 'server_id', 'client_ip', 'netmask', 'flags']
@@ -894,7 +994,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Ubisoft GS router wait-module service")
     ap.add_argument("--bind", default="0.0.0.0")
     ap.add_argument("--port", type=int, default=40005)
-    ap.add_argument("--proxy-ip", default="3.238.21.103")
+    ap.add_argument("--proxy-ip", default="192.168.0.213")
     ap.add_argument("--proxy-port", type=int, default=44001)
     ap.add_argument("--idle-timeout", type=float, default=2.0)
     ap.add_argument("--dump-max", type=int, default=256)
@@ -927,7 +1027,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ct34-enable", action="store_true", help="Enable experimental PROXY_HANDLER(0xCC) response builder")
     ap.add_argument("--ct34-mode", default="a", choices=["a", "b", "c"], help="ct34 payload variant mode")
     ap.add_argument("--ct34-base", default="persistantdata", help="ct34 module name/base token")
-    ap.add_argument("--ct34-host", default="3.238.21.103", help="ct34 proxy host in response")
+    ap.add_argument("--ct34-host", default="192.168.0.213", help="ct34 proxy host in response")
     ap.add_argument("--ct34-port", type=int, default=44001, help="ct34 proxy port in response")
     ap.add_argument("--ct34-id", type=int, default=1, help="ct34 proxy id in response")
     ap.add_argument("--ct34-num-a", type=int, default=0, help="ct34 numeric slot A")
@@ -1016,14 +1116,12 @@ def main(argv: list[str] | None = None) -> int:
             # overhead (~20-50ms) makes any thread-based timing approach unreliable.
             # Sending here wins the race and causes the game to bundle KE2+LOGINWAITMODULE.
             pre_ke1_sent = False
-            if args._boot_ke1_bytes is not None and args.login_boot_delay <= 0:
+            if args._boot_ke1_bytes is not None:
                 try:
                     conn.sendall(args._boot_ke1_bytes)
                     pre_ke1_sent = True
                 except Exception:
                     pass
-
-                
             th = threading.Thread(target=client_thread, args=(conn, addr, args), kwargs={"log_fp": log_fp, "pre_ke1_sent": pre_ke1_sent}, daemon=True)
             th.start()
     except KeyboardInterrupt:
