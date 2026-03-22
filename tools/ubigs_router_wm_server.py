@@ -1005,6 +1005,7 @@ def handle_message(
             primary_res = gsm.GSMResponse(msg)
             primary_res.header.property = gsm.PROPERTY.GS
             primary_res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+            primary_res.dl = List([])  # Must set dl so header.size is recalculated to 6
 
             if existing_rooms:
                 # Build GROUP_INFO response with rooms
