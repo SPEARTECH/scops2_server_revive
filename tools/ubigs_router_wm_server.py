@@ -87,10 +87,14 @@ class LobbyState:
                 removed.append(self.rooms.pop(rid))
             return removed  # list of {"room": Room, "owner_key": str}
 
-    def create_room(self, room, owner_key):
-        """Store a Room object built from CREATE_ROOM data."""
+    def create_room(self, room, owner_key, raw_frame=None):
+        """Store a Room object built from CREATE_ROOM data.
+
+        raw_frame: the original CREATE_ROOM frame bytes (with b5 set to S->P)
+                   for relaying to other players.
+        """
         with self.lock:
-            self.rooms[room.group_id] = {"room": room, "owner_key": owner_key}
+            self.rooms[room.group_id] = {"room": room, "owner_key": owner_key, "raw_frame": raw_frame}
             return room
 
     def remove_room_by_owner(self, owner_key):
@@ -105,6 +109,11 @@ class LobbyState:
         """Return list of Room objects."""
         with self.lock:
             return [info["room"] for info in self.rooms.values()]
+
+    def get_rooms_with_frames(self):
+        """Return list of (Room, raw_frame_bytes_or_None) tuples."""
+        with self.lock:
+            return [(info["room"], info.get("raw_frame")) for info in self.rooms.values()]
 
     def next_room_id(self):
         with self.lock:
@@ -816,13 +825,17 @@ def handle_message(
                     log_fp=log_fp,
                 )
 
-            # Push existing rooms as NEW_GROUP notifications to the new player
-            existing_rooms = _lobby_state.get_rooms()
+            # Push existing rooms to the new player using raw CREATE_ROOM relay frames
+            existing = _lobby_state.get_rooms_with_frames()
             extras = []
-            for room in existing_rooms:
-                new_group_dl = [str(54), room.to_list()]
-                frame = _build_lobby_msg_frame(new_group_dl)
-                extras.append(frame)
+            for room, raw_frame in existing:
+                if raw_frame:
+                    extras.append(raw_frame)
+                else:
+                    # Fallback: build NEW_GROUP if no raw frame stored
+                    new_group_dl = [str(54), room.to_list()]
+                    frame = _build_lobby_msg_frame(new_group_dl)
+                    extras.append(frame)
 
             if extras:
                 log_line(
@@ -929,7 +942,14 @@ def handle_message(
             room.game_version = game_version
 
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
-            _lobby_state.create_room(room=room, owner_key=sk)
+            # Store raw CREATE_ROOM frame (with b5 set to S->P) for relaying
+            relay_frame = None
+            raw_frame = frame_bytes or b""
+            if raw_frame and len(raw_frame) >= 6:
+                relay_frame = bytearray(raw_frame)
+                relay_frame[5] = 0x24  # S->P
+                relay_frame = bytes(relay_frame)
+            _lobby_state.create_room(room=room, owner_key=sk, raw_frame=relay_frame)
 
             log_line(
                 f"[{now_ts()}] ROUTER_WM LOBBY_MSG CREATE_ROOM name={room_name!r} master={username!r} "
@@ -937,10 +957,21 @@ def handle_message(
                 log_fp=log_fp,
             )
 
-            # Build NEW_GROUP notification using Room.to_list() format
-            new_group_frame = _build_lobby_msg_frame([str(54), room.to_list()])
-            log_line(f"[{now_ts()}] ROUTER_WM NEW_GROUP frame hex: {new_group_frame.hex()}", log_fp=log_fp)
-            _lobby_state.broadcast(new_group_frame, exclude_key=sk, log_fp=log_fp)
+            # --- Broadcast strategies (try raw relay first, keep NEW_GROUP as fallback) ---
+            # Strategy 1: Relay the raw CREATE_ROOM frame to other players.
+            # The game knows how to parse CREATE_ROOM (subtype 12) since it creates them.
+            # Re-encode with b5=0x24 (S->P) so the game accepts it from the server entity.
+            raw_frame = frame_bytes or b""
+            if raw_frame and len(raw_frame) >= 6:
+                relay = bytearray(raw_frame)
+                relay[5] = 0x24  # S->P for lobby server connection
+                log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM relay frame len={len(relay)} b5=0x{relay[5]:02x}", log_fp=log_fp)
+                _lobby_state.broadcast(bytes(relay), exclude_key=sk, log_fp=log_fp)
+            else:
+                # Fallback: Build NEW_GROUP notification using Room.to_list() format
+                new_group_frame = _build_lobby_msg_frame([str(54), room.to_list()])
+                log_line(f"[{now_ts()}] ROUTER_WM NEW_GROUP frame hex: {new_group_frame.hex()}", log_fp=log_fp)
+                _lobby_state.broadcast(new_group_frame, exclude_key=sk, log_fp=log_fp)
 
             # Respond with GSSUCCESS to the creator
             try:
