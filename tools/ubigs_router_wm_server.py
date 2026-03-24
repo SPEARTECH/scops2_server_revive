@@ -1022,7 +1022,15 @@ def handle_message(
             except Exception:
                 pass
 
-            existing_rooms = _lobby_state.get_rooms()
+            all_rooms = _lobby_state.get_rooms()
+            log_line(
+                f"[{now_ts()}] ROUTER_WM FIND_GAME DEBUG: total_rooms_in_state={len(all_rooms)} "
+                f"room_ids={[r.group_id for r in all_rooms]} "
+                f"allowed_games={[r.allowed_games for r in all_rooms]} "
+                f"game_filter={game_filter!r}",
+                log_fp=log_fp,
+            )
+            existing_rooms = all_rooms
             if game_filter:
                 existing_rooms = [r for r in existing_rooms
                                   if not r.allowed_games or r.allowed_games == game_filter]
