@@ -1108,29 +1108,24 @@ def handle_message(
                 log_fp=log_fp,
             )
 
-            # Build primary GSSUCCESS response
-            primary_res = gsm.GSMResponse(msg)
-            primary_res.header.property = gsm.PROPERTY.GS
-            primary_res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
-            primary_res.dl = List([])  # Must set dl so header.size is recalculated to 6
+            # Build GSSUCCESS as raw bytes (avoid shared-header bug with GSMResponse)
+            # b5 for response: swap sender/receiver from request.
+            # Request is P->R (b5=0x41), response is R->P (b5=0x14)
+            gssuccess_bytes = bytes([0, 0, 6, 0, gsm.MESSAGE_TYPE.GSSUCCESS.value, 0x14])
 
             if existing_rooms:
-                # Build GROUP_INFO response with rooms
-                from group import Room as _RoomCls
+                # Build GROUP_INFO frame with rooms using _build_lobby_msg_frame
                 room_lists = [r.to_list() for r in existing_rooms]
-                group_info = gsm.GSMResponse(msg)
-                group_info.header.property = gsm.PROPERTY.GS
-                group_info.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
-                group_info.dl = List([
-                    str(53),  # GROUP_INFO
-                    ["1", str(0x100), ["1"], room_lists]
-                ])
+                group_info_frame = _build_lobby_msg_frame(
+                    [str(53), ["1", str(0x100), ["1"], room_lists]],
+                    b5=0x14,  # R->P (same direction as Connection 1 responses)
+                )
                 log_line(
                     f"[{now_ts()}] ROUTER_WM FIND_GAME pushing {len(existing_rooms)} room(s) via GROUP_INFO",
                     log_fp=log_fp,
                 )
-                return (primary_res, [group_info])
-            return primary_res
+                return (gssuccess_bytes, [group_info_frame])
+            return gssuccess_bytes
 
         # Handle other lobby subtypes
         try:
