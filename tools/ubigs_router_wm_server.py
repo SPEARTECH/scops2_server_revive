@@ -61,8 +61,16 @@ def lobby_player_count():
 
 
 # ─── Shared Lobby State (room tracking + broadcasting) ────────────
+LOBBY_ROOMS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "state", "lobby_rooms.json")
+
+
 class LobbyState:
-    """Thread-safe shared state for lobby room broadcasting between sessions."""
+    """Thread-safe shared state for lobby room broadcasting between sessions.
+
+    Rooms are also persisted to state/lobby_rooms.json so that separate
+    server processes (Router on 40000 vs standalone WM on 40005) can share
+    the room list.
+    """
 
     def __init__(self):
         self.lock = threading.Lock()
@@ -73,6 +81,58 @@ class LobbyState:
         # they have different session keys (different src ports).
         self.sessions = {}
         self._next_room_id = 100
+
+    # --- File-backed room persistence for cross-process sharing ---
+
+    def _save_rooms_to_file(self):
+        """Write current rooms to JSON file (call while holding self.lock)."""
+        try:
+            ensure_ubigs_importable()
+            data = {}
+            for rid, info in self.rooms.items():
+                room = info["room"]
+                data[str(rid)] = {
+                    "group_id": room.group_id,
+                    "group_name": room.group_name,
+                    "master": room.master,
+                    "allowed_games": room.allowed_games,
+                    "max_players": room.max_players,
+                    "event_id": room.event_id,
+                    "game_version": room.game_version,
+                    "owner_key": info["owner_key"],
+                    "raw_frame": info.get("raw_frame", b"").hex() if info.get("raw_frame") else None,
+                }
+            p = pathlib.Path(LOBBY_ROOMS_FILE)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps(data, indent=2))
+        except Exception:
+            pass
+
+    def _load_rooms_from_file(self):
+        """Read rooms from JSON file (for cross-process queries like subtype 109)."""
+        try:
+            ensure_ubigs_importable()
+            from group import Room
+            p = pathlib.Path(LOBBY_ROOMS_FILE)
+            if not p.exists():
+                return []
+            data = json.loads(p.read_text())
+            rooms = []
+            for rid_str, info in data.items():
+                room = Room(
+                    id=int(info["group_id"]),
+                    name=info.get("group_name", ""),
+                    master=info.get("master", ""),
+                    game_mode=int(info.get("event_id", 0)),
+                )
+                room.allowed_games = info.get("allowed_games", "")
+                room.max_players = int(info.get("max_players", 8))
+                room.game_version = info.get("game_version", "")
+                room.nb_players = 1
+                rooms.append(room)
+            return rooms
+        except Exception:
+            return []
 
     def register_session(self, key, conn, username, source="unknown"):
         with self.lock:
@@ -85,6 +145,8 @@ class LobbyState:
             removed = []
             for rid in to_remove:
                 removed.append(self.rooms.pop(rid))
+            if removed:
+                self._save_rooms_to_file()
             return removed  # list of {"room": Room, "owner_key": str}
 
     def create_room(self, room, owner_key, raw_frame=None):
@@ -95,6 +157,7 @@ class LobbyState:
         """
         with self.lock:
             self.rooms[room.group_id] = {"room": room, "owner_key": owner_key, "raw_frame": raw_frame}
+            self._save_rooms_to_file()
             return room
 
     def remove_room_by_owner(self, owner_key):
@@ -103,6 +166,8 @@ class LobbyState:
             removed = []
             for rid in to_remove:
                 removed.append(self.rooms.pop(rid))
+            if removed:
+                self._save_rooms_to_file()
             return removed
 
     def get_rooms(self):
@@ -1023,6 +1088,9 @@ def handle_message(
                 pass
 
             all_rooms = _lobby_state.get_rooms()
+            # Cross-process fallback: if in-memory state is empty, read from shared file
+            if not all_rooms:
+                all_rooms = _lobby_state._load_rooms_from_file()
             log_line(
                 f"[{now_ts()}] ROUTER_WM FIND_GAME DEBUG: total_rooms_in_state={len(all_rooms)} "
                 f"room_ids={[r.group_id for r in all_rooms]} "
