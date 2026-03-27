@@ -81,16 +81,22 @@ class LobbyState:
         # they have different session keys (different src ports).
         self.sessions = {}
         self._next_room_id = 100
+        self._last_removed_username = None
 
     # --- File-backed room persistence for cross-process sharing ---
 
     def _save_rooms_to_file(self):
         """Write current rooms to JSON file (call while holding self.lock)."""
+        import base64
         try:
             ensure_ubigs_importable()
             data = {}
             for rid, info in self.rooms.items():
                 room = info["room"]
+                # Save ALL room fields so cross-process loading is complete
+                info_b64 = ""
+                if room.info and isinstance(room.info, (bytes, bytearray)):
+                    info_b64 = base64.b64encode(bytes(room.info)).decode("ascii")
                 data[str(rid)] = {
                     "group_id": room.group_id,
                     "group_name": room.group_name,
@@ -99,6 +105,16 @@ class LobbyState:
                     "max_players": room.max_players,
                     "event_id": room.event_id,
                     "game_version": room.game_version,
+                    "gs_version": room.gs_version,
+                    "config": room.config,
+                    "parent_id": room.parent_id,
+                    "ip_addr": room.ip_addr,
+                    "alt_ip_addr": room.alt_ip_addr,
+                    "info_b64": info_b64,
+                    "nb_players": room.nb_players,
+                    "max_visitors": room.max_visitors,
+                    "nb_visitors": room.nb_visitors,
+                    "games": room.games,
                     "owner_key": info["owner_key"],
                     "raw_frame": info.get("raw_frame", b"").hex() if info.get("raw_frame") else None,
                 }
@@ -110,6 +126,7 @@ class LobbyState:
 
     def _load_rooms_from_file(self):
         """Read rooms from JSON file (for cross-process queries like subtype 109)."""
+        import base64
         try:
             ensure_ubigs_importable()
             from group import Room
@@ -128,7 +145,21 @@ class LobbyState:
                 room.allowed_games = info.get("allowed_games", "")
                 room.max_players = int(info.get("max_players", 8))
                 room.game_version = info.get("game_version", "")
-                room.nb_players = 1
+                room.gs_version = info.get("gs_version", "")
+                room.config = int(info.get("config", 0))
+                room.parent_id = int(info.get("parent_id", 1))
+                room.ip_addr = info.get("ip_addr", "")
+                room.alt_ip_addr = info.get("alt_ip_addr", "")
+                room.nb_players = int(info.get("nb_players", 1))
+                room.max_visitors = int(info.get("max_visitors", 8))
+                room.nb_visitors = int(info.get("nb_visitors", 0))
+                room.games = info.get("games", "")
+                # Restore binary info blob from base64
+                info_b64 = info.get("info_b64", "")
+                if info_b64:
+                    room.info = base64.b64decode(info_b64)
+                else:
+                    room.info = b''
                 rooms.append(room)
             return rooms
         except Exception:
@@ -138,9 +169,20 @@ class LobbyState:
         with self.lock:
             self.sessions[key] = {"conn": conn, "username": username, "source": source}
 
+    def get_session_usernames(self, exclude_key=None):
+        """Return list of usernames of all registered sessions (excluding one)."""
+        with self.lock:
+            return [s["username"] for k, s in self.sessions.items()
+                    if k != exclude_key and s.get("username")]
+
     def unregister_session(self, key):
         with self.lock:
-            self.sessions.pop(key, None)
+            removed_username = None
+            session = self.sessions.pop(key, None)
+            if session:
+                removed_username = session.get("username")
+            # Also store removed username for MEMBER_LEAVE broadcast
+            self._last_removed_username = removed_username
             to_remove = [rid for rid, info in self.rooms.items() if info["owner_key"] == key]
             removed = []
             for rid in to_remove:
@@ -854,11 +896,32 @@ def handle_message(
                 ["1", str(0x100), ["0"], lobby_list]
             ])
 
-            log_line(
-                f"[{now_ts()}] ROUTER_WM LOBBY_MSG LOGIN -> pushing GROUP_INFO with 1 lobby",
-                log_fp=log_fp,
-            )
-            return (login_res, [group_info])
+            extras = [group_info]
+
+            # Also push room list if any rooms exist (file-backed cross-process)
+            all_rooms = _lobby_state.get_rooms()
+            if not all_rooms:
+                all_rooms = _lobby_state._load_rooms_from_file()
+            if all_rooms:
+                room_lists = [r.to_list() for r in all_rooms]
+                room_group_info = gsm.GSMResponse(msg)
+                room_group_info.header.property = gsm.PROPERTY.GS
+                room_group_info.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                room_group_info.dl = List([
+                    str(53),  # GROUP_INFO
+                    ["1", str(0x100), ["1"], room_lists]
+                ])
+                extras.append(room_group_info)
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM LOBBY_MSG LOGIN -> pushing GROUP_INFO with 1 lobby + {len(all_rooms)} room(s)",
+                    log_fp=log_fp,
+                )
+            else:
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM LOBBY_MSG LOGIN -> pushing GROUP_INFO with 1 lobby",
+                    log_fp=log_fp,
+                )
+            return (login_res, extras)
 
         if lobby_subtype == 3:
             # LOBBY_MSG.JOIN_SERVER — game wants to join a lobby server
@@ -874,25 +937,59 @@ def handle_message(
         if lobby_subtype == 23:
             # LOBBY_MSG.JOIN_LOBBY
             count = lobby_player_join()
+            lobby_id = "1"
+            try:
+                lobby_id = str(msg.dl.lst[1][0]) if msg.dl and len(msg.dl.lst) > 1 else "1"
+            except Exception:
+                pass
             log_line(
-                f"[{now_ts()}] ROUTER_WM LOBBY_MSG JOIN_LOBBY id={msg.dl.lst[1][0] if msg.dl and len(msg.dl.lst) > 1 else '?'} players_now={count}",
+                f"[{now_ts()}] ROUTER_WM LOBBY_MSG JOIN_LOBBY id={lobby_id} players_now={count}",
                 log_fp=log_fp,
             )
             resp = gsm.JoinLobbyResponse(msg)
             resp._player_joined = True  # Signal to client_thread for disconnect tracking
 
-            # Register/update this lobby session for room broadcasting
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            username = clt.username or "unknown"
+
+            # Get existing members BEFORE registering (for pushing to new joiner)
+            existing_members = _lobby_state.get_session_usernames(exclude_key=sk)
+
+            # Register/update this lobby session for room broadcasting
             if conn is not None:
-                _lobby_state.register_session(sk, conn, clt.username or "unknown", source="JOIN_LOBBY")
+                _lobby_state.register_session(sk, conn, username, source="JOIN_LOBBY")
                 log_line(
-                    f"[{now_ts()}] ROUTER_WM LOBBY session registered (JOIN_LOBBY): {sk} user={clt.username}",
+                    f"[{now_ts()}] ROUTER_WM LOBBY session registered (JOIN_LOBBY): {sk} user={username}",
+                    log_fp=log_fp,
+                )
+
+            # --- Player Presence: Broadcast MEMBER_JOIN (50) to existing members ---
+            # Tell other players that this user joined the lobby
+            member_join_frame = _build_lobby_msg_frame(
+                [str(50), [lobby_id, username]],  # MEMBER_JOIN: [lobby_id, username]
+            )
+            _lobby_state.broadcast(member_join_frame, exclude_key=sk, log_fp=log_fp)
+            log_line(
+                f"[{now_ts()}] ROUTER_WM MEMBER_JOIN broadcast: {username} joined lobby {lobby_id}",
+                log_fp=log_fp,
+            )
+
+            extras = []
+
+            # --- Push existing members to the new joiner as MEMBER_JOIN (50) ---
+            for member_name in existing_members:
+                mj_frame = _build_lobby_msg_frame(
+                    [str(50), [lobby_id, member_name]],
+                )
+                extras.append(mj_frame)
+            if existing_members:
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM pushing {len(existing_members)} existing member(s) to {username}",
                     log_fp=log_fp,
                 )
 
             # Push existing rooms to the new player using raw CREATE_ROOM relay frames
             existing = _lobby_state.get_rooms_with_frames()
-            extras = []
             for room, raw_frame in existing:
                 if raw_frame:
                     extras.append(raw_frame)
@@ -904,11 +1001,48 @@ def handle_message(
 
             if extras:
                 log_line(
-                    f"[{now_ts()}] ROUTER_WM LOBBY pushing {len(extras)} existing room(s) to new player",
+                    f"[{now_ts()}] ROUTER_WM LOBBY pushing {len(extras)} extras (members+rooms) to {username}",
                     log_fp=log_fp,
                 )
                 return (resp, extras)
             return resp
+
+        if lobby_subtype == 42:
+            # LOBBY_MSG.SET_PLAYER_INFO — player broadcasting their info to lobby
+            # DL: ['42', [lobby_id, player_data...]]
+            # Respond with GSSUCCESS and broadcast PLAYER_INFO_UPDATE (66) to others
+            sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            username = clt.username or "unknown"
+            log_line(
+                f"[{now_ts()}] ROUTER_WM SET_PLAYER_INFO from {username} raw DL: {msg.dl.lst if msg.dl else 'None'}",
+                log_fp=log_fp,
+            )
+
+            # Relay the raw SET_PLAYER_INFO frame to other lobby members as
+            # PLAYER_INFO_UPDATE (66) — same DL structure but different subtype
+            try:
+                raw_dl = msg.dl.lst if msg.dl else []
+                if len(raw_dl) > 1:
+                    # Build PLAYER_INFO_UPDATE (66) with same sub-data
+                    update_frame = _build_lobby_msg_frame(
+                        [str(66), raw_dl[1]],  # PLAYER_INFO_UPDATE with original sub_data
+                    )
+                    _lobby_state.broadcast(update_frame, exclude_key=sk, log_fp=log_fp)
+                    log_line(
+                        f"[{now_ts()}] ROUTER_WM PLAYER_INFO_UPDATE broadcast for {username}",
+                        log_fp=log_fp,
+                    )
+            except Exception as e:
+                log_line(f"[{now_ts()}] ROUTER_WM SET_PLAYER_INFO broadcast error: {e}", log_fp=log_fp)
+
+            try:
+                return gsm.LobbyMsgResponse(msg)
+            except Exception:
+                res = gsm.GSMResponse(msg)
+                res.header.property = gsm.PROPERTY.GS
+                res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+                res.dl = List([])
+                return res
 
         if lobby_subtype == 12:
             # LOBBY_MSG.CREATE_ROOM — player creating a game room
@@ -1005,6 +1139,10 @@ def handle_message(
             room.max_players = max_players
             room.nb_players = 1
             room.game_version = game_version
+            # Set host IP from the creator's connection address
+            creator_ip = clt.addr[0] if hasattr(clt, 'addr') and clt.addr else ""
+            room.ip_addr = creator_ip
+            room.alt_ip_addr = creator_ip
 
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
             # Store raw CREATE_ROOM frame (with b5 set to S->P) for relaying
@@ -1070,10 +1208,9 @@ def handle_message(
                 return res
 
         if lobby_subtype == 109:
-            # LOBBY_MSG subtype 109 — room list request (Find Game)
+            # LOBBY_MSG subtype 109 — CHANGE_REQUESTED_LOBBIES / Find Game
             # DL: ['109', ['SPLINTERCELL3PS2US']]
-            # Game sends this on Connection 1 (P->R) when navigating to Find Game.
-            # Respond with GSSUCCESS + GROUP_INFO push containing current rooms.
+            # Respond with GSSUCCESS + GROUP_INFO push + individual NEW_GROUP pushes
             game_filter = ""
             try:
                 if msg.dl and len(msg.dl.lst) > 1:
@@ -1091,8 +1228,12 @@ def handle_message(
             # Cross-process fallback: if in-memory state is empty, read from shared file
             if not all_rooms:
                 all_rooms = _lobby_state._load_rooms_from_file()
+
+            # Also get raw frames for relay approach
+            all_rooms_with_frames = _lobby_state.get_rooms_with_frames()
+
             log_line(
-                f"[{now_ts()}] ROUTER_WM FIND_GAME DEBUG: total_rooms_in_state={len(all_rooms)} "
+                f"[{now_ts()}] ROUTER_WM FIND_GAME DEBUG: total_rooms={len(all_rooms)} "
                 f"room_ids={[r.group_id for r in all_rooms]} "
                 f"allowed_games={[r.allowed_games for r in all_rooms]} "
                 f"game_filter={game_filter!r}",
@@ -1109,22 +1250,42 @@ def handle_message(
             )
 
             # Build GSSUCCESS as raw bytes (avoid shared-header bug with GSMResponse)
-            # b5 for response: swap sender/receiver from request.
-            # Request is P->R (b5=0x41), response is R->P (b5=0x14)
             gssuccess_bytes = bytes([0, 0, 6, 0, gsm.MESSAGE_TYPE.GSSUCCESS.value, 0x14])
 
             if existing_rooms:
-                # Build GROUP_INFO frame with rooms using _build_lobby_msg_frame
+                extras = []
+
+                # Strategy 1: GROUP_INFO (53) with room data
                 room_lists = [r.to_list() for r in existing_rooms]
                 group_info_frame = _build_lobby_msg_frame(
                     [str(53), ["1", str(0x100), ["1"], room_lists]],
-                    b5=0x14,  # R->P (same direction as Connection 1 responses)
+                    b5=0x24,  # S->P (lobby server push)
                 )
+                extras.append(group_info_frame)
+
+                # Strategy 2: Individual NEW_GROUP (54) for each room
+                for room in existing_rooms:
+                    new_group_frame = _build_lobby_msg_frame(
+                        [str(54), room.to_list()],
+                        b5=0x24,
+                    )
+                    extras.append(new_group_frame)
+
+                # Strategy 3: Relay raw CREATE_ROOM frames if available
+                for room, raw_frame in all_rooms_with_frames:
+                    if raw_frame:
+                        # Adjust b5 for this connection context
+                        relay = bytearray(raw_frame)
+                        if len(relay) >= 6:
+                            relay[5] = 0x24  # S->P
+                        extras.append(bytes(relay))
+
                 log_line(
-                    f"[{now_ts()}] ROUTER_WM FIND_GAME pushing {len(existing_rooms)} room(s) via GROUP_INFO",
+                    f"[{now_ts()}] ROUTER_WM FIND_GAME pushing {len(existing_rooms)} room(s) "
+                    f"via {len(extras)} frames (GROUP_INFO + NEW_GROUP + raw relay)",
                     log_fp=log_fp,
                 )
-                return (gssuccess_bytes, [group_info_frame])
+                return (gssuccess_bytes, extras)
             return gssuccess_bytes
 
         # Handle other lobby subtypes
@@ -1421,9 +1582,20 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
         if _joined_lobby:
             count = lobby_player_leave()
             log_line(f"[{now_ts()}] ROUTER_WM {src_ip}:{src_port} left lobby, players_now={count}", log_fp=log_fp)
-        # Clean up lobby session and broadcast room removal
+        # Clean up lobby session and broadcast room removal + member leave
         _sk = f"{src_ip}:{src_port}"
         removed_rooms = _lobby_state.unregister_session(_sk)
+        # Broadcast MEMBER_LEAVE (51) for the departing player
+        _left_username = getattr(_lobby_state, '_last_removed_username', None)
+        if _left_username and _joined_lobby:
+            member_leave_frame = _build_lobby_msg_frame(
+                [str(51), ["1", _left_username]],  # MEMBER_LEAVE: [lobby_id, username]
+            )
+            _lobby_state.broadcast(member_leave_frame, log_fp=log_fp)
+            log_line(
+                f"[{now_ts()}] ROUTER_WM MEMBER_LEAVE broadcast: {_left_username} left lobby",
+                log_fp=log_fp,
+            )
         if removed_rooms:
             for room_entry in removed_rooms:
                 room = room_entry["room"]
