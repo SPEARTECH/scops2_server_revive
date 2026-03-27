@@ -658,6 +658,63 @@ def handle_message(
             return (res, extras)
         return None
 
+    if msg.header.type == gsm.MESSAGE_TYPE.NEWUSERREQUEST:
+        # Account creation — can arrive here if the game's first connection (Router)
+        # failed and the second connection (WM) gets routed the full flow.
+        # Parse and create the user, then respond with the same format the Router uses.
+        username = None
+        password = None
+        dp = None
+        try:
+            if msg.dl is not None and getattr(msg.dl, "lst", None):
+                lst = msg.dl.lst
+                # NEWUSERREQUEST payload: [dp, username, password, ...]
+                dp = lst[0] if len(lst) >= 1 and isinstance(lst[0], str) else None
+                username = lst[1] if len(lst) >= 2 and isinstance(lst[1], str) else None
+                password = lst[2] if len(lst) >= 3 and isinstance(lst[2], str) else None
+        except Exception:
+            pass
+
+        if userdb is not None:
+            try:
+                userdb.load()
+            except Exception:
+                pass
+        if userdb is not None and username:
+            if userdb.get_user(username) is not None:
+                log_line(f"[{now_ts()}] ROUTER_WM NEWUSERREQUEST SKIP: user={username!r} already exists", log_fp=log_fp)
+            elif password is not None:
+                userdb.upsert_user(username=username, password=password, dp=dp)
+                try:
+                    userdb.save()
+                except Exception:
+                    pass
+                log_line(f"[{now_ts()}] ROUTER_WM NEWUSERREQUEST OK: created user={username!r}", log_fp=log_fp)
+        else:
+            log_line(f"[{now_ts()}] ROUTER_WM NEWUSERREQUEST: user={username!r} db={'yes' if userdb else 'no'}", log_fp=log_fp)
+
+        if username:
+            clt.username = username
+
+        # Respond with PROXY_HANDLER (0xCC) b5=0x41 + hardcoded extras
+        # (same format the Router uses — game expects this specific pattern)
+        res = gsm.GSMResponse(msg)
+        res.header = copy.deepcopy(msg.header)
+        res.header.property = gsm.PROPERTY.GS
+        res.header.type = gsm.MESSAGE_TYPE.PROXY_HANDLER
+        res.header.sender = gsm.SENDER_RECEIVER.P
+        res.header.receiver = gsm.SENDER_RECEIVER.R
+        msg_id = gsm.MESSAGE_TYPE.NEWUSERREQUEST.value
+        res.dl = List([msg_id.to_bytes(1, "little")])
+        extras = [
+            bytes.fromhex("00000c00cc41eb8be88a8c8c"),
+            bytes.fromhex("00002600cc41eb8bd3abafae8a8ca0a0ada28ce3a4a9a1a6d4bab4a039a1a9fde1f5b69ea7a7"),
+            bytes.fromhex("00000c002641eb8b8f8a8c8c"),
+            bytes.fromhex("000006002641"),
+            bytes.fromhex("00004400cc41fab3fde1fef9a4acb9d6cae5e8939a858c90e7f5d1d98388bef1fba1f29f8a8ae3edc1f3829989c2ebeba79686cff098ff969f9bbbf099d6de8c898f9e9b"),
+        ]
+        return (res, extras)
+
     if msg.header.type == gsm.MESSAGE_TYPE.LOGIN:
         # Game sends LOGIN on WM just like on Router.
         # Must respond with proper GSSUCCESS(LOGIN) so game proceeds to LOGINWAITMODULE.

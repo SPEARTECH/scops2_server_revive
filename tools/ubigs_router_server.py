@@ -1127,6 +1127,17 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
             ),
             log_fp=log_fp,
         )
+        # If this Router connection had no meaningful frames (quick disconnect/probe),
+        # reset the per-IP connection counter so the next connection from this IP
+        # gets correctly routed to Router instead of WM.
+        if stats['frames'] == 0:
+            try:
+                _ip_conn_reset = getattr(args, '_ip_conn_reset', None)
+                if _ip_conn_reset is not None:
+                    _ip_conn_reset(src_ip)
+                    log_line(f"[{now_ts()}] ROUTER {src_ip} conn counter reset (no frames)", log_fp=log_fp)
+            except Exception:
+                pass
         log_line(f"[{now_ts()}] ROUTER {src_ip}:{src_port} DISCONNECT", log_fp=log_fp)
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Ubisoft GS router service")
@@ -1330,6 +1341,9 @@ def main(argv: list[str] | None = None) -> int:
         """Reset counter for this IP (called after WM connection handled)."""
         with _ip_conn_lock:
             _ip_conn_count.pop(ip, None)
+
+    # Attach reset function to args so client_thread can reset on quick disconnect
+    args._ip_conn_reset = _ip_conn_reset
 
     try:
         while True:
