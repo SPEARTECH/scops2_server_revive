@@ -14,6 +14,7 @@ what the Chaos Theory PS2 client does next.
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import pathlib
@@ -191,14 +192,21 @@ class LobbyState:
                 self._save_rooms_to_file()
             return removed  # list of {"room": Room, "owner_key": str}
 
-    def create_room(self, room, owner_key, raw_frame=None):
+    def create_room(self, room, owner_key, raw_frame=None, create_sub_data=None):
         """Store a Room object built from CREATE_ROOM data.
 
         raw_frame: the original CREATE_ROOM frame bytes (with b5 set to S->P)
                    for relaying to other players.
+        create_sub_data: the original CREATE_ROOM DL sub_data list (msg.dl.lst[1])
+                         for building NEW_GROUP(54) frames in the game's own format.
         """
         with self.lock:
-            self.rooms[room.group_id] = {"room": room, "owner_key": owner_key, "raw_frame": raw_frame}
+            self.rooms[room.group_id] = {
+                "room": room,
+                "owner_key": owner_key,
+                "raw_frame": raw_frame,
+                "create_sub_data": create_sub_data,
+            }
             self._save_rooms_to_file()
             return room
 
@@ -222,6 +230,11 @@ class LobbyState:
         with self.lock:
             return [(info["room"], info.get("raw_frame")) for info in self.rooms.values()]
 
+    def get_rooms_with_create_data(self):
+        """Return list of (Room, create_sub_data_or_None) tuples."""
+        with self.lock:
+            return [(info["room"], info.get("create_sub_data")) for info in self.rooms.values()]
+
     def next_room_id(self):
         with self.lock:
             rid = self._next_room_id
@@ -241,6 +254,34 @@ class LobbyState:
 
 
 _lobby_state = LobbyState()
+
+
+def _room_as_lobby_format(room):
+    """Convert a Room to a 14-field lobby-style list for GROUP_INFO.
+
+    The PS2 game's GROUP_INFO parser appears to use the same 14-field format
+    for both lobbies and rooms, differentiating by group_type (field 0):
+      0 = lobby, 1 = room.
+
+    Room.to_list() produces 20 fields which likely breaks the parser.
+    This function maps room data to the 14-field format the game expects.
+    """
+    return [
+        str(1),                       # [0]  group_type = ROOM
+        room.group_name,              # [1]  group_name
+        str(room.group_id),           # [2]  group_id
+        str(room.lobby_sv_id),        # [3]  lobby_sv_id
+        str(room.parent_id),          # [4]  parent_id (lobby this room belongs to)
+        str(room.config),             # [5]  config / flags
+        str(room.group_level),        # [6]  group_level
+        room.master,                  # [7]  master (room creator)
+        room.allowed_games,           # [8]  allowed_games (game filter)
+        room.games,                   # [9]  games
+        room.info,                    # [10] info (binary blob with room name, IPs)
+        str(room.event_id),           # [11] event_id (game mode)
+        str(room.max_players),        # [12] max_members / max_players
+        str(room.nb_players),         # [13] nb_members / nb_players
+    ]
 
 
 def _build_lobby_msg_frame(dl_list, b5=0x24):
@@ -851,6 +892,20 @@ def handle_message(
     if msg.header.type == gsm.MESSAGE_TYPE.LOGINFRIENDS:
         return gsm.LoginFriendsResponse(msg)
 
+    if msg.header.type == gsm.MESSAGE_TYPE.JOINWAITMODULE:
+        # JOINWAITMODULE arrives on WM when the game reconnects for lobby-server.
+        # Respond with GSSUCCESS pointing back to ourselves (WM server).
+        try:
+            if msg.dl is not None and msg.dl.lst and isinstance(msg.dl.lst[0], str):
+                clt.username = msg.dl.lst[0]
+        except Exception:
+            pass
+        log_line(
+            f"[{now_ts()}] ROUTER_WM JOINWAITMODULE user={clt.username} -> self {ct34_host}:40005",
+            log_fp=log_fp,
+        )
+        return gsm.JoinWaitModuleResponse(msg, (str(ct34_host), 40005))
+
     if msg.header.type == gsm.MESSAGE_TYPE.PLAYERINFO:
         return gsm.PlayerInfoResponse(msg, clt.username or "noname")
 
@@ -936,48 +991,85 @@ def handle_message(
 
         if lobby_subtype == 21:
             # LOBBY_MSG.LOGIN — respond with GSSUCCESS, then push lobby list
-            login_res = gsm.LobbyMsgResponse(msg)
+            # CRITICAL: deepcopy header BEFORE any GSMResponse touches it,
+            # because GSMResponse.__init__ mutates req.header in-place.
+            orig_hdr = copy.deepcopy(msg.header)
 
-            # Build GROUP_INFO push with one lobby
-            from group import Lobby
+            def _make_lobby_push_header():
+                """Create a fresh response header (swapped S/R) from the original."""
+                h = copy.deepcopy(orig_hdr)
+                h.sender, h.receiver = h.receiver, h.sender
+                return h
+
+            login_res = gsm.LobbyMsgResponse(msg)
+            # Replace the mutated shared header with a clean copy
+            login_res.header = _make_lobby_push_header()
+            login_res.header.property = gsm.PROPERTY.GS
+            login_res.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+
+            # Build GROUP_INFO push with lobby + any existing rooms
+            from group import Lobby, Room as RoomCls
             lobby1 = Lobby(id=1, name="www.splintercellonline.net", master="", game_mode=0)
             lobby1.max_members = 16
             lobby1.nb_members = lobby_player_count()
 
+            # Check for existing rooms (file-backed cross-process)
+            all_rooms = _lobby_state.get_rooms()
+            if not all_rooms:
+                all_rooms = _lobby_state._load_rooms_from_file()
+
+            # --- Build a SINGLE GROUP_INFO with lobby + rooms (14-field format) ---
+            # The game's GROUP_INFO parser uses the same 14-field format for both
+            # lobbies and rooms, differentiating by group_type (field[0]).
+            # Embedding rooms in the SAME GROUP_INFO as the lobby ensures the game
+            # parses them through the working code path.
             group_info = gsm.GSMResponse(msg)
+            group_info.header = _make_lobby_push_header()
             group_info.header.property = gsm.PROPERTY.GS
             group_info.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
-            lobby_list = [lobby1.to_list()]
+            group_list = [lobby1.to_list()]  # Start with the lobby (14 fields)
+            for room in all_rooms:
+                group_list.append(_room_as_lobby_format(room))  # Add rooms (14 fields each)
             group_info.dl = List([
                 str(53),  # LOBBY_MSG.GROUP_INFO
-                ["1", str(0x100), ["0"], lobby_list]
+                ["1", str(0x100), ["0"], group_list]
             ])
 
             extras = [group_info]
 
-            # Also push room list if any rooms exist (file-backed cross-process)
-            all_rooms = _lobby_state.get_rooms()
-            if not all_rooms:
-                all_rooms = _lobby_state._load_rooms_from_file()
+            # Also send a separate rooms-only GROUP_INFO with is_rooms='1' as fallback
             if all_rooms:
-                room_lists = [r.to_list() for r in all_rooms]
-                room_group_info = gsm.GSMResponse(msg)
-                room_group_info.header.property = gsm.PROPERTY.GS
-                room_group_info.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
-                room_group_info.dl = List([
+                room_gi = gsm.GSMResponse(msg)
+                room_gi.header = _make_lobby_push_header()
+                room_gi.header.property = gsm.PROPERTY.GS
+                room_gi.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                room_only_list = [_room_as_lobby_format(r) for r in all_rooms]
+                room_gi.dl = List([
                     str(53),  # GROUP_INFO
-                    ["1", str(0x100), ["1"], room_lists]
+                    ["1", str(0x100), ["1"], room_only_list]
                 ])
-                extras.append(room_group_info)
+                extras.append(room_gi)
+
                 log_line(
-                    f"[{now_ts()}] ROUTER_WM LOBBY_MSG LOGIN -> pushing GROUP_INFO with 1 lobby + {len(all_rooms)} room(s)",
+                    f"[{now_ts()}] ROUTER_WM LOBBY_MSG LOGIN -> GROUP_INFO with 1 lobby + "
+                    f"{len(all_rooms)} room(s) embedded (14-field format) + separate rooms GROUP_INFO",
                     log_fp=log_fp,
                 )
             else:
                 log_line(
-                    f"[{now_ts()}] ROUTER_WM LOBBY_MSG LOGIN -> pushing GROUP_INFO with 1 lobby",
+                    f"[{now_ts()}] ROUTER_WM LOBBY_MSG LOGIN -> GROUP_INFO with 1 lobby (no rooms)",
                     log_fp=log_fp,
                 )
+
+            # Log extras for debugging
+            for i, ex in enumerate(extras):
+                ex_bytes = bytes(ex) if not isinstance(ex, (bytes, bytearray)) else ex
+                b5_val = ex_bytes[5] if len(ex_bytes) > 5 else -1
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM LOGIN extra[{i}] len={len(ex_bytes)} b5=0x{b5_val:02x}",
+                    log_fp=log_fp,
+                )
+
             return (login_res, extras)
 
         if lobby_subtype == 3:
@@ -1045,16 +1137,22 @@ def handle_message(
                     log_fp=log_fp,
                 )
 
-            # Push existing rooms to the new player using raw CREATE_ROOM relay frames
-            existing = _lobby_state.get_rooms_with_frames()
-            for room, raw_frame in existing:
-                if raw_frame:
-                    extras.append(raw_frame)
-                else:
-                    # Fallback: build NEW_GROUP if no raw frame stored
-                    new_group_dl = [str(54), room.to_list()]
-                    frame = _build_lobby_msg_frame(new_group_dl)
-                    extras.append(frame)
+            # Push existing rooms via GROUP_INFO (14-field lobby format)
+            existing_rooms = _lobby_state.get_rooms()
+            if not existing_rooms:
+                existing_rooms = _lobby_state._load_rooms_from_file()
+            if existing_rooms:
+                room_gi_frame = _build_lobby_msg_frame(
+                    [str(53), ["1", str(0x100), ["0"],
+                     [_room_as_lobby_format(r) for r in existing_rooms]]],
+                    b5=0x24,  # S->P for lobby server connection (Connection 2)
+                )
+                extras.append(room_gi_frame)
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM pushing GROUP_INFO with {len(existing_rooms)} room(s) "
+                    f"(14-field format) to {username}",
+                    log_fp=log_fp,
+                )
 
             if extras:
                 log_line(
@@ -1202,14 +1300,17 @@ def handle_message(
             room.alt_ip_addr = creator_ip
 
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
-            # Store raw CREATE_ROOM frame (with b5 set to S->P) for relaying
+            # Store raw CREATE_ROOM frame and original sub_data for broadcasting
             relay_frame = None
             raw_frame = frame_bytes or b""
             if raw_frame and len(raw_frame) >= 6:
                 relay_frame = bytearray(raw_frame)
                 relay_frame[5] = 0x24  # S->P
                 relay_frame = bytes(relay_frame)
-            _lobby_state.create_room(room=room, owner_key=sk, raw_frame=relay_frame)
+            _lobby_state.create_room(
+                room=room, owner_key=sk, raw_frame=relay_frame,
+                create_sub_data=sub_data,  # Store original CREATE_ROOM fields
+            )
 
             log_line(
                 f"[{now_ts()}] ROUTER_WM LOBBY_MSG CREATE_ROOM name={room_name!r} master={username!r} "
@@ -1217,21 +1318,35 @@ def handle_message(
                 log_fp=log_fp,
             )
 
-            # --- Broadcast strategies (try raw relay first, keep NEW_GROUP as fallback) ---
-            # Strategy 1: Relay the raw CREATE_ROOM frame to other players.
-            # The game knows how to parse CREATE_ROOM (subtype 12) since it creates them.
-            # Re-encode with b5=0x24 (S->P) so the game accepts it from the server entity.
-            raw_frame = frame_bytes or b""
-            if raw_frame and len(raw_frame) >= 6:
-                relay = bytearray(raw_frame)
-                relay[5] = 0x24  # S->P for lobby server connection
-                log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM relay frame len={len(relay)} b5=0x{relay[5]:02x}", log_fp=log_fp)
-                _lobby_state.broadcast(bytes(relay), exclude_key=sk, log_fp=log_fp)
-            else:
-                # Fallback: Build NEW_GROUP notification using Room.to_list() format
-                new_group_frame = _build_lobby_msg_frame([str(54), room.to_list()])
-                log_line(f"[{now_ts()}] ROUTER_WM NEW_GROUP frame hex: {new_group_frame.hex()}", log_fp=log_fp)
-                _lobby_state.broadcast(new_group_frame, exclude_key=sk, log_fp=log_fp)
+            # --- Broadcast room via GROUP_INFO (14-field format) ---
+            # Send a full GROUP_INFO with all current rooms to other players.
+            # This uses the same format that works for lobbies.
+            all_current_rooms = _lobby_state.get_rooms()
+            if all_current_rooms:
+                room_gi_broadcast = _build_lobby_msg_frame(
+                    [str(53), ["1", str(0x100), ["0"],
+                     [_room_as_lobby_format(r) for r in all_current_rooms]]],
+                    b5=0x24,  # S->P for lobby server connection (Connection 2)
+                )
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM CREATE_ROOM -> GROUP_INFO broadcast "
+                    f"with {len(all_current_rooms)} room(s) (14-field format) "
+                    f"len={len(room_gi_broadcast)}",
+                    log_fp=log_fp,
+                )
+                _lobby_state.broadcast(room_gi_broadcast, exclude_key=sk, log_fp=log_fp)
+
+            # Also send NEW_GROUP(54) with original CREATE_ROOM sub_data as fallback
+            new_group_frame = _build_lobby_msg_frame(
+                [str(54), sub_data],
+                b5=0x24,
+            )
+            log_line(
+                f"[{now_ts()}] ROUTER_WM CREATE_ROOM -> NEW_GROUP(54) broadcast "
+                f"len={len(new_group_frame)} sub_data_len={len(sub_data)}",
+                log_fp=log_fp,
+            )
+            _lobby_state.broadcast(new_group_frame, exclude_key=sk, log_fp=log_fp)
 
             # Respond with GSSUCCESS to the creator
             try:
@@ -1265,9 +1380,10 @@ def handle_message(
                 return res
 
         if lobby_subtype == 109:
-            # LOBBY_MSG subtype 109 — CHANGE_REQUESTED_LOBBIES / Find Game
+            # LOBBY_MSG subtype 109 — FIND_GAME / CHANGE_REQUESTED_LOBBIES
             # DL: ['109', ['SPLINTERCELL3PS2US']]
-            # Respond with GSSUCCESS + GROUP_INFO push + individual NEW_GROUP pushes
+            # CRITICAL: This arrives on Connection 1 (P->R, b5=0x41), so responses
+            # must use b5=0x14 (R->P) and be LOBBY_MSG type (not bare GSSUCCESS).
             game_filter = ""
             try:
                 if msg.dl and len(msg.dl.lst) > 1:
@@ -1282,12 +1398,8 @@ def handle_message(
                 pass
 
             all_rooms = _lobby_state.get_rooms()
-            # Cross-process fallback: if in-memory state is empty, read from shared file
             if not all_rooms:
                 all_rooms = _lobby_state._load_rooms_from_file()
-
-            # Also get raw frames for relay approach
-            all_rooms_with_frames = _lobby_state.get_rooms_with_frames()
 
             log_line(
                 f"[{now_ts()}] ROUTER_WM FIND_GAME DEBUG: total_rooms={len(all_rooms)} "
@@ -1306,44 +1418,77 @@ def handle_message(
                 log_fp=log_fp,
             )
 
-            # Build GSSUCCESS as raw bytes (avoid shared-header bug with GSMResponse)
-            gssuccess_bytes = bytes([0, 0, 6, 0, gsm.MESSAGE_TYPE.GSSUCCESS.value, 0x14])
+            # Respond with GROUP_INFO containing rooms in 14-field lobby format.
+            # CRITICAL: This arrives on Connection 1 (P->R, b5=0x41), so responses
+            # must use R->P direction.
+            orig_hdr_109 = copy.deepcopy(msg.header)
+
+            def _make_109_header():
+                h = copy.deepcopy(orig_hdr_109)
+                h.sender, h.receiver = h.receiver, h.sender
+                return h
 
             if existing_rooms:
+                # --- Primary: GROUP_INFO(53) as the direct response ---
+                # Instead of GSSUCCESS ack + extras, send GROUP_INFO directly.
+                # This matches the GroupInfoResponse pattern from the ubi-gs library
+                # (response to CHANGE_REQUESTED_LOBBIES = 109).
+                gi_resp = gsm.GSMResponse(msg)
+                gi_resp.header = _make_109_header()
+                gi_resp.header.property = gsm.PROPERTY.GS
+                gi_resp.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                room_list_14 = [_room_as_lobby_format(r) for r in existing_rooms]
+                gi_resp.dl = List([
+                    str(53),  # GROUP_INFO
+                    ["1", str(0x100), ["0"], room_list_14]
+                ])
+
                 extras = []
 
-                # Strategy 1: GROUP_INFO (53) with room data
-                room_lists = [r.to_list() for r in existing_rooms]
-                group_info_frame = _build_lobby_msg_frame(
-                    [str(53), ["1", str(0x100), ["1"], room_lists]],
-                    b5=0x24,  # S->P (lobby server push)
-                )
-                extras.append(group_info_frame)
+                # Also send a GSSUCCESS ack as fallback (in case game expects it first)
+                ack = gsm.GSMResponse(msg)
+                ack.header = _make_109_header()
+                ack.header.property = gsm.PROPERTY.GS
+                ack.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                ack.dl = List([str(gsm.MESSAGE_TYPE.GSSUCCESS.value), ["109"]])
+                extras.append(ack)
 
-                # Strategy 2: Individual NEW_GROUP (54) for each room
-                for room in existing_rooms:
-                    new_group_frame = _build_lobby_msg_frame(
-                        [str(54), room.to_list()],
-                        b5=0x24,
-                    )
-                    extras.append(new_group_frame)
-
-                # Strategy 3: Relay raw CREATE_ROOM frames if available
-                for room, raw_frame in all_rooms_with_frames:
-                    if raw_frame:
-                        # Adjust b5 for this connection context
-                        relay = bytearray(raw_frame)
-                        if len(relay) >= 6:
-                            relay[5] = 0x24  # S->P
-                        extras.append(bytes(relay))
+                # Also send rooms-only GROUP_INFO with is_rooms='1' as second fallback
+                gi_rooms = gsm.GSMResponse(msg)
+                gi_rooms.header = _make_109_header()
+                gi_rooms.header.property = gsm.PROPERTY.GS
+                gi_rooms.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                gi_rooms.dl = List([
+                    str(53),  # GROUP_INFO
+                    ["1", str(0x100), ["1"], room_list_14]
+                ])
+                extras.append(gi_rooms)
 
                 log_line(
-                    f"[{now_ts()}] ROUTER_WM FIND_GAME pushing {len(existing_rooms)} room(s) "
-                    f"via {len(extras)} frames (GROUP_INFO + NEW_GROUP + raw relay)",
+                    f"[{now_ts()}] ROUTER_WM FIND_GAME -> GROUP_INFO with {len(existing_rooms)} room(s) "
+                    f"(14-field format, is_rooms=0 primary + is_rooms=1 fallback)",
                     log_fp=log_fp,
                 )
-                return (gssuccess_bytes, extras)
-            return gssuccess_bytes
+                for i, ex in enumerate([gi_resp] + extras):
+                    ex_b = bytes(ex)
+                    b5v = ex_b[5] if len(ex_b) > 5 else -1
+                    log_line(
+                        f"[{now_ts()}] ROUTER_WM FIND_GAME frame[{i}] len={len(ex_b)} b5=0x{b5v:02x}",
+                        log_fp=log_fp,
+                    )
+                return (gi_resp, extras)
+
+            # No rooms — just ack
+            lobby_resp = gsm.GSMResponse(msg)
+            lobby_resp.header = _make_109_header()
+            lobby_resp.header.property = gsm.PROPERTY.GS
+            lobby_resp.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+            lobby_resp.dl = List([str(gsm.MESSAGE_TYPE.GSSUCCESS.value), ["109"]])
+            log_line(
+                f"[{now_ts()}] ROUTER_WM FIND_GAME -> no rooms, sending GSSUCCESS ack only",
+                log_fp=log_fp,
+            )
+            return lobby_resp
 
         # Handle other lobby subtypes
         try:
