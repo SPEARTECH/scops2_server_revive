@@ -1018,41 +1018,37 @@ def handle_message(
             if not all_rooms:
                 all_rooms = _lobby_state._load_rooms_from_file()
 
-            # --- Build a SINGLE GROUP_INFO with lobby + rooms (14-field format) ---
-            # The game's GROUP_INFO parser uses the same 14-field format for both
-            # lobbies and rooms, differentiating by group_type (field[0]).
-            # Embedding rooms in the SAME GROUP_INFO as the lobby ensures the game
-            # parses them through the working code path.
+            # --- Build lobby-only GROUP_INFO (14-field, is_rooms='0') ---
+            # This is the WORKING path: the game parses and displays lobbies from this.
             group_info = gsm.GSMResponse(msg)
             group_info.header = _make_lobby_push_header()
             group_info.header.property = gsm.PROPERTY.GS
             group_info.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
-            group_list = [lobby1.to_list()]  # Start with the lobby (14 fields)
-            for room in all_rooms:
-                group_list.append(_room_as_lobby_format(room))  # Add rooms (14 fields each)
             group_info.dl = List([
                 str(53),  # LOBBY_MSG.GROUP_INFO
-                ["1", str(0x100), ["0"], group_list]
+                ["1", str(0x100), ["0"], [lobby1.to_list()]]
             ])
 
             extras = [group_info]
 
-            # Also send a separate rooms-only GROUP_INFO with is_rooms='1' as fallback
+            # --- Also send rooms GROUP_INFO with FULL 20-field format, is_rooms='1' ---
+            # The game may have a SEPARATE parser for rooms (is_rooms='1') that expects
+            # the full 20-field Room.to_list() format, not the 14-field lobby format.
             if all_rooms:
                 room_gi = gsm.GSMResponse(msg)
                 room_gi.header = _make_lobby_push_header()
                 room_gi.header.property = gsm.PROPERTY.GS
                 room_gi.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
-                room_only_list = [_room_as_lobby_format(r) for r in all_rooms]
+                room_full_list = [r.to_list() for r in all_rooms]  # Full 20-field format
                 room_gi.dl = List([
                     str(53),  # GROUP_INFO
-                    ["1", str(0x100), ["1"], room_only_list]
+                    ["1", str(0x100), ["1"], room_full_list]
                 ])
                 extras.append(room_gi)
 
                 log_line(
                     f"[{now_ts()}] ROUTER_WM LOBBY_MSG LOGIN -> GROUP_INFO with 1 lobby + "
-                    f"{len(all_rooms)} room(s) embedded (14-field format) + separate rooms GROUP_INFO",
+                    f"{len(all_rooms)} room(s) (20-field format, is_rooms=1)",
                     log_fp=log_fp,
                 )
             else:
@@ -1137,20 +1133,20 @@ def handle_message(
                     log_fp=log_fp,
                 )
 
-            # Push existing rooms via GROUP_INFO (14-field lobby format)
+            # Push existing rooms via GROUP_INFO (full 20-field format, is_rooms='1')
             existing_rooms = _lobby_state.get_rooms()
             if not existing_rooms:
                 existing_rooms = _lobby_state._load_rooms_from_file()
             if existing_rooms:
                 room_gi_frame = _build_lobby_msg_frame(
-                    [str(53), ["1", str(0x100), ["0"],
-                     [_room_as_lobby_format(r) for r in existing_rooms]]],
+                    [str(53), ["1", str(0x100), ["1"],
+                     [r.to_list() for r in existing_rooms]]],
                     b5=0x24,  # S->P for lobby server connection (Connection 2)
                 )
                 extras.append(room_gi_frame)
                 log_line(
                     f"[{now_ts()}] ROUTER_WM pushing GROUP_INFO with {len(existing_rooms)} room(s) "
-                    f"(14-field format) to {username}",
+                    f"(20-field format, is_rooms=1) to {username}",
                     log_fp=log_fp,
                 )
 
@@ -1324,13 +1320,13 @@ def handle_message(
             all_current_rooms = _lobby_state.get_rooms()
             if all_current_rooms:
                 room_gi_broadcast = _build_lobby_msg_frame(
-                    [str(53), ["1", str(0x100), ["0"],
-                     [_room_as_lobby_format(r) for r in all_current_rooms]]],
+                    [str(53), ["1", str(0x100), ["1"],
+                     [r.to_list() for r in all_current_rooms]]],
                     b5=0x24,  # S->P for lobby server connection (Connection 2)
                 )
                 log_line(
                     f"[{now_ts()}] ROUTER_WM CREATE_ROOM -> GROUP_INFO broadcast "
-                    f"with {len(all_current_rooms)} room(s) (14-field format) "
+                    f"with {len(all_current_rooms)} room(s) (20-field format, is_rooms=1) "
                     f"len={len(room_gi_broadcast)}",
                     log_fp=log_fp,
                 )
@@ -1429,23 +1425,34 @@ def handle_message(
                 return h
 
             if existing_rooms:
-                # --- Primary: GROUP_INFO(53) as the direct response ---
-                # Instead of GSSUCCESS ack + extras, send GROUP_INFO directly.
-                # This matches the GroupInfoResponse pattern from the ubi-gs library
-                # (response to CHANGE_REQUESTED_LOBBIES = 109).
+                # --- Primary: GROUP_INFO(53) with full 20-field Room.to_list(), is_rooms='1' ---
+                # The game's room parser likely expects the full 20 fields when is_rooms='1'.
+                # This is the direct response to 109 (CHANGE_REQUESTED_LOBBIES).
                 gi_resp = gsm.GSMResponse(msg)
                 gi_resp.header = _make_109_header()
                 gi_resp.header.property = gsm.PROPERTY.GS
                 gi_resp.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
-                room_list_14 = [_room_as_lobby_format(r) for r in existing_rooms]
+                room_list_20 = [r.to_list() for r in existing_rooms]  # Full 20-field
                 gi_resp.dl = List([
                     str(53),  # GROUP_INFO
-                    ["1", str(0x100), ["0"], room_list_14]
+                    ["1", str(0x100), ["1"], room_list_20]
                 ])
 
                 extras = []
 
-                # Also send a GSSUCCESS ack as fallback (in case game expects it first)
+                # Fallback: GROUP_INFO with is_rooms='0' and 14-field format
+                gi_14 = gsm.GSMResponse(msg)
+                gi_14.header = _make_109_header()
+                gi_14.header.property = gsm.PROPERTY.GS
+                gi_14.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                room_list_14 = [_room_as_lobby_format(r) for r in existing_rooms]
+                gi_14.dl = List([
+                    str(53),  # GROUP_INFO
+                    ["1", str(0x100), ["0"], room_list_14]
+                ])
+                extras.append(gi_14)
+
+                # GSSUCCESS ack as second fallback
                 ack = gsm.GSMResponse(msg)
                 ack.header = _make_109_header()
                 ack.header.property = gsm.PROPERTY.GS
@@ -1453,20 +1460,9 @@ def handle_message(
                 ack.dl = List([str(gsm.MESSAGE_TYPE.GSSUCCESS.value), ["109"]])
                 extras.append(ack)
 
-                # Also send rooms-only GROUP_INFO with is_rooms='1' as second fallback
-                gi_rooms = gsm.GSMResponse(msg)
-                gi_rooms.header = _make_109_header()
-                gi_rooms.header.property = gsm.PROPERTY.GS
-                gi_rooms.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
-                gi_rooms.dl = List([
-                    str(53),  # GROUP_INFO
-                    ["1", str(0x100), ["1"], room_list_14]
-                ])
-                extras.append(gi_rooms)
-
                 log_line(
                     f"[{now_ts()}] ROUTER_WM FIND_GAME -> GROUP_INFO with {len(existing_rooms)} room(s) "
-                    f"(14-field format, is_rooms=0 primary + is_rooms=1 fallback)",
+                    f"(20-field primary is_rooms=1, 14-field fallback is_rooms=0)",
                     log_fp=log_fp,
                 )
                 for i, ex in enumerate([gi_resp] + extras):
