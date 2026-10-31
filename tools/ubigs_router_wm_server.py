@@ -21,6 +21,7 @@ import pathlib
 import socket
 import threading
 import time
+import traceback
 from typing import TextIO
 
 from ubigs_common import (
@@ -42,27 +43,108 @@ _lobby_lock = threading.Lock()
 _lobby_player_count = 0
 
 
+def _unique_lobby_users(exclude_key=None):
+    """Round 37: players currently connected to the lobby server = unique user names among the registered lobby
+    sessions (the old counter went up on every JOIN_LOBBY, so a player rejoining was counted again)."""
+    try:
+        with _lobby_state.lock:
+            return len({(inf.get("username") or k) for k, inf in _lobby_state.sessions.items()
+                        if k != exclude_key and inf.get("source") in ("JOIN_LOBBY", "LOBBYSERVERLOGIN")})
+    except Exception:
+        return 0
+
+
 def lobby_player_join():
-    global _lobby_player_count
-    with _lobby_lock:
-        _lobby_player_count += 1
-        return _lobby_player_count
+    return _unique_lobby_users()
 
 
-def lobby_player_leave():
-    global _lobby_player_count
-    with _lobby_lock:
-        _lobby_player_count = max(0, _lobby_player_count - 1)
-        return _lobby_player_count
+def lobby_player_leave(exclude_key=None):
+    return _unique_lobby_users(exclude_key)
 
 
 def lobby_player_count():
-    with _lobby_lock:
-        return _lobby_player_count
+    return _unique_lobby_users()
 
 
 # ─── Shared Lobby State (room tracking + broadcasting) ────────────
 LOBBY_ROOMS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "state", "lobby_rooms.json")
+
+# --- Room tuning knobs (environment variables, so no code edits are needed) -------------
+#   SCCT_ROOM_CONFIG     LSM flag mask for new rooms. Default 0x1C0 (LSM_ALLINFO, as ubi-gs uses).
+#   SCCT_ROOM_OVERRIDE   JSON object of Room attributes forced onto every new room, e.g.
+#                        {"group_type": 5, "config": 16, "event_id": 0, "games": "SPLINTERCELL3PS2US"}
+#   SCCT_ROOM_NAME_FROM  "host" (default: CREATE_ROOM field 1) or "blob" (name found inside the info blob)
+#   SCCT_NEW_GROUP       NEW_GROUP(54) payload: "request" (default, old behaviour), "room", or "off"
+#   SCCT_CREATE_ACK      Reply to the creator: "legacy" (default) or "roomid"
+#   SCCT_KEEP_ROOMS=1    Keep state/lobby_rooms.json across restarts (default: wiped on startup)
+#   SCCT_LOBBY_CONFIG    LSM flag mask on the lobby entry itself (default 0), e.g. 0x1C0
+#   SCCT_PUSH_ROOMS_AFTER_42=1  Re-push the room list after the client's SET_PLAYER_INFO
+LSM_PRIVATE = 0x1
+LSM_ALLINFO = 0x1C0
+
+_ROOM_INT_ATTRS = {
+    "group_type", "config", "event_id", "max_players", "max_visitors", "nb_players",
+    "nb_visitors", "parent_id", "lobby_sv_id", "group_level",
+}
+_ROOM_STR_ATTRS = {
+    "group_name", "master", "allowed_games", "games", "game_version", "gs_version",
+    "ip_addr", "alt_ip_addr",
+}
+
+
+def _default_room_config(password: str) -> int:
+    raw = os.environ.get("SCCT_ROOM_CONFIG", "").strip()
+    try:
+        cfg = int(raw, 0) if raw else LSM_ALLINFO
+    except ValueError:
+        cfg = LSM_ALLINFO
+    if password:
+        cfg |= LSM_PRIVATE
+    return cfg
+
+
+def _apply_room_overrides(room, *, log_fp=None) -> None:
+    raw = os.environ.get("SCCT_ROOM_OVERRIDE", "").strip()
+    if not raw:
+        return
+    try:
+        data = json.loads(raw)
+        if not isinstance(data, dict):
+            raise ValueError("must be a JSON object")
+    except Exception as e:
+        log_line(f"[{now_ts()}] ROOM_OVERRIDE ignored (bad JSON): {e}", log_fp=log_fp)
+        return
+    applied = {}
+    for key, val in data.items():
+        try:
+            if key in _ROOM_INT_ATTRS:
+                setattr(room, key, int(val))
+            elif key in _ROOM_STR_ATTRS:
+                setattr(room, key, str(val))
+            else:
+                log_line(f"[{now_ts()}] ROOM_OVERRIDE unknown key ignored: {key!r}", log_fp=log_fp)
+                continue
+            applied[key] = val
+        except Exception as e:
+            log_line(f"[{now_ts()}] ROOM_OVERRIDE {key!r}={val!r} failed: {e}", log_fp=log_fp)
+    if applied:
+        log_line(f"[{now_ts()}] ROOM_OVERRIDE applied: {applied}", log_fp=log_fp)
+
+
+def _room_name_from_blob(info_blob: bytes) -> str:
+    """Best-effort map/room name embedded in the 96-byte info blob (e.g. 'Cinema')."""
+    try:
+        nulls = [i for i, b in enumerate(info_blob) if b == 0]
+        for ni in range(len(nulls)):
+            candidate = info_blob[nulls[ni] + 1:]
+            null_pos = candidate.find(b"\x00")
+            if null_pos > 0:
+                cs = candidate[:null_pos].decode("ascii", errors="ignore")
+                if cs and cs.isprintable() and len(cs) > 1 and not cs.startswith("CAU"):
+                    return cs
+    except Exception:
+        pass
+    return ""
 
 
 class LobbyState:
@@ -99,6 +181,7 @@ class LobbyState:
                 if room.info and isinstance(room.info, (bytes, bytearray)):
                     info_b64 = base64.b64encode(bytes(room.info)).decode("ascii")
                 data[str(rid)] = {
+                    "group_type": getattr(room, "group_type", 1),
                     "group_id": room.group_id,
                     "group_name": room.group_name,
                     "master": room.master,
@@ -155,6 +238,7 @@ class LobbyState:
                 room.max_visitors = int(info.get("max_visitors", 8))
                 room.nb_visitors = int(info.get("nb_visitors", 0))
                 room.games = info.get("games", "")
+                room.group_type = int(info.get("group_type", 1))
                 # Restore binary info blob from base64
                 info_b64 = info.get("info_b64", "")
                 if info_b64:
@@ -169,6 +253,31 @@ class LobbyState:
     def register_session(self, key, conn, username, source="unknown"):
         with self.lock:
             self.sessions[key] = {"conn": conn, "username": username, "source": source}
+
+    def set_ctx(self, key, room_id):
+        with self.lock:
+            self.__dict__.setdefault("ctx", {})[key] = str(room_id)
+
+    def clear_ctx(self, key):
+        with self.lock:
+            self.__dict__.setdefault("ctx", {}).pop(key, None)
+
+    def get_ctx(self, key):
+        with self.lock:
+            return self.__dict__.setdefault("ctx", {}).get(key)
+
+    def send_rooms_per_session(self, build_frame, exclude_key=None, log_fp=None):
+        """build_frame(ctx_room_id_or_None) -> bytes. Sessions still 'inside' a room they hosted or joined
+        (the game never sends a leave for a host) get room entries re-parented to that room."""
+        with self.lock:
+            targets = [(k, s) for k, s in self.sessions.items() if k != exclude_key]
+        for key, session in targets:
+            ctx = self.get_ctx(key) if os.environ.get("SCCT_CTX_PARENT", "1").strip().lower() not in ("0", "off", "false", "no") else None
+            try:
+                session["conn"].sendall(build_frame(ctx))
+                log_line(f"[{now_ts()}] LOBBY_BROADCAST(rooms) -> {key} ctx={ctx}", log_fp=log_fp)
+            except Exception as e:
+                log_line(f"[{now_ts()}] LOBBY_BROADCAST(rooms) -> {key} FAILED: {e}", log_fp=log_fp)
 
     def get_session_usernames(self, exclude_key=None):
         """Return list of usernames of all registered sessions (excluding one)."""
@@ -220,6 +329,16 @@ class LobbyState:
                 self._save_rooms_to_file()
             return removed
 
+    def remove_rooms_by_master(self, master):
+        """Drop every room hosted by this username (the game never tells us when a host backs out)."""
+        with self.lock:
+            to_remove = [rid for rid, info in self.rooms.items()
+                         if str(getattr(info["room"], "master", "")).lower() == str(master).lower()]
+            removed = [self.rooms.pop(rid) for rid in to_remove]
+            if removed:
+                self._save_rooms_to_file()
+            return removed
+
     def get_rooms(self):
         """Return list of Room objects."""
         with self.lock:
@@ -245,6 +364,11 @@ class LobbyState:
         """Send frame bytes to all registered lobby sessions except exclude_key."""
         with self.lock:
             targets = [(k, s) for k, s in self.sessions.items() if k != exclude_key]
+        if not targets:
+            log_line(
+                f"[{now_ts()}] LOBBY_BROADCAST: no other registered sessions (len={len(frame_bytes)})",
+                log_fp=log_fp,
+            )
         for key, session in targets:
             try:
                 session["conn"].sendall(frame_bytes)
@@ -254,6 +378,68 @@ class LobbyState:
 
 
 _lobby_state = LobbyState()
+
+
+def _removal_frames(room_id):
+    """GROUP_REMOVE(55) frames. SCCT_REMOVE_B5 = comma list of hex sender/receiver bytes (default 24 = S->P).
+    Experiment: the client may file rooms under the sender that delivered them (R=1,S=2,W=3), so a removal
+    from another sender would not find the entry. e.g. SCCT_REMOVE_B5=24,14,34"""
+    try:
+        _b5s = [int(x, 16) for x in os.environ.get("SCCT_REMOVE_B5", "24").split(",") if x.strip()]
+    except Exception:
+        _b5s = [0x24]
+    # Round 26: the client's GROUP_REMOVE parser (CGSLobbyLib::LobbyRcv_GroupRemove) reads index 1 as a nested LIST
+    # and index 0 as the int group id. A one-element payload fails that parse, so the room was never removed.
+    # SCCT_REMOVE_SHAPE=old restores [id].
+    if os.environ.get("SCCT_REMOVE_SHAPE", "old").strip().lower() == "old":
+        _pl55 = [str(room_id)]
+    else:
+        _pl55 = [str(room_id), ["1"]]
+    return [_build_lobby_msg_frame([str(55), _pl55], b5=_b) for _b in (_b5s or [0x24])]
+
+
+def _broadcast_removal(room_id, log_fp=None):
+    """GROUP_REMOVE(55) now, and again ~0.8s / ~2.5s later: right after a leave the game may still be
+    switching back to the lobby context and silently drop the first one."""
+    import threading
+    frames = _removal_frames(room_id)
+    for _f in frames:
+        _lobby_state.broadcast(_f, log_fp=log_fp)
+    _push_room_list_all(log_fp)
+    if os.environ.get("SCCT_REPEAT_REMOVE", "1").strip().lower() in ("0", "off", "false", "no"):
+        return
+    try:
+        _delays = [float(x) for x in os.environ.get("SCCT_REMOVE_DELAYS", "0.8,2.5").split(",") if x.strip()]
+    except Exception:
+        _delays = [0.8, 2.5]
+    for delay in _delays:
+        t = threading.Timer(delay, lambda: [_lobby_state.broadcast(_f, log_fp=log_fp) for _f in frames])
+        t.daemon = True
+        t.start()
+
+
+def _push_room_list_all(log_fp=None, delays=None):
+    """Authoritative GROUP_INFO(53) of lobby 1 with the CURRENT rooms (possibly none) to every session,
+    so clients that cache the old list replace it (the game itself asks for this with msg 9 after leaving a room)."""
+    import threading
+    if os.environ.get("SCCT_PUSH_AFTER_REMOVE", "1").strip().lower() in ("0", "off", "false", "no"):
+        return
+
+    def _send():
+        rooms = _lobby_state.get_rooms()
+        frame = _build_lobby_msg_frame([str(53), ["1", str(0x100), ["1"], [r.to_list() for r in rooms]]], b5=0x24)
+        log_line(f"[{now_ts()}] ROUTER_WM pushing authoritative room list ({len(rooms)} room(s)) to all sessions", log_fp=log_fp)
+        _lobby_state.broadcast(frame, log_fp=log_fp)
+
+    if delays is None:
+        try:
+            delays = [float(x) for x in os.environ.get("SCCT_PUSH_DELAYS", "0.4,1.6").split(",") if x.strip()]
+        except Exception:
+            delays = [0.4, 1.6]
+    for d in delays:
+        t = threading.Timer(d, _send)
+        t.daemon = True
+        t.start()
 
 
 def _room_as_lobby_format(room):
@@ -282,6 +468,52 @@ def _room_as_lobby_format(room):
         str(room.max_players),        # [12] max_members / max_players
         str(room.nb_players),         # [13] nb_members / nb_players
     ]
+
+
+def _lobby_reply(msg, subtype, payload):
+    """Proper LOBBY_MSG reply: ['38', [subtype, payload]] (same shape the JOIN_ROOM ack uses)."""
+    import gsm
+    from data import List
+    r = gsm.GSMResponse(msg)
+    r.header.property = gsm.PROPERTY.GS
+    r.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+    r.dl = List([str(gsm.MESSAGE_TYPE.GSSUCCESS.value), [str(subtype), payload]])
+    return r
+
+
+def _lobby_fail(msg, subtype, reason, echo):
+    """Refusal reply like the reference server: ['39', [subtype, [reason, echo]]]."""
+    import gsm
+    from data import List
+    r = gsm.GSMResponse(msg)
+    r.header.property = gsm.PROPERTY.GS
+    r.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+    r.dl = List([str(gsm.MESSAGE_TYPE.GSFAIL.value) if hasattr(gsm.MESSAGE_TYPE, "GSFAIL") else "39",
+                 [str(subtype), [str(reason), str(echo)]]])
+    return r
+
+
+def _req_payload_strs(msg):
+    try:
+        pl = msg.dl.lst[1]
+        lst = pl.lst if hasattr(pl, "lst") else pl
+        return [str(x) for x in lst]
+    except Exception:
+        return []
+
+
+_WM_CONNS = {}
+_LEFT_LOBBY = set()
+
+
+def _lobby_list_frame():
+    """Round 29: the same lobby-list GROUP_INFO that LOGIN pushes (b5=0x14)."""
+    ensure_ubigs_importable()
+    from group import Lobby
+    lobby1 = Lobby(id=1, name="www.splintercellonline.net", master="", game_mode=0)
+    lobby1.max_members = 16
+    lobby1.nb_members = lobby_player_count()
+    return _build_lobby_msg_frame([str(53), ["1", str(0x100), ["0"], [lobby1.to_list()]]], b5=0x14)
 
 
 def _build_lobby_msg_frame(dl_list, b5=0x24):
@@ -985,7 +1217,7 @@ def handle_message(
             pass
 
         log_line(
-            f"[{now_ts()}] ROUTER_WM LOBBY_MSG subtype={lobby_subtype}",
+            f"[{now_ts()}] ROUTER_WM LOBBY_MSG subtype={lobby_subtype} from={getattr(clt, 'username', None)}@{clt.addr[0]}:{clt.addr[1]}",
             log_fp=log_fp,
         )
 
@@ -1011,7 +1243,27 @@ def handle_message(
             from group import Lobby, Room as RoomCls
             lobby1 = Lobby(id=1, name="www.splintercellonline.net", master="", game_mode=0)
             lobby1.max_members = 16
-            lobby1.nb_members = lobby_player_count()
+            # r38: the lobby list is only sent at login, before this user's JOIN_LOBBY registers them; count them too
+            try:
+                _me = getattr(clt, 'username', None)
+                with _lobby_state.lock:
+                    _us = {(inf.get('username') or k) for k, inf in _lobby_state.sessions.items() if inf.get('source') in ('JOIN_LOBBY', 'LOBBYSERVERLOGIN')}
+                if _me: _us.add(_me)
+                lobby1.nb_members = len(_us)
+            except Exception:
+                lobby1.nb_members = lobby_player_count()
+            _lc = os.environ.get("SCCT_LOBBY_CONFIG", "").strip()
+            if _lc:
+                try:
+                    lobby1.config = int(_lc, 0)
+                except ValueError:
+                    log_line(f"[{now_ts()}] SCCT_LOBBY_CONFIG ignored (not a number): {_lc!r}", log_fp=log_fp)
+            log_line(f"[{now_ts()}] ROUTER_WM LOGIN lobby entry: {lobby1.to_list()}", log_fp=log_fp)
+            try:
+                if conn is not None and getattr(clt, 'username', None):
+                    _WM_CONNS[clt.username] = conn
+            except Exception:
+                pass
 
             # Check for existing rooms (file-backed cross-process)
             all_rooms = _lobby_state.get_rooms()
@@ -1045,6 +1297,7 @@ def handle_message(
                     ["1", str(0x100), ["1"], room_full_list]
                 ])
                 extras.append(room_gi)
+                log_line(f"[{now_ts()}] ROUTER_WM LOGIN GROUP_INFO rooms payload: {room_full_list}", log_fp=log_fp)
 
                 log_line(
                     f"[{now_ts()}] ROUTER_WM LOBBY_MSG LOGIN -> GROUP_INFO with 1 lobby + "
@@ -1079,9 +1332,29 @@ def handle_message(
             )
             return gsm.JoinLobbyServerResponse(msg, (lobby_sv_ip, lobby_sv_port))
 
+        def _drop_stale_rooms_of(user):
+            if os.environ.get("SCCT_DROP_STALE", "1").strip().lower() in ("0", "off", "false", "no") or not user:
+                return
+            for entry in _lobby_state.remove_rooms_by_master(user):
+                r = entry["room"]
+                _broadcast_removal(r.group_id, log_fp)
+                log_line(f"[{now_ts()}] ROUTER_WM dropped stale room id={r.group_id} host={r.master}", log_fp=log_fp)
+
         if lobby_subtype == 23:
             # LOBBY_MSG.JOIN_LOBBY
+            _sk23 = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            if _sk23 in _LEFT_LOBBY:
+                _LEFT_LOBBY.discard(_sk23)
+                log_line(f"[{now_ts()}] ROUTER_WM JOIN_LOBBY on reused connection {_sk23} after lobby leave: dropping connection so the client reconnects", log_fp=log_fp)
+                try:
+                    if conn is not None:
+                        threading.Timer(float(os.environ.get("SCCT_REJOIN_DROP_DELAY", "0.05")), lambda _c=conn: _c.shutdown(socket.SHUT_RDWR)).start()
+                except Exception:
+                    pass
+                return None
             count = lobby_player_join()
+            _lobby_state.clear_ctx(session_key or f"{clt.addr[0]}:{clt.addr[1]}")
+            _drop_stale_rooms_of(clt.username)
             lobby_id = "1"
             try:
                 lobby_id = str(msg.dl.lst[1][0]) if msg.dl and len(msg.dl.lst) > 1 else "1"
@@ -1145,6 +1418,11 @@ def handle_message(
                 )
                 extras.append(room_gi_frame)
                 log_line(
+                    f"[{now_ts()}] ROUTER_WM JOIN_LOBBY GROUP_INFO rooms payload: "
+                    f"{[r.to_list() for r in existing_rooms]}",
+                    log_fp=log_fp,
+                )
+                log_line(
                     f"[{now_ts()}] ROUTER_WM pushing GROUP_INFO with {len(existing_rooms)} room(s) "
                     f"(20-field format, is_rooms=1) to {username}",
                     log_fp=log_fp,
@@ -1186,14 +1464,59 @@ def handle_message(
             except Exception as e:
                 log_line(f"[{now_ts()}] ROUTER_WM SET_PLAYER_INFO broadcast error: {e}", log_fp=log_fp)
 
-            try:
-                return gsm.LobbyMsgResponse(msg)
-            except Exception:
-                res = gsm.GSMResponse(msg)
-                res.header.property = gsm.PROPERTY.GS
-                res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
-                res.dl = List([])
-                return res
+            if os.environ.get("SCCT_ACK42", "").strip().lower() in {"1", "ok", "true", "on"}:
+                # proper S->P reply: LOBBY_MSG ['38', ['42']] (single header swap)
+                ack = gsm.GSMResponse(msg)
+                ack.header.property = gsm.PROPERTY.GS
+                ack.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                ack.dl = List([str(gsm.MESSAGE_TYPE.GSSUCCESS.value), [str(42)]])
+                log_line(f"[{now_ts()}] ROUTER_WM SET_PLAYER_INFO ack=proper S->P", log_fp=log_fp)
+            else:
+              try:
+                ack = gsm.LobbyMsgResponse(msg)
+              except Exception:
+                ack = gsm.GSMResponse(msg)
+                ack.header.property = gsm.PROPERTY.GS
+                ack.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+                ack.dl = List([])
+
+            # SCCT_PUSH_ROOMS_AFTER_42=1: the client sends SET_PLAYER_INFO last in its join
+            # sequence, so rooms pushed earlier (inside the JOIN_LOBBY reply) may arrive before
+            # its lobby UI can take them. Push the room list again now.
+            if os.environ.get("SCCT_PUSH_ROOMS_AFTER_42", "").strip().lower() in {"1", "true", "yes", "on"}:
+                late_rooms = _lobby_state.get_rooms()
+                if late_rooms:
+                    late_frame = _build_lobby_msg_frame(
+                        [str(53), ["1", str(0x100), ["1"], [r.to_list() for r in late_rooms]]],
+                        b5=0x24,
+                    )
+                    log_line(
+                        f"[{now_ts()}] ROUTER_WM pushing {len(late_rooms)} room(s) to {username} after SET_PLAYER_INFO",
+                        log_fp=log_fp,
+                    )
+                    frames = [late_frame]
+                    # SCCT_SHOTGUN=1: also send alternative formats of the same data, each logged,
+                    # to learn which (if any) makes the Games List / player list populate.
+                    if os.environ.get("SCCT_SHOTGUN", "").strip().lower() in {"1", "true", "yes", "on"}:
+                        rl = [r.to_list() for r in late_rooms]
+                        variants = [
+                            ("A GROUP_INFO flag0 is_rooms=0", [str(53), ["1", "0", ["0"], rl]]),
+                            ("B GROUP_INFO flag0x1C0 is_rooms=1", [str(53), ["1", str(0x1C0), ["1"], rl]]),
+                            ("C NEW_GROUP with parent prefix", [str(54), ["1"] + [rl[0]]]),
+                        ]
+                        try:
+                            names = _lobby_state.get_session_usernames(exclude_key=sk) + [username]
+                            variants.append(("D MEMBER_LIST(151) names", [str(151), ["1", list(names)]]))
+                        except Exception as e:
+                            log_line(f"[{now_ts()}] ROUTER_WM SHOTGUN D skipped: {e}", log_fp=log_fp)
+                        for label, dl in variants:
+                            try:
+                                frames.append(_build_lobby_msg_frame(dl, b5=0x24))
+                                log_line(f"[{now_ts()}] ROUTER_WM SHOTGUN sent {label} to {username}", log_fp=log_fp)
+                            except Exception as e:
+                                log_line(f"[{now_ts()}] ROUTER_WM SHOTGUN {label} build error: {e}", log_fp=log_fp)
+                    return (ack, frames)
+            return ack
 
         if lobby_subtype == 12:
             # LOBBY_MSG.CREATE_ROOM — player creating a game room
@@ -1207,7 +1530,6 @@ def handle_message(
                 log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM raw DL: {msg.dl.lst}", log_fp=log_fp)
             except Exception:
                 pass
-
             from group import Room
 
             # Parse fields from CREATE_ROOM sub_data
@@ -1226,74 +1548,91 @@ def handle_message(
             except Exception as e:
                 log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM parse error: {e}", log_fp=log_fp)
 
-            # Map CREATE_ROOM fields to Room fields:
-            #   sub_data[0] = lobby_id (parent)     -> room.parent_id
-            #   sub_data[1] = username               -> room.master
-            #   sub_data[2] = game_name              -> room.allowed_games
-            #   sub_data[3] = max_players            -> room.max_players
-            #   sub_data[4] = game_mode              -> room.event_id
-            #   sub_data[5] = flags                  -> room.config
-            #   sub_data[6] = binary blob (room name + IPs) -> room.info
-            #   sub_data[7] = ''
-            #   sub_data[8] = numeric_id
-            #   sub_data[9] = version                -> room.game_version
-            #   sub_data[10] = empty bytes
-            parent_id = 1
-            game_mode = 0
-            info_blob = b''
-            max_players = 8
-            config = 0
-            allowed_games = ""
-            game_version = ""
-
-            if len(sub_data) > 0:
-                try: parent_id = int(sub_data[0])
-                except: pass
-            if len(sub_data) > 1 and isinstance(sub_data[1], str):
-                username = sub_data[1]
-            if len(sub_data) > 2:
-                allowed_games = str(sub_data[2])
-            if len(sub_data) > 3:
-                try: max_players = int(sub_data[3])
-                except: pass
-            if len(sub_data) > 4:
-                try: game_mode = int(sub_data[4])
-                except: pass
-            if len(sub_data) > 5:
-                try: config = int(sub_data[5])
-                except: pass
-            if len(sub_data) > 6 and isinstance(sub_data[6], (bytes, bytearray)):
-                info_blob = bytes(sub_data[6])
-                # Extract room name from binary blob (null-terminated string after header)
+            # Map CREATE_ROOM fields. Observed Chaos Theory PS2 payload (11 fields):
+            #   [0] parent lobby id     '1'
+            #   [1] host / room name    'ABC'
+            #   [2] game title          'SPLINTERCELL3PS2US'
+            #   [3] room_type           '5'   (5 = ROOM_UBI_CLIENTHOST in ubi-gs)
+            #   [4] max_players         '4'   (2v2)
+            #   [5] max_visitors        '0'
+            #   [6] group_info blob     96 bytes, echoed back verbatim (never edited)
+            #   [7] password            ''
+            #   [8] numeric id          '1534654573' -> event_id
+            #   [9] game_version        '1.0'
+            #   [10] alt group info     b''
+            def _sd_int(idx, default):
                 try:
-                    nulls = [i for i, b in enumerate(info_blob) if b == 0]
-                    for ni in range(len(nulls)):
-                        candidate = info_blob[nulls[ni]+1:]
-                        null_pos = candidate.find(b'\x00')
-                        if null_pos > 0:
-                            cs = candidate[:null_pos].decode('ascii', errors='ignore')
-                            if cs and cs.isprintable() and len(cs) > 1 and not cs.startswith('CAU'):
-                                room_name = cs
-                                break
+                    return int(sub_data[idx])
                 except Exception:
-                    pass
-            if len(sub_data) > 9:
-                game_version = str(sub_data[9])
+                    return default
 
-            # Build Room object with proper fields
+            def _sd_str(idx, default=""):
+                try:
+                    v = sub_data[idx]
+                    return v if isinstance(v, str) else default
+                except Exception:
+                    return default
+
+            def _sd_bin(idx):
+                try:
+                    v = sub_data[idx]
+                    return bytes(v) if isinstance(v, (bytes, bytearray)) else b""
+                except Exception:
+                    return b""
+
+            parent_id = _sd_int(0, 1)
+            username = _sd_str(1) or username
+            allowed_games = _sd_str(2)
+            room_type = _sd_int(3, 1)
+            max_players = _sd_int(4, 8)
+            max_visitors = _sd_int(5, 0)
+            info_blob = _sd_bin(6)
+            room_password = _sd_str(7)
+            event_id = _sd_int(8, 0)
+            game_version = _sd_str(9)
+            alt_info_blob = _sd_bin(10)
+
+            blob_name = _room_name_from_blob(info_blob)
+            if os.environ.get("SCCT_ROOM_NAME_FROM", "host").strip().lower() == "blob" and blob_name:
+                room_name = blob_name
+            else:
+                room_name = username
+
+            # Build Room object
+            _drop_stale_rooms_of(username)
             rid = _lobby_state.next_room_id()
-            room = Room(id=rid, name=room_name, master=username, game_mode=game_mode)
+            _lobby_state.set_ctx(session_key or f"{clt.addr[0]}:{clt.addr[1]}", rid)
+            room = Room(id=rid, name=room_name, master=username, game_mode=event_id)
+            room.group_type = room_type
             room.parent_id = parent_id
-            room.config = config
+            room.config = _default_room_config(room_password)
             room.allowed_games = allowed_games
+            # Client-side filter (SC3_ON.ELF 0x387950) checks room field 9 ('games') against the
+            # game-name whitelist it set at login; an empty 'games' makes it silently drop the room.
+            if os.environ.get("SCCT_GAMES_FIELD", "1").strip().lower() not in ("0", "off", "false", "no"):
+                room.games = allowed_games
             room.info = info_blob
             room.max_players = max_players
+            room.max_visitors = max_visitors
             room.nb_players = 1
-            room.game_version = game_version
+            # SC3_ON.ELF room observer (0x361310) does strcmp(room.game_version, <client build id>)
+            # and silently drops the room on mismatch. The client's build id is the numeric string it
+            # sends in CREATE_ROOM element [8]; element [9] ('1.0') is the gs_version. (Replay of the
+            # game's own handler on a save state confirmed this.)  SCCT_GV_FROM=legacy restores old mapping.
+            if os.environ.get("SCCT_GV_FROM", "request").strip().lower() == "legacy":
+                room.game_version = game_version
+            else:
+                room.game_version = _sd_str(8) or game_version
+                room.gs_version = game_version
+            if os.environ.get("SCCT_GV_FORCE", "").strip():
+                room.game_version = os.environ["SCCT_GV_FORCE"].strip()
+            room.room_password = room_password   # not serialized by Room.to_list()
+            room.alt_info = alt_info_blob        # not serialized by Room.to_list()
             # Set host IP from the creator's connection address
             creator_ip = clt.addr[0] if hasattr(clt, 'addr') and clt.addr else ""
             room.ip_addr = creator_ip
             room.alt_ip_addr = creator_ip
+            _apply_room_overrides(room, log_fp=log_fp)
 
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
             # Store raw CREATE_ROOM frame and original sub_data for broadcasting
@@ -1309,10 +1648,13 @@ def handle_message(
             )
 
             log_line(
-                f"[{now_ts()}] ROUTER_WM LOBBY_MSG CREATE_ROOM name={room_name!r} master={username!r} "
-                f"room_id={rid} parent={parent_id} max={max_players} mode={game_mode} info_len={len(info_blob)}",
+                f"[{now_ts()}] ROUTER_WM LOBBY_MSG CREATE_ROOM host={username!r} map={blob_name!r} "
+                f"group_name={room.group_name!r} room_id={rid} parent={room.parent_id} type={room.group_type} "
+                f"max={room.max_players} visitors={room.max_visitors} event_id={room.event_id} "
+                f"config=0x{int(room.config):x} info_len={len(info_blob)}",
                 log_fp=log_fp,
             )
+            log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM room.to_list()={room.to_list()}", log_fp=log_fp)
 
             # --- Broadcast room via GROUP_INFO (14-field format) ---
             # Send a full GROUP_INFO with all current rooms to other players.
@@ -1330,19 +1672,97 @@ def handle_message(
                     f"len={len(room_gi_broadcast)}",
                     log_fp=log_fp,
                 )
-                _lobby_state.broadcast(room_gi_broadcast, exclude_key=sk, log_fp=log_fp)
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM CREATE_ROOM GROUP_INFO payload: "
+                    f"{[r.to_list() for r in all_current_rooms]}",
+                    log_fp=log_fp,
+                )
+                def _gi_for(ctx, _rooms=all_current_rooms):
+                    rl = []
+                    for _r in _rooms:
+                        _l = list(_r.to_list())
+                        if ctx:
+                            _l[4] = str(ctx)
+                        rl.append(_l)
+                    return _build_lobby_msg_frame([str(53), ["1", str(0x100), ["1"], rl]], b5=0x24)
+                _lobby_state.send_rooms_per_session(_gi_for, exclude_key=sk, log_fp=log_fp)
 
-            # Also send NEW_GROUP(54) with original CREATE_ROOM sub_data as fallback
-            new_group_frame = _build_lobby_msg_frame(
-                [str(54), sub_data],
-                b5=0x24,
-            )
-            log_line(
-                f"[{now_ts()}] ROUTER_WM CREATE_ROOM -> NEW_GROUP(54) broadcast "
-                f"len={len(new_group_frame)} sub_data_len={len(sub_data)}",
-                log_fp=log_fp,
-            )
-            _lobby_state.broadcast(new_group_frame, exclude_key=sk, log_fp=log_fp)
+            # Also send NEW_GROUP(54). SCCT_NEW_GROUP: request (old default) | room | off
+            ng_mode = os.environ.get("SCCT_NEW_GROUP", "request").strip().lower()
+            if ng_mode == "off":
+                log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM -> NEW_GROUP(54) skipped (SCCT_NEW_GROUP=off)", log_fp=log_fp)
+            else:
+                ng_payload = room.to_list() if ng_mode == "room" else sub_data
+                new_group_frame = _build_lobby_msg_frame(
+                    [str(54), ng_payload],
+                    b5=0x24,
+                )
+                log_line(
+                    f"[{now_ts()}] ROUTER_WM CREATE_ROOM -> NEW_GROUP(54) broadcast mode={ng_mode} "
+                    f"len={len(new_group_frame)} payload={ng_payload}",
+                    log_fp=log_fp,
+                )
+                def _ng_for(ctx, _pl=ng_payload):
+                    _p = list(_pl) if isinstance(_pl, list) else _pl
+                    if ctx and isinstance(_p, list) and len(_p) > 4 and ng_mode == "room":
+                        _p[4] = str(ctx)
+                    return _build_lobby_msg_frame([str(54), _p], b5=0x24)
+                _lobby_state.send_rooms_per_session(_ng_for, exclude_key=sk, log_fp=log_fp)
+                # Round 24: the creator was excluded from NEW_GROUP, so its own room list never contained the room.
+                # With the full ack it then auto-joins (24) a room it doesn't know, fails, and sends GROUP_LEAVE
+                # 33 ms later ("Game creation failed"). Send the creator the room too, before the ack.
+                if os.environ.get("SCCT_NEW_GROUP_TO_CREATOR", "").strip().lower() == "early":
+                    try:
+                        _sc = (_lobby_state.sessions.get(sk) or {}).get("conn")
+                        if _sc is not None:
+                            _sc.sendall(_ng_for(None))
+                            log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM -> NEW_GROUP(54) also sent to creator {sk}", log_fp=log_fp)
+                        else:
+                            log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM creator conn not found for {sk}", log_fp=log_fp)
+                    except Exception as _ec:
+                        log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM NEW_GROUP to creator failed: {_ec}", log_fp=log_fp)
+
+            # TEST ONLY: SCCT_TEST_KILL_ROOM_AFTER=<seconds> removes every new room that many seconds after it is
+            # created and broadcasts the removal (GROUP_REMOVE) -- lets us see whether clients drop a room they
+            # never joined, without depending on what the host console sends.
+            _kill_after = os.environ.get("SCCT_TEST_KILL_ROOM_AFTER", "").strip()
+            if _kill_after:
+                try:
+                    _kill_s = float(_kill_after)
+                    _kill_rid = str(rid)
+                    def _kill_room(_rid=_kill_rid):
+                        try:
+                            for _r in list(_lobby_state.get_rooms()):
+                                if str(_r.group_id) == _rid:
+                                    _lobby_state.remove_rooms_by_master(_r.master)
+                            log_line(f"[{now_ts()}] ROUTER_WM TEST_KILL_ROOM removing room {_rid}", log_fp=log_fp)
+                            _broadcast_removal(_rid, log_fp)
+                        except Exception:
+                            log_line(f"[{now_ts()}] ROUTER_WM TEST_KILL_ROOM failed: {traceback.format_exc()}", log_fp=log_fp)
+                    _kt = threading.Timer(_kill_s, _kill_room)
+                    _kt.daemon = True
+                    _kt.start()
+                    log_line(f"[{now_ts()}] ROUTER_WM TEST_KILL_ROOM armed: room {_kill_rid} in {_kill_s}s", log_fp=log_fp)
+                except Exception:
+                    pass
+
+            # SCCT_CREATE_ACK=roomid: reply S->P in the same shape JOIN_LOBBY uses
+            # (LOBBY_MSG, ['38', ['12', [room_id]]]). Default keeps the old reply.
+            _ca = os.environ.get("SCCT_CREATE_ACK", "legacy").strip().lower()
+            if os.environ.get("SCCT_CREATE_FULL", "").strip().lower() in ("1", "on", "true", "yes"):
+                _ca = "full"
+            if _ca in ("roomid", "full"):
+                ack = gsm.GSMResponse(msg)  # single header swap -> S->P
+                ack.header.property = gsm.PROPERTY.GS
+                ack.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                if _ca == "full":
+                    # Round 22: the game's CREATE_ROOM reply parser needs [roomId, roomName, lobbyId]; with only
+                    # [roomId] the parse fails, the host never "joins" its own room and never sends GROUP_LEAVE.
+                    ack.dl = List([str(gsm.MESSAGE_TYPE.GSSUCCESS.value), [str(12), [str(rid), str(room.group_name), str(room.parent_id or 1)]]])
+                else:
+                    ack.dl = List([str(gsm.MESSAGE_TYPE.GSSUCCESS.value), [str(12), [str(rid)]]])
+                log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM ack=roomid room_id={rid}", log_fp=log_fp)
+                return ack
 
             # Respond with GSSUCCESS to the creator
             try:
@@ -1354,26 +1774,349 @@ def handle_message(
                 res.dl = List([])
                 return res
 
+        if lobby_subtype == 24:
+            # LOBBY_MSG.JOIN_ROOM request: ['24', [room_id, password, flags, '0', gs_version]].
+            # Client-side reply parser (SC3_ON.ELF 0x37c1e0) expects, on success (code 38):
+            #   ['38', ['24', [<int>, <string<=128>]]]   (same envelope as the CREATE_ROOM ack)
+            # SCCT_JOIN_REPLY: ip (default) | name | empty | off (leave unhandled, old behaviour)
+            mode = os.environ.get("SCCT_JOIN_REPLY", "ip").strip().lower()
+            try:
+                sd = msg.dl.lst[1]
+                sub = list(sd.lst) if hasattr(sd, "lst") else list(sd)
+            except Exception:
+                sub = []
+            try:
+                want = int(str(sub[0])) if sub else -1
+            except Exception:
+                want = -1
+            target = None
+            try:
+                rooms_now = _lobby_state.get_rooms() or _lobby_state._load_rooms_from_file()
+                for r in rooms_now:
+                    if int(r.group_id) == want:
+                        target = r
+                        break
+            except Exception as e:
+                log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM lookup error: {e}", log_fp=log_fp)
+            log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM request={sub} room_found={target is not None} mode={mode}", log_fp=log_fp)
+            if target is None and want >= 0 and os.environ.get("SCCT_JOIN_FAIL_REPLY", "1").strip().lower() not in ("0", "off", "false", "no"):
+                # Round 33: proper refusal (GROUP_NOT_EXIST) instead of the generic stray reply
+                log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM room {want} not found: refusal reply [39,[24,[1,{want}]]]", log_fp=log_fp)
+                return _lobby_fail(msg, 24, 1, want)
+            if target is None and want >= 0 and os.environ.get("SCCT_STALE_JOIN_CLEAN", "0").strip().lower() not in ("0", "off", "false", "no"):
+                # The client tried to join a room that no longer exists (it still lists it). After the generic failure
+                # reply (the game then shows "The game is no longer available") tell THIS client to drop the room.
+                _frames = _removal_frames(want) + [
+                           _build_lobby_msg_frame([str(53), ["1", str(0x100), ["1"], [r.to_list() for r in _lobby_state.get_rooms()]]], b5=0x24)]
+                def _clean_stale(_conn=conn, _fr=_frames, _w=want):
+                    for _f in _fr:
+                        try:
+                            _conn.sendall(_f)
+                        except Exception:
+                            pass
+                    log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM stale room {_w}: sent targeted GROUP_REMOVE + room list to {clt.username}", log_fp=log_fp)
+                for _d in (0.5, 1.5, 3.0):
+                    _t = threading.Timer(_d, _clean_stale)
+                    _t.daemon = True
+                    _t.start()
+            if mode != "off" and target is not None:
+                # Round 23: the host auto-joins its own room right after CREATE_ROOM (full ack). Answering it with its
+                # own IP made the game abort ("Game creation failed", GROUP_LEAVE 33 ms later). SCCT_HOST_JOIN_REPLY
+                # (empty | name | ip) chooses the reply for that case; default empty.
+                try:
+                    _sk24 = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+                    _host24 = (str(target.master).lower() == str(clt.username or "").lower()
+                               or (_lobby_state.rooms.get(target.group_id) or {}).get("owner_key") == _sk24)
+                except Exception:
+                    _host24 = False
+                if _host24 and os.environ.get("SCCT_NEW_GROUP_TO_CREATOR", "").strip().lower() in ("1", "on", "true", "yes", "late"):
+                    # Round 25: the client only sets its current room from NEW_GROUP(54) AFTER it has processed the
+                    # CREATE_ROOM reply (it queues a pending "created room" event there). The JOIN_ROOM reply is
+                    # accepted only if that room is the current room, otherwise the client sends GROUP_LEAVE.
+                    # The host's 24 arrives after it processed our 12 reply, so 54 sent now arrives in the right order.
+                    try:
+                        _sc24 = (_lobby_state.sessions.get(_sk24) or {}).get("conn")
+                        if _sc24 is not None:
+                            _sc24.sendall(_build_lobby_msg_frame([str(54), target.to_list()], b5=0x24))
+                            log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM host: NEW_GROUP(54) sent to creator before join ack (room {target.group_id})", log_fp=log_fp)
+                        else:
+                            log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM host: creator conn not found for {_sk24}", log_fp=log_fp)
+                    except Exception as _e54:
+                        log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM host NEW_GROUP failed: {_e54}", log_fp=log_fp)
+                if (not _host24) and os.environ.get("SCCT_JOIN_GROUPINFO", "").strip().lower() in ("1", "on", "true", "yes"):
+                    # Round 27: the reference server (ubi-gs-go) answers JOIN_ROOM by first sending the joiner a
+                    # room-level GROUP_INFO [roomId, flags, roomData, [], [members]] ("the game takes the room from this
+                    # GROUP_INFO"), then the reply. After a leave/rejoin the client's list no longer has a usable entry
+                    # for the room, which is the "game is no longer available" refusal.
+                    try:
+                        _fl = str(sub[2]) if len(sub) > 2 else "128"
+                        _gi = _build_lobby_msg_frame([str(53), [str(target.group_id), _fl, target.to_list(), [], []]], b5=0x24)
+                        conn.sendall(_gi)
+                        log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM joiner {clt.username}: room-level GROUP_INFO(53) sent before ack (room {target.group_id} flags={_fl})", log_fp=log_fp)
+                    except Exception as _egi:
+                        log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM GROUP_INFO to joiner failed: {_egi}", log_fp=log_fp)
+                if _host24:
+                    mode = os.environ.get("SCCT_HOST_JOIN_REPLY", "ip").strip().lower()
+                    log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM requester is host -> reply mode={mode}", log_fp=log_fp)
+                if mode == "name":
+                    extra = target.group_name
+                elif mode == "empty":
+                    extra = ""
+                else:
+                    extra = target.ip_addr or ""
+                ack = gsm.GSMResponse(msg)
+                ack.header.property = gsm.PROPERTY.GS
+                ack.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
+                ack.dl = List([str(gsm.MESSAGE_TYPE.GSSUCCESS.value), [str(24), [str(target.group_id), str(extra)]]])
+                log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM ack room_id={target.group_id} extra={extra!r}", log_fp=log_fp)
+                return ack
+
+        if lobby_subtype == 34:
+            # Join completed: ['34', [room_id]]. Remember the room was really joined, and that this client is inside it.
+            try:
+                _a34 = msg.dl.lst[1].lst[0] if hasattr(msg.dl.lst[1], "lst") else msg.dl.lst[1][0]
+                _lobby_state.__dict__.setdefault("played", set()).add(str(_a34))
+                _lobby_state.set_ctx(session_key or f"{clt.addr[0]}:{clt.addr[1]}", _a34)
+                log_line(f"[{now_ts()}] ROUTER_WM room {_a34} joined successfully by {clt.username}; marked as played", log_fp=log_fp)
+            except Exception:
+                pass
+
+        if os.environ.get("SCCT_STRAY_FIX", "1").strip().lower() not in ("0", "off", "false", "no") and lobby_subtype in (15, 17, 31, 33, 34, 35, 44, 45, 70):
+            # Round 32: the generic empty GSSUCCESS this server used to send for unhandled lobby messages is an
+            # UNSOLICITED reply for 34/70 (the client expects none) and an untyped one for 15/31. The client queues
+            # replies by subtype, so a stray one stays in its queue and breaks later replies (e.g. the next JOIN_LOBBY
+            # answers "Couldn't Access Lobby"). 34/70: no reply. 15/31/33: typed reply [38,[subtype,[group id]]].
+            try:
+                _pl = _req_payload_strs(msg)
+            except Exception:
+                _pl = []
+            if lobby_subtype in (34, 35, 44, 70):
+                if lobby_subtype == 70:
+                    try:
+                        _a70 = _pl[0] if _pl else None
+                        if _a70 is not None and str(_a70) in {str(r.group_id) for r in _lobby_state.get_rooms()}:
+                            _lobby_state.__dict__.setdefault("played", set()).add(str(_a70))
+                    except Exception:
+                        pass
+                log_line(f"[{now_ts()}] ROUTER_WM LOBBY_MSG {lobby_subtype}: notification, no reply sent", log_fp=log_fp)
+                return None
+            if lobby_subtype == 31 and os.environ.get("SCCT_ROOM_UPDATE", "1").strip().lower() not in ("0", "off", "false", "no"):
+                # Round 34: host changed the room config (map, mode...). The new room info blob (flag 0x40) replaces the
+                # stored one, and the room list is pushed to the other lobby sessions so the Games List shows it.
+                try:
+                    _raw = msg.dl.lst[1]
+                    _items = list(_raw.lst if hasattr(_raw, "lst") else _raw)
+                    _rid = str(_items[0]); _fl = int(str(_items[1]), 0)
+                    _blob = next((x for x in _items[2:] if isinstance(x, (bytes, bytearray)) and len(x) >= 32), None)
+                    if (_fl & 0x40) and _blob is not None:
+                        _room = None
+                        with _lobby_state.lock:
+                            for _inf in _lobby_state.rooms.values():
+                                if str(_inf["room"].group_id) == _rid:
+                                    _room = _inf["room"]
+                                    _room.info = bytes(_blob)
+                                    break
+                            if _room is not None:
+                                _lobby_state._save_rooms_to_file()
+                        if _room is not None:
+                            _sk31 = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+                            _all = _lobby_state.get_rooms()
+                            _fr = _build_lobby_msg_frame([str(53), ["1", str(0x100), ["1"], [r.to_list() for r in _all]]], b5=0x24)
+                            _lobby_state.broadcast(_fr, exclude_key=_sk31, log_fp=log_fp)
+                            log_line(f"[{now_ts()}] ROUTER_WM ROOM_UPDATE room {_rid}: info replaced ({len(_blob)}B), room list pushed", log_fp=log_fp)
+                        else:
+                            log_line(f"[{now_ts()}] ROUTER_WM ROOM_UPDATE room {_rid} not found", log_fp=log_fp)
+                except Exception as _e31:
+                    log_line(f"[{now_ts()}] ROUTER_WM ROOM_UPDATE failed: {_e31}", log_fp=log_fp)
+            log_line(f"[{now_ts()}] ROUTER_WM LOBBY_MSG {lobby_subtype}: typed reply [{_pl[:1]}]", log_fp=log_fp)
+            return _lobby_reply(msg, lobby_subtype, [_pl[0] if _pl else "0"])
+
+        if lobby_subtype == 70:
+            # In-match report from a joiner carries the room id; remember that this room was really played.
+            try:
+                _a70 = msg.dl.lst[1].lst[0] if hasattr(msg.dl.lst[1], "lst") else msg.dl.lst[1][0]
+                if str(_a70) in {str(r.group_id) for r in _lobby_state.get_rooms()}:
+                    _lobby_state.__dict__.setdefault("played", set()).add(str(_a70))
+                    log_line(f"[{now_ts()}] ROUTER_WM room {_a70} marked as played (from {clt.username})", log_fp=log_fp)
+            except Exception:
+                pass
+
         if lobby_subtype == 8:
             # LOBBY_MSG.GROUP_LEAVE — player leaving a room/lobby
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            _lobby_state.clear_ctx(sk)
             removed = _lobby_state.remove_room_by_owner(sk)
             for room_entry in removed:
                 room = room_entry["room"]
-                remove_frame = _build_lobby_msg_frame([str(55), [str(room.group_id)]])
-                _lobby_state.broadcast(remove_frame, log_fp=log_fp)
+                for remove_frame in _removal_frames(room.group_id):
+                    _lobby_state.broadcast(remove_frame, log_fp=log_fp)
                 log_line(
                     f"[{now_ts()}] ROUTER_WM LOBBY room removed (GROUP_LEAVE): id={room.group_id} name={room.group_name}",
                     log_fp=log_fp,
                 )
+            # Leaving a specific room: ['8', [room_id]]. Host leaving removes the room.
             try:
-                return gsm.LobbyMsgResponse(msg)
+                leave_id = str(msg.dl.lst[1].lst[0]) if hasattr(msg.dl.lst[1], "lst") else str(msg.dl.lst[1][0])
             except Exception:
-                res = gsm.GSMResponse(msg)
-                res.header.property = gsm.PROPERTY.GS
-                res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
-                res.dl = List([])
-                return res
+                leave_id = ""
+            if leave_id:
+                for r in list(_lobby_state.get_rooms()):
+                    _sess_user = ""
+                    try:
+                        _sess_user = str((_lobby_state.sessions.get(sk) or {}).get("username") or "")
+                    except Exception:
+                        pass
+                    _is_host = (
+                        str(r.master).lower() in (str(clt.username or "").lower(), _sess_user.lower())
+                        or str(getattr(r, "ip_addr", "")) == str(clt.addr[0])
+                        or (_lobby_state.rooms.get(r.group_id) or {}).get("owner_key") == sk
+                    )
+                    log_line(f"[{now_ts()}] ROUTER_WM GROUP_LEAVE room={leave_id} master={r.master} room_ip={getattr(r,'ip_addr','')} sender={clt.username!r}/{_sess_user!r}@{clt.addr[0]} sk={sk} host_match={_is_host}", log_fp=log_fp)
+                    _close_on_member = os.environ.get("SCCT_CLOSE_ON_MEMBER_LEAVE", "1").strip().lower() not in ("0", "off", "false", "no")
+                    if str(r.group_id) == leave_id and (_is_host or (_close_on_member and leave_id in _lobby_state.__dict__.get("played", set()))):
+                        _lobby_state.remove_rooms_by_master(r.master)
+                        _broadcast_removal(r.group_id, log_fp)
+                        log_line(f"[{now_ts()}] ROUTER_WM LOBBY room removed (host left): id={r.group_id}", log_fp=log_fp)
+            # Round 21: tell the room's remaining members (the host) that this player left the room.
+            # MEMBER_LEAVE(51) wire format in the game is [name, groupId]. Without it the host never learns the
+            # joiner left, and a later rejoin by the same player is refused ("no longer available").
+            if leave_id and os.environ.get("SCCT_ROOM_MEMBER_LEAVE", "").strip().lower() in ("1", "on", "true", "yes"):
+                try:
+                    _lv_user = str(clt.username or "")
+                    try:
+                        _lv_user = _lv_user or str((_lobby_state.sessions.get(sk) or {}).get("username") or "")
+                    except Exception:
+                        pass
+                    _still = any(str(r.group_id) == leave_id for r in _lobby_state.get_rooms())
+                    if _lv_user and _still:
+                        _ml = _build_lobby_msg_frame([str(51), [_lv_user, leave_id]])
+                        _lobby_state.broadcast(_ml, exclude_key=sk, log_fp=log_fp)
+                        log_line(f"[{now_ts()}] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: {_lv_user} left room {leave_id}", log_fp=log_fp)
+                except Exception as _e51:
+                    log_line(f"[{now_ts()}] ROUTER_WM ROOM MEMBER_LEAVE failed: {_e51}", log_fp=log_fp)
+            if leave_id and leave_id in _lobby_state.__dict__.get("played", set()) \
+                    and os.environ.get("SCCT_DROP_AFTER_LEAVE", "").strip():
+                _lobby_state.__dict__.setdefault("recent_leavers", set()).add(sk)
+            # Round 28: leaving the LOBBY (['8', ['1']]) from the Online menu. The client keeps its lobby-server
+            # connection in its list and, when the lobby is selected again, sends JOIN_LOBBY(23) straight down the old
+            # connection instead of JOIN_SERVER + a new connection; that 23 always fails ("Couldn't Access Lobby").
+            # Close the lobby connection shortly after the leave reply so the client drops it and reconnects properly.
+            if leave_id == "1" and os.environ.get("SCCT_CLOSE_ON_LOBBY_LEAVE", "").strip().lower() == "rejoin":
+                # Round 30: keep the connection (client keeps its lobby list), but remember that this connection left
+                # the lobby; if the client then sends JOIN_LOBBY(23) down it again, drop the connection.
+                _LEFT_LOBBY.add(sk)
+                log_line(f"[{now_ts()}] ROUTER_WM LOBBY LEAVE by {clt.username}: connection {sk} marked; will be dropped on next JOIN_LOBBY", log_fp=log_fp)
+            if leave_id == "1" and os.environ.get("SCCT_CLOSE_ON_LOBBY_LEAVE", "").strip().lower() in ("1", "on", "true", "yes"):
+                try:
+                    _dl = float(os.environ.get("SCCT_CLOSE_ON_LOBBY_LEAVE_DELAY", "0.4"))
+                    def _close_lobby_conn(_c=conn, _who=clt.username):
+                        log_line(f"[{now_ts()}] ROUTER_WM LOBBY LEAVE: closing lobby connection of {_who}", log_fp=log_fp)
+                        try:
+                            _c.shutdown(socket.SHUT_RDWR)
+                        except Exception:
+                            pass
+                    _ct = threading.Timer(_dl, _close_lobby_conn)
+                    _ct.daemon = True
+                    _ct.start()
+                    # Round 29: the client wipes its lobby list when the lobby connection closes (screen then says
+                    # "No Lobby available"). Re-push the lobby list on the Online-menu (WM) connection afterwards.
+                    if os.environ.get("SCCT_REPUSH_LOBBYLIST", "1").strip().lower() not in ("0", "off", "false", "no"):
+                        def _repush(_who=clt.username):
+                            try:
+                                _wc = _WM_CONNS.get(_who)
+                                if _wc is None:
+                                    log_line(f"[{now_ts()}] ROUTER_WM LOBBY LEAVE: no WM conn to re-push lobby list for {_who}", log_fp=log_fp)
+                                    return
+                                _wc.sendall(_lobby_list_frame())
+                                log_line(f"[{now_ts()}] ROUTER_WM LOBBY LEAVE: lobby list re-pushed to {_who} on WM conn", log_fp=log_fp)
+                            except Exception as _erp:
+                                log_line(f"[{now_ts()}] ROUTER_WM lobby list re-push failed: {_erp}", log_fp=log_fp)
+                        _rt = threading.Timer(_dl + float(os.environ.get("SCCT_REPUSH_DELAY", "0.6")), _repush)
+                        _rt.daemon = True
+                        _rt.start()
+                    log_line(f"[{now_ts()}] ROUTER_WM LOBBY LEAVE by {clt.username}: closing its lobby connection in {_dl}s", log_fp=log_fp)
+                except Exception as _ecl:
+                    log_line(f"[{now_ts()}] ROUTER_WM LOBBY LEAVE close failed: {_ecl}", log_fp=log_fp)
+            _r8 = os.environ.get("SCCT_R8", "flat").strip().lower()
+            if _r8 not in ("off", "0", "false", "no"):
+                _p8 = _req_payload_strs(msg)
+                _lid8 = leave_id or (_p8[0] if _p8 else "0")
+                _pl8 = [_lid8, ["1", str(0x100)]] if _r8 == "nested" else ([_lid8] if _r8 == "single" else [_lid8, "0"])
+                log_line(f"[{now_ts()}] ROUTER_WM GROUP_LEAVE reply shape={_r8} payload={_pl8}", log_fp=log_fp)
+                return _lobby_reply(msg, 8, _pl8)
+            try:
+                ack8 = gsm.LobbyMsgResponse(msg)
+            except Exception:
+                ack8 = gsm.GSMResponse(msg)
+                ack8.header.property = gsm.PROPERTY.GS
+                ack8.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+                ack8.dl = List([])
+            return ack8
+
+        if lobby_subtype == 9:
+            # Client returning to lobby after leaving a room: ['9', ['1', '256']].
+            # Answer, then re-push the current room list so the Games List is populated.
+            _r9 = os.environ.get("SCCT_R9", "flat").strip().lower()
+            _p9 = _req_payload_strs(msg) or ["1", str(0x100)]
+            if _r9 == "nested":
+                ack9 = _lobby_reply(msg, 9, [_p9[0], list(_p9[:2])])
+            elif _r9 == "echo":
+                ack9 = _lobby_reply(msg, 9, list(_p9[:2]))
+            elif _r9 == "flat":
+                ack9 = _lobby_reply(msg, 9, [_p9[0], "0"])
+            else:
+                ack9 = gsm.GSMResponse(msg)
+                ack9.header.property = gsm.PROPERTY.GS
+                ack9.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+                ack9.dl = List([])
+            log_line(f"[{now_ts()}] ROUTER_WM GROUP_INFO_GET reply shape={_r9} req={_p9}", log_fp=log_fp)
+            # WORKAROUND: the game keeps its own copy of a room it joined and ignores GROUP_REMOVE for it.
+            # SCCT_DROP_AFTER_LEAVE=<seconds>: close this client's lobby connection that many seconds after it
+            # returned to the lobby from a room it had joined, so the game rebuilds its lobby/list.
+            _drop_s = os.environ.get("SCCT_DROP_AFTER_LEAVE", "").strip()
+            _sk9 = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            if _drop_s and _sk9 in _lobby_state.__dict__.get("recent_leavers", set()):
+                _lobby_state.__dict__["recent_leavers"].discard(_sk9)
+                try:
+                    _dsec = float(_drop_s)
+                    def _drop_conn(_c=conn, _who=clt.username, _sk=_sk9):
+                        log_line(f"[{now_ts()}] ROUTER_WM DROP_AFTER_LEAVE closing lobby connection of {_who} ({_sk})", log_fp=log_fp)
+                        try:
+                            _c.shutdown(socket.SHUT_RDWR)
+                        except Exception:
+                            pass
+                        try:
+                            _c.close()
+                        except Exception:
+                            pass
+                    _dt = threading.Timer(_dsec, _drop_conn)
+                    _dt.daemon = True
+                    _dt.start()
+                    log_line(f"[{now_ts()}] ROUTER_WM DROP_AFTER_LEAVE armed for {clt.username} in {_dsec}s", log_fp=log_fp)
+                except Exception:
+                    pass
+            rooms9 = _lobby_state.get_rooms()
+            log_line(f"[{now_ts()}] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing {len(rooms9)} room(s)", log_fp=log_fp)
+            if (rooms9 or os.environ.get("SCCT_PUSH_EMPTY", "1").strip().lower() not in ("0", "off", "false", "no")) \
+                    and os.environ.get("SCCT_PUSH_ON_9", "1").strip().lower() not in ("0", "off", "false", "no"):
+                _f9 = os.environ.get("SCCT_9FORM", "old").strip().lower()
+                if _f9 == "skip":
+                    log_line(f"[{now_ts()}] ROUTER_WM GROUP_INFO_GET: nothing sent (SCCT_9FORM=skip)", log_fp=log_fp)
+                    return None
+                if _f9 == "ref":
+                    # Round 31: reference-server shape [id, flags, data, [child rooms], [members]]
+                    _gi9 = _build_lobby_msg_frame(
+                        [str(53), [str(_p9[0]), str(_p9[1] if len(_p9) > 1 else 0x100), [], [r.to_list() for r in rooms9], []]], b5=0x24)
+                else:
+                    _gi9 = _build_lobby_msg_frame(
+                        [str(53), ["1", str(0x100), ["1"], [r.to_list() for r in rooms9]]], b5=0x24)
+                if _r9 == "none":
+                    # Round 28: the reference server sends no reply to GROUP_INFO_GET; the GROUP_INFO is the answer.
+                    conn.sendall(_gi9)
+                    log_line(f"[{now_ts()}] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only", log_fp=log_fp)
+                    return None
+                return (ack9, [_gi9])
+            return ack9
 
         if lobby_subtype == 109:
             # LOBBY_MSG subtype 109 — FIND_GAME / CHANGE_REQUESTED_LOBBIES
@@ -1487,6 +2230,11 @@ def handle_message(
             return lobby_resp
 
         # Handle other lobby subtypes
+        log_line(
+            f"[{now_ts()}] ROUTER_WM LOBBY_MSG UNHANDLED subtype={lobby_subtype} "
+            f"DL={msg.dl.lst if msg.dl else None}",
+            log_fp=log_fp,
+        )
         try:
             return gsm.LobbyMsgResponse(msg)
         except Exception:
@@ -1719,6 +2467,7 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                         res = handled
                 except Exception as e:
                     log_line(f"[{now_ts()}] ROUTER_WM handler error: {e}", log_fp=log_fp)
+                    log_line(traceback.format_exc(), log_fp=log_fp)
 
                 if res is None:
                     continue
@@ -1778,7 +2527,7 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
 
     finally:
         if _joined_lobby:
-            count = lobby_player_leave()
+            count = lobby_player_leave(f"{src_ip}:{src_port}")
             log_line(f"[{now_ts()}] ROUTER_WM {src_ip}:{src_port} left lobby, players_now={count}", log_fp=log_fp)
         # Clean up lobby session and broadcast room removal + member leave
         _sk = f"{src_ip}:{src_port}"
@@ -1787,7 +2536,7 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
         _left_username = getattr(_lobby_state, '_last_removed_username', None)
         if _left_username and _joined_lobby:
             member_leave_frame = _build_lobby_msg_frame(
-                [str(51), ["1", _left_username]],  # MEMBER_LEAVE: [lobby_id, username]
+                [str(51), [_left_username, "1"]],  # MEMBER_LEAVE: [name, groupId] (round 28: was reversed)
             )
             _lobby_state.broadcast(member_leave_frame, log_fp=log_fp)
             log_line(
@@ -1797,8 +2546,8 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
         if removed_rooms:
             for room_entry in removed_rooms:
                 room = room_entry["room"]
-                remove_frame = _build_lobby_msg_frame([str(55), [str(room.group_id)]])
-                _lobby_state.broadcast(remove_frame, log_fp=log_fp)
+                for remove_frame in _removal_frames(room.group_id):
+                    _lobby_state.broadcast(remove_frame, log_fp=log_fp)
                 log_line(
                     f"[{now_ts()}] ROUTER_WM LOBBY room removed on disconnect: id={room.group_id} name={room.group_name}",
                     log_fp=log_fp,
@@ -1881,6 +2630,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.log_file:
         pathlib.Path(args.log_file).parent.mkdir(parents=True, exist_ok=True)
         log_fp = pathlib.Path(args.log_file).open("a", encoding="utf-8")
+
+    # Rooms are persisted to state/lobby_rooms.json so a second process can read them,
+    # but after a restart nobody owns them any more: they show up as ghost rooms.
+    if os.environ.get("SCCT_KEEP_ROOMS", "").strip().lower() not in {"1", "true", "yes", "on"}:
+        try:
+            _rf = pathlib.Path(LOBBY_ROOMS_FILE)
+            if _rf.exists() and _rf.read_text().strip() not in {"", "{}"}:
+                _rf.write_text("{}")
+                log_line(f"[{now_ts()}] ROUTER_WM cleared stale rooms from {_rf.name} (set SCCT_KEEP_ROOMS=1 to keep)", log_fp=log_fp)
+        except Exception as e:
+            log_line(f"[{now_ts()}] ROUTER_WM could not clear stale rooms: {e}", log_fp=log_fp)
 
     args._fixed_rsa = None
     args._post_ke2_replay_frames = []

@@ -715,6 +715,27 @@ def handle_joinwaitmodule(msg, *, wait_module: tuple[str, int], joinwait_format:
     # Dynamic _build_joinwait_success produces different-sized output now
     # (40 bytes vs 38 bytes) which the game can't parse correctly.
     primary = bytes.fromhex("000026002641eb8bd3abafae8a8ca0a0ada28ce3a4a9a1a6d4bab4a039a1a9fde1f5b69ea7a7")
+    # FIX: the captured reply above has the wait-module address baked in
+    # (192.168.0.213:40005). Re-encode it with the real --wm-ip/--wm-port, otherwise the
+    # client's first login attempt dials a dead address and shows
+    # "Cannot access Ubi.Com". Falls back to the captured bytes on any error.
+    try:
+        import gsxor
+        _wip, _wport = wait_module
+        _dl = List([b']', [str(_wip), int(_wport).to_bytes(4, "little")]])
+        _body = bytearray(bytes(_dl))
+        _body.pop(0)
+        _body.pop()
+        _enc = gsxor.encrypt(bytes(_body))
+        _hdr = bytearray(primary[:6])
+        _hdr[2:4] = (6 + len(_enc)).to_bytes(2, "little")
+        _new = bytes(_hdr) + _enc
+        if _wip == "192.168.0.213" and int(_wport) == 40005 and _new != primary:
+            raise ValueError("re-encode self-check mismatch")
+        primary = _new
+        log_line(f"[{now_ts()}] ROUTER JOINWAIT wait-module patched to {_wip}:{_wport}", log_fp=log_fp)
+    except Exception as _e:
+        log_line(f"[{now_ts()}] ROUTER JOINWAIT wait-module patch failed ({_e}); using captured reply", log_fp=log_fp)
     push0 = bytes.fromhex("00000c002641eb8bd38a8c8c")
 
     jwm_extras = [
@@ -1130,7 +1151,9 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
         # If this Router connection had no meaningful frames (quick disconnect/probe),
         # reset the per-IP connection counter so the next connection from this IP
         # gets correctly routed to Router instead of WM.
-        if stats['frames'] == 0:
+        # Also reset after a completed JOINWAITMODULE: the client is then sent to the WM
+        # port (40005) directly, so no 2nd connection arrives on 40000 to clear the counter.
+        if stats['frames'] == 0 or stats.get('joinwait', 0) > 0:
             try:
                 _ip_conn_reset = getattr(args, '_ip_conn_reset', None)
                 if _ip_conn_reset is not None:
