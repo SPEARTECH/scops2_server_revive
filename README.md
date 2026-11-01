@@ -2,11 +2,11 @@
 
 A community server that brings the online lobby of **Tom Clancy's Splinter Cell: Chaos Theory (PS2, US, SLUS-21137)** back to life. It's built on [SPEARTECH/scops2_server_revive](https://github.com/SPEARTECH/scops2_server_revive), which in turn builds on [michal-kapala/ubi-gs](https://github.com/michal-kapala/ubi-gs).
 
-This fork adds fixes for the lobby and room list so that real PS2 consoles and PCSX2 players can see each other, join rooms and play full matches.
+This fork adds fixes for the lobby and room list so that real PS2 consoles and PCSX2 players can see each other, join rooms and play full matches. It also adds the online menu's **friend list, game invites and Join Friend**.
 
 ## Status
 
-Tested on a LAN with a real PS2 (via OPL) and two PCSX2 clients (3 players). Working:
+Tested on a LAN with a real PS2 (via OPL) and two PCSX2 clients (3 players for lobby and matches; friend features tested with one PCSX2 and one real PS2). Working:
 
 - Login, lobby selection and lobby join
 - Creating and joining rooms; rooms appear in other players' game lists
@@ -15,8 +15,23 @@ Tested on a LAN with a real PS2 (via OPL) and two PCSX2 clients (3 players). Wor
 - Stale rooms are removed; joining a removed room shows "game no longer available" without breaking the lobby
 - Lobby player count shown on the Lobby Selection screen
 - Full matches with a PS2 host and PCSX2 joiners (and the reverse)
+- **Friend list:** add and remove friends, live online/offline icons, friends saved across restarts
+- **Invites:** Invite Friend, "Invited" on the Online Menu, Game Invites, and joining from an invite
+- **Join Friend:** join a friend's room straight from the friend list (see Friend Slots below)
 
-Not tested or not supported yet: 4 players at once, full-room refusal, and Internet play (everything above was tested on one LAN).
+Not tested or not supported yet: 4 players at once, full-room refusal, and Internet play (everything above was tested on one LAN). Ranking, ignore lists and friend-request approval are not implemented.
+
+## Friends, invites and Friend Slots
+
+- **Add / remove friends** in the online menu's friend list. Adding a name that doesn't exist shows "<name> doesn't exist". Friends are stored in `state/friends.json`.
+- **Online / offline icons** update live, with no restart.
+- **Invite Friend:** the host presses X on an online friend. The friend sees "Invited" on the Online Menu and joins from **Game Invites** (or from the friend list). When they join, the host's "Cancel Invite" goes back to "Invite".
+- **Join Friend:** a friend who is hosting a room is shown as joinable; press X on them in the friend list to join their room.
+
+**Friend Slots:** a room created with **Friend Slots 3** has no public slots, so it is hidden from the Games List and can only be joined by friends the host has **invited**. Pressing Join Friend on such a room without an invite fails (the game leaves again about a second after joining). With **Friend Slots 0**, Join Friend works in both directions. This looks like the game's own design (reserved slots are for invited friends); it is not fully confirmed and may be explored further.
+**Recommendation:** use Friend Slots 0 if players should join from the friend list, or send an invite first.
+
+Set `SCCT_FRIENDS=0` to turn all friend features off.
 
 ## How it works (short version)
 
@@ -30,19 +45,37 @@ The game client talks to several Ubisoft "GS" services (router, lobby, persisten
 | Router | 40000 |
 | Lobby / wait module | 40005 |
 | Persistent data proxies | 44001, 44002 |
-| NAT probe / UDP reply | 45000 (UDP) |
+| NAT probe / UDP reply | 45000, 45001 (UDP) |
 
 Players join each other's rooms by **direct client-to-client connections**. The server only runs the lobby and the room list, so the player hosting a room must be reachable by the others.
+
+### Ports from the game manual
+
+The US PS2 manual lists these ports. The start scripts already listen on all of the UDP ports.
+
+| Protocol | Ports | Used for |
+|---|---|---|
+| UDP | 3658, 10070-10080 | the game itself (room traffic between players) |
+| TCP | 40000-42999, 6668 | connection to the Ubisoft server |
+| UDP | 41006, 4400, 45000-45001 | connection check / NAT probe |
+
+On a LAN, just allow them in the server PC's firewall. For play over the internet, the **host's** router must forward UDP 3658 and 10070-10080 to the host's console or PC, and the server's TCP ports must be reachable.
 
 ## Root cause of the lobby bugs (for developers)
 
 The game matches replies to requests by LOBBY_MSG subtype. Any stray, untyped or unsolicited reply poisons its reply queue, and the next request fails. Typically this was the automatic JOIN_LOBBY after backing out of the games list, which showed "Couldn't Access Lobby". The server now follows the reference behaviour:
 
-- **No reply** for notifications: 34 GAME_CONNECTED, 35 GAME_FINISH, 44 PLAYER_MATCH_STARTED, 70 PLAYER_MATCH_FINISHED
+- **No reply** for notifications: 34 GAME_CONNECTED, 35 GAME_FINISH, 44 PLAYER_MATCH_STARTED, 70 PLAYER_MATCH_FINISHED, and 36/40 PLAYER_BAN/UNBAN (the game sends UNBAN with every invite, and answering it left a stray reply behind)
 - **Typed success reply** `['38',[subtype,[id]]]` for 15, 17, 31, 33 and 45
 - **Failure reply** `['39',[24,[1,room_id]]]` when joining a room that no longer exists
 - Message 31 (room config update) replaces the stored room info and pushes the updated room list, so map changes show up
 - The lobby connection is never closed when a client leaves the lobby
+
+Friend-related details found in the game code:
+
+- Invites travel as PEERPLAYER (91) from the sender, which the server forwards to the target as PEERMSG (90). A 16-byte payload with command 1 is an invite, command 3 cancels it. When the invited friend joins, the server sends the host a **1-byte** PEERMSG with command 2, which clears "Cancel Invite" (the game ignores a command-2 message of any other length).
+- A friend hosting a room is reported with status 10 ("joinable") and the game id in the friend update.
+- **Join Friend** asks the server PLAYER_GROUP_GET (106). The game's handler reads the reply as `['106', [name, [id,parent], ...]]` with **no** `['38', ...]` success wrapper, and needs one pair matching a known lobby followed by one pair for the room. A wrapped reply makes it read "106" as the player name and fail with "game no longer available".
 
 See `docs/ONLINE_FIXES.md` for the complete write-up, client-side findings and test results.
 
@@ -78,6 +111,20 @@ set SCCT_9FORM=ref
 
 `SCCT_STRAY_FIX`, `SCCT_ROOM_UPDATE` and `SCCT_JOIN_FAIL_REPLY` are on by default.
 
+Optional friend settings (defaults work; change only when testing):
+
+| Variable | Purpose |
+|---|---|
+| `SCCT_FRIENDS=0` | turn the friend features off |
+| `SCCT_FRIEND_UNKNOWN_REASON` | failure code when adding an unknown name (default 14) |
+| `SCCT_PEER_OFFLINE_REASON` | failure code when messaging an offline friend |
+| `SCCT_FRIEND_JOINABLE` | show hosting friends as joinable |
+| `SCCT_FRIEND_GAME` | game id used to mark friends as playing this game |
+| `SCCT_PLAYER_GROUP_GET` | enable the Join Friend lookup |
+| `SCCT_PGG_WRAP` | `raw` (default) or `typed` (old reply format) |
+| `SCCT_INVITE_REFRESH` | refresh the host's friend list after an invite is taken |
+| `SCCT_BAN_REPLY` | how ban/unban notifications are answered (default: no reply) |
+
 ## Connecting clients
 
 On every client, set the **DNS server manually to the server's IP**.
@@ -106,8 +153,9 @@ So real consoles currently need a **patched ISO** that skips the DNAS check. PCS
 ## Troubleshooting
 
 - **"Couldn't Access Lobby" or "No Lobby available":** make sure `SCCT_CLOSE_ON_LOBBY_LEAVE=0` and that you are running the current `tools\ubigs_router_wm_server.py`.
-- **Room not visible to others:** check the log for `CREATE_ROOM` and for the rooms push; confirm both clients have the same DNS and can ping each other.
-- **"Game is no longer available" when joining:** the host is unreachable from the joiner (client isolation, Sockets mode, firewall) or the room was already closed.
+- **Room not visible to others:** check the log for `CREATE_ROOM` and for the rooms push; confirm both clients have the same DNS and can ping each other. A room with Friend Slots 3 is hidden from the games list on purpose; invite the friend instead.
+- **"Game is no longer available" when joining:** the host is unreachable from the joiner (client isolation, Sockets mode, firewall) or the room was already closed. From the friend list it can also mean the room has Friend Slots 3 and the friend wasn't invited.
+- **Friend shows as offline:** the friend must be logged in to the same server and be in your friend list on both sides.
 - **Port in use:** the start script stops listeners it knows about; close other programs using ports 53, 80 or 443.
 - **Logs:** everything is in `logs\`. `router_wm_40005.log` is the main one.
 
@@ -118,6 +166,7 @@ Any small Linux VPS (1 vCPU, 1–2 GB RAM) is enough. Atlanta, Dallas or Chicago
 - Restrict the DNS forwarder so it only answers the game's hostnames (an open resolver can be abused).
 - Open only the ports listed above.
 - Trim or rotate logs, since they contain players' IP addresses.
+- Players who host rooms need UDP 3658 and 10070-10080 forwarded on their own router.
 
 ## Repository layout
 
@@ -128,6 +177,7 @@ tools/start_online_capture_ext.ps1  Windows start script for the whole stack
 run_test_keep.bat / run_test.bat  recommended settings / base settings
 run.sh                            Linux start script
 docs/ONLINE_FIXES.md              full technical write-up
+state/friends.json                saved friend lists (created at runtime; don't commit)
 ```
 
 ## Credits
