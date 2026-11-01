@@ -18,6 +18,7 @@ Tested on a LAN with a real PS2 (via OPL) and two PCSX2 clients (3 players for l
 - **Friend list:** add and remove friends, live online/offline icons, friends saved across restarts
 - **Invites:** Invite Friend, "Invited" on the Online Menu, Game Invites, and joining from an invite
 - **Join Friend:** join a friend's room straight from the friend list (see Friend Slots below)
+- **News:** the Online menu's News screen shows your own message of the day (`state/motd.txt`)
 
 Not tested or not supported yet: 4 players at once, full-room refusal, and Internet play (everything above was tested on one LAN). Ranking, ignore lists and friend-request approval are not implemented.
 
@@ -32,6 +33,10 @@ Not tested or not supported yet: 4 players at once, full-room refusal, and Inter
 **Recommendation:** use Friend Slots 0 if players should join from the friend list, or send an invite first.
 
 Set `SCCT_FRIENDS=0` to turn all friend features off.
+
+## News (message of the day)
+
+The Online menu's **News** screen shows a message served by this server. Edit `state/motd.txt` to change it (it is created with a short welcome on first use and re-read on every request, so no restart is needed). Optional `state/motd_ubi.txt` fills the screen's first block; set `SCCT_MOTD=0` to turn the feature off.
 
 ## How it works (short version)
 
@@ -123,6 +128,7 @@ Optional friend settings (defaults work; change only when testing):
 | `SCCT_PLAYER_GROUP_GET` | enable the Join Friend lookup |
 | `SCCT_PGG_WRAP` | `raw` (default) or `typed` (old reply format) |
 | `SCCT_INVITE_REFRESH` | refresh the host's friend list after an invite is taken |
+| `SCCT_MOTD=0` | turn the News / message of the day off |
 | `SCCT_BAN_REPLY` | how ban/unban notifications are answered (default: no reply) |
 
 ## Connecting clients
