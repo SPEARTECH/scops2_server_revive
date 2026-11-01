@@ -116,6 +116,12 @@ SCCT_R9=none  SCCT_9FORM=ref
 - PCSX2 Sockets mode: reports `192.0.2.100` as its address. Such a client can log in and JOIN rooms (worked in
   testing) but cannot HOST, since other consoles get an unroutable address.
 - PS2 via OPL: compatibility modes 2, 4, 6 (see above).
+- **Ports (from the US PS2 manual):** UDP 3658 and 10070-10080 are used by the game itself (room traffic between players);
+  TCP 40000-42999 and 6668 are used for the connection to the Ubisoft server; UDP 41006, 4400 and 45000-45001 are used for
+  the connection check/NAT probe. The stock start script (`run.sh` / `start_online_capture_ext.ps1`) already listens on all
+  of these UDP ports, plus TCP 40000 (router), 40005 (wait module), 44001/44002 (persistent proxy), 80/443 and 6667/6668.
+  On a LAN just allow them in the server PC's firewall. For play over the internet, the **host's** router must forward
+  UDP 3658 and 10070-10080 to the host's console/PC (a room advertises UDP 3658), and the server's TCP ports must be reachable.
 
 ## Things that did not work
 - Closing the lobby connection on leave (+ repush of the lobby list), or dropping it on rejoin.
