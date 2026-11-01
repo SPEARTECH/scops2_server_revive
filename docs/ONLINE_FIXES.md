@@ -145,6 +145,14 @@ SCCT_R9=none  SCCT_9FORM=ref
 No game files, ISOs or personal logs are included.
 
 
+## News / Message of the day
+The Online menu's **News** screen asks the server for the message of the day (message 0xDE, with the language). The server answers
+with the text in `state/motd.txt` (created with a short welcome message on the first request). Edit the file with any text
+editor; it is re-read on every request, so no restart is needed. Line breaks are kept and the text is cut at 500 characters.
+The screen can show two blocks, a Ubisoft message and a game message: the game message comes from `state/motd.txt`, and an optional
+`state/motd_ubi.txt` fills the first block. If that file is missing the first block is empty (the text then starts a little lower
+on the screen). `SCCT_MOTD=0` turns this off; `SCCT_MOTD_BOTH=1` sends the same text in both blocks.
+
 ## Friend list, invites and Join Friend (v6)
 
 Friends persist in `state/friends.json` and update live:

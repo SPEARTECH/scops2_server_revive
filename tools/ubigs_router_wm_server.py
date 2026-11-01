@@ -2709,6 +2709,27 @@ def handle_message(
         msg_type_val = msg.header.type.value if hasattr(msg.header.type, 'value') else int(msg.header.type)
     except Exception:
         msg_type_val = "?"
+
+    # Round 52: 0xDE (222) is the game's RequestMOTD ("News" in the Online menu). The request carries the language ['en'];
+    # the game reads GSSUCCESS [b'\xde', [ubi_motd, game_motd]] (each up to 512 chars). The text comes from state/motd.txt
+    # (game message) and, optionally, state/motd_ubi.txt; the files are re-read on every request, so edits show up at once.
+    if msg_type_val == 222 and os.environ.get("SCCT_MOTD", "1").strip().lower() not in ("0", "off", "false", "no"):
+        try:
+            _lang = str(msg.dl.lst[0]) if msg.dl is not None and len(msg.dl.lst) >= 1 else ""
+        except Exception:
+            _lang = ""
+        _game_motd = _read_motd_file("motd.txt", _DEFAULT_MOTD, create=True)
+        # The News screen shows BOTH texts one under the other (Ubisoft message first, game message second). By default only
+        # the game message is sent (the Ubisoft one is empty); add state/motd_ubi.txt to fill the first block.
+        _ubi_motd = _read_motd_file("motd_ubi.txt", "") or ""
+        if os.environ.get("SCCT_MOTD_BOTH", "0").strip().lower() in ("1", "on", "true", "yes"):
+            _ubi_motd = _ubi_motd or _game_motd
+        log_line(f"[{now_ts()}] ROUTER_WM MOTD request lang={_lang!r} -> game={_game_motd[:60]!r}... ubi={_ubi_motd[:60]!r}...", log_fp=log_fp)
+        res = gsm.GSMResponse(msg)
+        res.header.property = gsm.PROPERTY.GS
+        res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+        res.dl = List([(222).to_bytes(1, "little"), [_ubi_motd, _game_motd]])
+        return res
     log_line(f"[{now_ts()}] ROUTER_WM unhandled msg type={msg_type_val} — sending empty GSSUCCESS", log_fp=log_fp)
     # Respond with a generic GSSUCCESS to avoid silent drops
     res = gsm.GSMResponse(msg)
@@ -2716,6 +2737,36 @@ def handle_message(
     res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
     res.dl = List([])
     return res
+
+
+_DEFAULT_MOTD = ("Welcome to the Splinter Cell: Chaos Theory community server!\n"
+                 "Edit state/motd.txt to change this message.")
+
+
+def _read_motd_file(name, default, create=False):
+    """Message-of-the-day text from state/<name> (re-read on every request). Max 500 characters, CRLF -> LF."""
+    try:
+        base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "state")
+        path = os.path.normpath(os.path.join(base, name))
+        if not os.path.exists(path):
+            if create and default is not None:
+                try:
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                    with open(path, "w", encoding="utf-8", newline="\n") as f:
+                        f.write(default + "\n")
+                except Exception:
+                    pass
+            return default
+        raw = open(path, "rb").read()
+        try:
+            txt = raw.decode("utf-8-sig")
+        except Exception:
+            txt = raw.decode("latin-1")
+        txt = txt.replace("\r\n", "\n").replace("\r", "\n").strip()
+        return txt[:500] if txt else default
+    except Exception:
+        return default
+
 
 
 def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Namespace, *, log_fp: TextIO | None, pre_ke1_sent: bool = False):

@@ -1,5 +1,5 @@
 --- /tmp/w/up/tools/ubigs_router_wm_server.py	2026-10-31 07:29:35.624454550 -0700
-+++ pr_files/tools/ubigs_router_wm_server.py	2026-10-31 23:07:19.121982705 -0700
++++ pr_files/tools/ubigs_router_wm_server.py	2026-10-31 23:46:05.290987077 -0700
 @@ -21,6 +21,7 @@
  import socket
  import threading
@@ -986,8 +986,7 @@
 -            if len(sub_data) > 9:
 -                game_version = str(sub_data[9])
 +                    return default
- 
--            # Build Room object with proper fields
++
 +            def _sd_str(idx, default=""):
 +                try:
 +                    v = sub_data[idx]
@@ -1019,7 +1018,8 @@
 +                room_name = blob_name
 +            else:
 +                room_name = username
-+
+ 
+-            # Build Room object with proper fields
 +            # Build Room object
 +            _drop_stale_rooms_of(username)
              rid = _lobby_state.next_room_id()
@@ -1558,7 +1558,72 @@
          try:
              return gsm.LobbyMsgResponse(msg)
          except Exception:
-@@ -1719,6 +2865,7 @@
+@@ -1563,6 +2709,27 @@
+         msg_type_val = msg.header.type.value if hasattr(msg.header.type, 'value') else int(msg.header.type)
+     except Exception:
+         msg_type_val = "?"
++
++    # Round 52: 0xDE (222) is the game's RequestMOTD ("News" in the Online menu). The request carries the language ['en'];
++    # the game reads GSSUCCESS [b'\xde', [ubi_motd, game_motd]] (each up to 512 chars). The text comes from state/motd.txt
++    # (game message) and, optionally, state/motd_ubi.txt; the files are re-read on every request, so edits show up at once.
++    if msg_type_val == 222 and os.environ.get("SCCT_MOTD", "1").strip().lower() not in ("0", "off", "false", "no"):
++        try:
++            _lang = str(msg.dl.lst[0]) if msg.dl is not None and len(msg.dl.lst) >= 1 else ""
++        except Exception:
++            _lang = ""
++        _game_motd = _read_motd_file("motd.txt", _DEFAULT_MOTD, create=True)
++        # The News screen shows BOTH texts one under the other (Ubisoft message first, game message second). By default only
++        # the game message is sent (the Ubisoft one is empty); add state/motd_ubi.txt to fill the first block.
++        _ubi_motd = _read_motd_file("motd_ubi.txt", "") or ""
++        if os.environ.get("SCCT_MOTD_BOTH", "0").strip().lower() in ("1", "on", "true", "yes"):
++            _ubi_motd = _ubi_motd or _game_motd
++        log_line(f"[{now_ts()}] ROUTER_WM MOTD request lang={_lang!r} -> game={_game_motd[:60]!r}... ubi={_ubi_motd[:60]!r}...", log_fp=log_fp)
++        res = gsm.GSMResponse(msg)
++        res.header.property = gsm.PROPERTY.GS
++        res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
++        res.dl = List([(222).to_bytes(1, "little"), [_ubi_motd, _game_motd]])
++        return res
+     log_line(f"[{now_ts()}] ROUTER_WM unhandled msg type={msg_type_val} — sending empty GSSUCCESS", log_fp=log_fp)
+     # Respond with a generic GSSUCCESS to avoid silent drops
+     res = gsm.GSMResponse(msg)
+@@ -1572,6 +2739,36 @@
+     return res
+ 
+ 
++_DEFAULT_MOTD = ("Welcome to the Splinter Cell: Chaos Theory community server!\n"
++                 "Edit state/motd.txt to change this message.")
++
++
++def _read_motd_file(name, default, create=False):
++    """Message-of-the-day text from state/<name> (re-read on every request). Max 500 characters, CRLF -> LF."""
++    try:
++        base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "state")
++        path = os.path.normpath(os.path.join(base, name))
++        if not os.path.exists(path):
++            if create and default is not None:
++                try:
++                    os.makedirs(os.path.dirname(path), exist_ok=True)
++                    with open(path, "w", encoding="utf-8", newline="\n") as f:
++                        f.write(default + "\n")
++                except Exception:
++                    pass
++            return default
++        raw = open(path, "rb").read()
++        try:
++            txt = raw.decode("utf-8-sig")
++        except Exception:
++            txt = raw.decode("latin-1")
++        txt = txt.replace("\r\n", "\n").replace("\r", "\n").strip()
++        return txt[:500] if txt else default
++    except Exception:
++        return default
++
++
++
+ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Namespace, *, log_fp: TextIO | None, pre_ke1_sent: bool = False):
+     ensure_ubigs_importable()
+     import gsm
+@@ -1719,6 +2916,7 @@
                          res = handled
                  except Exception as e:
                      log_line(f"[{now_ts()}] ROUTER_WM handler error: {e}", log_fp=log_fp)
@@ -1566,7 +1631,7 @@
  
                  if res is None:
                      continue
-@@ -1777,8 +2924,12 @@
+@@ -1777,8 +2975,12 @@
                      conn.sendall(b"".join(all_out_parts))
  
      finally:
@@ -1580,7 +1645,7 @@
              log_line(f"[{now_ts()}] ROUTER_WM {src_ip}:{src_port} left lobby, players_now={count}", log_fp=log_fp)
          # Clean up lobby session and broadcast room removal + member leave
          _sk = f"{src_ip}:{src_port}"
-@@ -1787,7 +2938,7 @@
+@@ -1787,7 +2989,7 @@
          _left_username = getattr(_lobby_state, '_last_removed_username', None)
          if _left_username and _joined_lobby:
              member_leave_frame = _build_lobby_msg_frame(
@@ -1589,7 +1654,7 @@
              )
              _lobby_state.broadcast(member_leave_frame, log_fp=log_fp)
              log_line(
-@@ -1797,8 +2948,8 @@
+@@ -1797,8 +2999,8 @@
          if removed_rooms:
              for room_entry in removed_rooms:
                  room = room_entry["room"]
@@ -1600,7 +1665,7 @@
                  log_line(
                      f"[{now_ts()}] ROUTER_WM LOBBY room removed on disconnect: id={room.group_id} name={room.group_name}",
                      log_fp=log_fp,
-@@ -1882,6 +3033,17 @@
+@@ -1882,6 +3084,17 @@
          pathlib.Path(args.log_file).parent.mkdir(parents=True, exist_ok=True)
          log_fp = pathlib.Path(args.log_file).open("a", encoding="utf-8")
  
