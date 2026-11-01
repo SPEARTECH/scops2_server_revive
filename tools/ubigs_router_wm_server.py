@@ -519,6 +519,53 @@ def _req_payload_strs(msg):
 
 
 _WM_CONNS = {}
+
+
+_LIVE_COUNT_STARTED = False
+
+
+def _start_live_lobby_count(log_fp=None):
+    """Round 73: keep the 'Lobby selection' player count live. A watcher thread notices when the set of players inside the
+    lobby changes and pushes a fresh lobby-list GROUP_INFO (with the count) on the Online-menu connection of every
+    logged-in player who is NOT inside the lobby (i.e. sitting on the selection screen). Every logged-in player gets the count (lobby
+    players plus themselves, like the count sent at login) whenever it changes. Disable with SCCT_LOBBY_COUNT_LIVE=0."""
+    global _LIVE_COUNT_STARTED
+    if _LIVE_COUNT_STARTED or os.environ.get("SCCT_LOBBY_COUNT_LIVE", "1").strip().lower() in ("0", "off", "false", "no"):
+        return
+    _LIVE_COUNT_STARTED = True
+    import threading as _t
+    import time as _tm
+
+    def _users():
+        with _lobby_state.lock:
+            return {(inf.get("username") or k) for k, inf in _lobby_state.sessions.items()
+                    if inf.get("source") in ("JOIN_LOBBY", "LOBBYSERVERLOGIN")}
+
+    def _loop():
+        sent = {}   # user -> count last shown to that user
+        while True:
+            try:
+                _tm.sleep(float(os.environ.get("SCCT_LOBBY_COUNT_POLL", "2")))
+                cur = frozenset(_users())
+                for name, wc in list(_WM_CONNS.items()):
+                    n = len(cur | {name})
+                    if name not in sent or sent[name][0] is not wc:
+                        sent[name] = (wc, n)      # count the player got at login
+                        continue
+                    if sent[name][1] == n:
+                        continue
+                    try:
+                        wc.sendall(_lobby_list_frame(count=n))
+                        sent[name] = (wc, n)
+                        log_line(f"[{now_ts()}] LOBBY_COUNT live update -> {name}: {n}", log_fp=log_fp)
+                    except Exception as _e:
+                        log_line(f"[{now_ts()}] LOBBY_COUNT push to {name} failed: {_e!r}; dropping its WM conn", log_fp=log_fp)
+                        _WM_CONNS.pop(name, None)
+                        sent.pop(name, None)
+            except Exception as _e2:
+                log_line(f"[{now_ts()}] LOBBY_COUNT watcher error: {_e2!r}", log_fp=log_fp)
+    _th = _t.Thread(target=_loop, daemon=True)
+    _th.start()
 _LEFT_LOBBY = set()
 
 # --- Friend list (round 39) -------------------------------------------------------------------------
@@ -832,13 +879,13 @@ def _handle_friends(clt, msg, userdb, conn, log_fp):
     return None
 
 
-def _lobby_list_frame():
+def _lobby_list_frame(count=None):
     """Round 29: the same lobby-list GROUP_INFO that LOGIN pushes (b5=0x14)."""
     ensure_ubigs_importable()
     from group import Lobby
     lobby1 = Lobby(id=1, name="www.splintercellonline.net", master="", game_mode=0)
     lobby1.max_members = 16
-    lobby1.nb_members = lobby_player_count()
+    lobby1.nb_members = lobby_player_count() if count is None else count
     return _build_lobby_msg_frame([str(53), ["1", str(0x100), ["0"], [lobby1.to_list()]]], b5=0x14)
 
 
@@ -1329,6 +1376,15 @@ def handle_message(
         if username:
             clt.username = username
 
+        if os.environ.get("SCCT_LADDER_MODULE","0").strip()=="1":
+            log_line(f"[{now_ts()}] LADDER_MODULE LOGIN accepted: {lst!r}" if False else f"[{now_ts()}] LADDER_MODULE LOGIN accepted user={username!r} game={password!r}", log_fp=log_fp)
+            _lr = gsm.GSMResponse(msg)
+            _lr.header = copy.deepcopy(msg.header)
+            _lr.header.property = gsm.PROPERTY.GS
+            _lr.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+            _lr.dl = List([b'\x66', []])
+            return _lr
+
         # Validate against userdb
         login_ok = True
         login_encrypted_unparsed = (
@@ -1445,6 +1501,14 @@ def handle_message(
                 clt.username = msg.dl.lst[0]
         except Exception:
             pass
+        if os.environ.get("SCCT_LADDER_MODULE","0").strip()=="1":
+            log_line(f"[{now_ts()}] LADDER_MODULE LOGINWAITMODULE user={clt.username!r}", log_fp=log_fp)
+            _wr = gsm.GSMResponse(msg)
+            _wr.header = copy.deepcopy(msg.header)
+            _wr.header.property = gsm.PROPERTY.GS
+            _wr.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+            _wr.dl = List([b'\x4d', []])
+            return _wr
         return gsm.LoginWaitModuleResponse(msg)
 
     if _friends_enabled() and msg.header.type in (
@@ -1471,10 +1535,171 @@ def handle_message(
             f"[{now_ts()}] ROUTER_WM JOINWAITMODULE user={clt.username} -> self {ct34_host}:40005",
             log_fp=log_fp,
         )
+        if os.environ.get("SCCT_LADDER_MODULE","0").strip()=="1":
+            log_line(f"[{now_ts()}] LADDER_MODULE JOINWAITMODULE -> {ct34_host}:44002", log_fp=log_fp)
+            _jr = gsm.GSMResponse(msg)
+            _jr.header = copy.deepcopy(msg.header)
+            _jr.header.property = gsm.PROPERTY.GS
+            _jr.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+            _jr.dl = List([b'\x5d', [str(clt.username or '')[:16], str(ct34_host), "44002"]])
+            return _jr
         return gsm.JoinWaitModuleResponse(msg, (str(ct34_host), 40005))
 
     if msg.header.type == gsm.MESSAGE_TYPE.PLAYERINFO:
         return gsm.PlayerInfoResponse(msg, clt.username or "noname")
+
+    if msg.header.type == gsm.MESSAGE_TYPE.PROXY_HANDLER and os.environ.get("SCCT_LADDER_MODULE", "0").strip() == "1":
+        # Round 54: this process is the proxy MODULE server (port 44002: ladderquery = Ranking screen, persistantdata =
+        # profile). Module data arrives as [code, seq, payload] and is answered [code, seq, result] (same connection).
+        # Step 1: log every request in full so the Ranking formats can be read from the log, answer with a failure.
+        def _dlr(x, depth=0):
+            try:
+                if hasattr(x, "lst"):
+                    x = x.lst
+                if isinstance(x, (list, tuple)):
+                    return "[" + ", ".join(_dlr(i, depth + 1) for i in x) + "]"
+                if isinstance(x, (bytes, bytearray)):
+                    return "b" + repr(bytes(x)[:200])
+                return repr(x)
+            except Exception as _e:
+                return f"<{_e}>"
+        _items = list(msg.dl.lst) if msg.dl is not None else []
+        log_line(f"[{now_ts()}] LADDER_MODULE request from {clt.username!r}: {_dlr(_items)}", log_fp=log_fp)
+        if len(_items) >= 3 and str(_items[0]) == "1281" and os.environ.get("SCCT_LADDER_REPLY","1").strip()!="0":
+            try:
+                _body = _items[2]
+                _rq = _body[1]
+                _req_id = str(_rq[0]); _qtype = str(_rq[4][0]); _qargs = [str(a) for a in _rq[4][1]]
+                _cols = [str(c) for c in _rq[5][0]]
+                _sortspec = [str(x) for x in (_rq[5][1] if len(_rq[5]) > 1 else [])]
+                _db = {}
+                try:
+                    import json as _json
+                    _sp = pathlib.Path(__file__).resolve().parent.parent / "state" / "ladder_stats.json"
+                    if _sp.exists():
+                        _db = _json.loads(_sp.read_text(encoding="utf-8-sig"))
+                except Exception as _e:
+                    log_line(f"[{now_ts()}] LADDER_MODULE stats read error: {_e}", log_fp=log_fp)
+                # every player starts at level 1 / 0 points; a player is added to the file on first query
+                try:
+                    _me = str(clt.username or "")
+                    if _me and _me not in _db:
+                        _db[_me] = {"GEN_LEVEL": 1, "GEN_SCORE": 0, "GEN_GAMES": 0, "GEN_WON": 0, "GEN_TIME": 0,
+                                    "SPY_SCORE": 0, "SPY_GAMES": 0, "SPY_WON": 0, "SPY_TIME": 0,
+                                    "SEN_SCORE": 0, "SEN_GAMES": 0, "SEN_WON": 0, "SEN_TIME": 0}
+                        _sp.parent.mkdir(exist_ok=True); _sp.write_text(_json.dumps(_db, indent=1), encoding="utf-8")
+                        log_line(f"[{now_ts()}] LADDER_MODULE new ranking player {_me!r} added at level 1 / 0 points", log_fp=log_fp)
+                except Exception as _e:
+                    log_line(f"[{now_ts()}] LADDER_MODULE add player error: {_e!r}", log_fp=log_fp)
+                # also add every registered account (state/users.json) at level 1 / 0 points
+                try:
+                    _up = _sp.parent / "users.json"
+                    if _up.exists():
+                        _ud = _json.loads(_up.read_text(encoding="utf-8-sig")).get("users", {})
+                        _added = [u for u in _ud if u not in _db]
+                        for u in _added:
+                            _db[u] = {"GEN_LEVEL": 1, "GEN_SCORE": 0, "GEN_GAMES": 0, "GEN_WON": 0, "GEN_TIME": 0,
+                                      "SPY_SCORE": 0, "SPY_GAMES": 0, "SPY_WON": 0, "SPY_TIME": 0,
+                                      "SEN_SCORE": 0, "SEN_GAMES": 0, "SEN_WON": 0, "SEN_TIME": 0}
+                        if _added:
+                            _sp.write_text(_json.dumps(_db, indent=1), encoding="utf-8")
+                            log_line(f"[{now_ts()}] LADDER_MODULE added registered users at level 1 / 0 points: {_added}", log_fp=log_fp)
+                except Exception as _e:
+                    log_line(f"[{now_ts()}] LADDER_MODULE users.json sync error: {_e!r}", log_fp=log_fp)
+                _ppl = max(1, int(os.environ.get("SCCT_LADDER_PTS_PER_LEVEL", "500")))
+                _maxlvl = max(1, int(os.environ.get("SCCT_LADDER_MAX_LEVEL", "15")))
+                _lin = os.environ.get("SCCT_LADDER_PTS_PER_LEVEL", "").strip()
+                def _level_for(_pts):
+                    _pts = max(0, int(float(_pts or 0)))
+                    if _lin:   # optional linear override
+                        return min(_maxlvl, 1 + _pts // max(1, int(_lin)))
+                    # Round 69: curve fitted to the original server's ranking screenshots (level L needs 50*(L-1)*(L+9) points)
+                    _lv = 1
+                    while _lv < _maxlvl and _pts >= 50 * _lv * (_lv + 10):
+                        _lv += 1
+                    return _lv
+                for _n in _db:
+                    if "SPY_SCORE" in _db[_n] or "SEN_SCORE" in _db[_n]:   # overall = spy + mercenary totals
+                        try: _db[_n]["GEN_SCORE"] = int(float(_db[_n].get("SPY_SCORE", 0) or 0)) + int(float(_db[_n].get("SEN_SCORE", 0) or 0))
+                        except Exception: pass
+                    _db[_n]["GEN_LEVEL"] = _level_for(_db[_n].get("GEN_SCORE", 0))
+                _skey = _sortspec[0] if _sortspec else "GEN_SCORE"
+                def _num(v):
+                    try: return int(float(v))
+                    except Exception: return 0
+                _ranked = sorted(_db.keys(), key=lambda n: (-_num(_db[n].get(_skey, 0)), n.upper()))
+                def _row_for(name):
+                    st = dict(_db.get(name) or {})
+                    st["ALIAS"] = name
+                    _rk = (_ranked.index(name) + 1) if name in _ranked else 0
+                    st["GLOBAL_RANK"] = _rk
+                    st["QUERY_RANK"] = _rk
+                    for _pfx in ("GEN", "SPY", "SEN"):
+                        g = _num(st.get(_pfx + "_GAMES", 0)); w = _num(st.get(_pfx + "_WON", 0))
+                        if (_pfx + "_WINRATIO") not in st:
+                            st[_pfx + "_WINRATIO"] = (100 * w // g) if g else 0
+                    # the player's level is one overall value: every view (teams/modes) shows GEN_LEVEL
+                    for _c in _cols:
+                        if _c.endswith("_LEVEL") and _c != "GEN_LEVEL":
+                            st[_c] = st.get("GEN_LEVEL", 0)
+                    return [str(st.get(c, 0)) for c in _cols]
+                _total = len(_ranked)
+                if _qtype == "3":
+                    _off = _num(_qargs[0]) if _qargs else 0
+                    _cnt = _num(_qargs[1]) if len(_qargs) > 1 else 19
+                    _names = _ranked[_off:_off + _cnt + 1]
+                elif _qtype == "4":
+                    # list of names (Friends filter): every known name, in rank order
+                    _names = [n for n in _ranked if n.upper() in [a.upper() for a in _qargs]]
+                    _total = len(_names)
+                elif _qtype == "1":
+                    # pivot: page of rows around the named player (Top Rank / Find Me / Details)
+                    _cnt = _num(_qargs[1]) if len(_qargs) > 1 else 19
+                    _up = {n.upper(): n for n in _ranked}
+                    _nm = _up.get(_qargs[0].upper() if _qargs else "", None)
+                    _ix = _ranked.index(_nm) if _nm else 0
+                    _lo = max(0, _ix - _cnt // 2)
+                    _names = _ranked[_lo:_lo + _cnt + 1]
+                    if not _names and _qargs:
+                        _names = _qargs[:1]
+                elif _qtype == "2":
+                    _names = _qargs if _qargs else [str(clt.username or "")]
+                else:
+                    _names = _qargs[:1]
+                _rows = [_row_for(n) for n in _names]
+                # Diagnostic (only while state/ladder_diag.flag exists): the post-match "my stats" query gets recognisable
+                # score values (GEN 333 / SPY 555 / SEN 777) so the Game Statistics "Old Total" shows which column it reads.
+                try:
+                    if _qtype == "2" and (_sp.parent / "ladder_diag.flag").exists() and (_sp.parent / "ladder_diag.flag").read_text(encoding="utf-8-sig", errors="ignore").strip().lower() == "diag":
+                        _dv = {"GEN_SCORE": "333", "SPY_SCORE": "555", "SEN_SCORE": "777"}
+                        _rows = [[_dv.get(c, v) for c, v in zip(_cols, r)] for r in _rows]
+                        log_line(f"[{now_ts()}] LADDER_MODULE DIAG my-stats values for {_qargs}: {_rows}", log_fp=log_fp)
+                except Exception as _e:
+                    log_line(f"[{now_ts()}] LADDER_MODULE diag error: {_e!r}", log_fp=log_fp)
+                if not _rows and _qtype in ("1", "2"):
+                    _rows = [_row_for(str(clt.username or ""))]
+                res = gsm.GSMResponse(msg)
+                res.header.property = gsm.PROPERTY.GS
+                res.header.type = gsm.MESSAGE_TYPE.PROXY_HANDLER
+                res.dl = List(["1281", _items[1], ["38", ["1", [_req_id, str(_total), [[c, c] for c in _cols], _rows]]]])
+                log_line(f"[{now_ts()}] LADDER_MODULE ladderquery id={_req_id} type={_qtype} args={_qargs} sort={_sortspec} -> total={_total} rows={len(_rows)} first={_rows[:1]}", log_fp=log_fp)
+                return res
+            except Exception as _e:
+                log_line(f"[{now_ts()}] LADDER_MODULE ladder reply error: {_e!r}", log_fp=log_fp)
+        if len(_items) >= 3:
+            _code = str(_items[0])
+            _fail = "0" if _code != "1025" else "1"
+            res = gsm.GSMResponse(msg)
+            res.header.property = gsm.PROPERTY.GS
+            res.header.type = gsm.MESSAGE_TYPE.PROXY_HANDLER
+            res.dl = List([_code, _items[1], ["39", [_fail]]])
+            log_line(f"[{now_ts()}] LADDER_MODULE code={_code} -> failure reply ['39',['{_fail}']]", log_fp=log_fp)
+            return res
+        res = gsm.GSMResponse(msg)
+        res.header.property = gsm.PROPERTY.GS
+        res.header.type = gsm.MESSAGE_TYPE.GSSUCCESS
+        res.dl = List([])
+        return res
 
     if msg.header.type == gsm.MESSAGE_TYPE.PROXY_HANDLER:
         # Parse subtype and module name from request DL
@@ -1494,6 +1719,15 @@ def handle_message(
             f"[{now_ts()}] ROUTER_WM PROXY_HANDLER subtype={req_subtype} module={req_module}",
             log_fp=log_fp,
         )
+
+        try:
+            _first = msg.dl.lst[0] if (msg.dl is not None and msg.dl.lst) else None
+            if isinstance(_first, (list, tuple)) or hasattr(_first, 'lst'):
+                # [[3|4, id]] = the game's notice that a proxy module logged in (3) or failed (4): no reply.
+                log_line(f"[{now_ts()}] ROUTER_WM PROXY_HANDLER module notice {req_subtype}: no reply sent", log_fp=log_fp)
+                return None
+        except Exception:
+            pass
 
         if req_subtype == "2":
             # Subtype 2 = unregister/disconnect module. Respond with ack.
@@ -1597,6 +1831,7 @@ def handle_message(
             try:
                 if conn is not None and getattr(clt, 'username', None):
                     _WM_CONNS[clt.username] = conn
+                    _start_live_lobby_count(log_fp=log_fp)
             except Exception:
                 pass
 
@@ -2278,6 +2513,178 @@ def handle_message(
                 log_line(f"[{now_ts()}] ROUTER_WM room {_a34} joined successfully by {clt.username}; marked as played", log_fp=log_fp)
             except Exception:
                 pass
+
+        if lobby_subtype in (17, 30, 45) and os.environ.get("SCCT_RANKED_FLOW", "1").strip().lower() not in ("0", "off", "false", "no"):
+            # Round 66: ranked match flow (modelled on ubi-gs-go): START_MATCH(17) -> push MATCH_STARTED(62) to the room;
+            # SUBMIT_MATCH(30) stores each player's result values; MATCH_FINISH(45) -> push FINAL_MATCH_RESULTS(71).
+            import threading as _thr
+            def _plain(x):
+                x = x.lst if hasattr(x, "lst") else x
+                if isinstance(x, (list, tuple)):
+                    return [_plain(i) for i in x]
+                if isinstance(x, (bytes, bytearray)):
+                    return bytes(x).decode("latin-1")
+                return str(x)
+            try:
+                _pl = _req_payload_strs(msg)
+                _raw_args = _plain(msg.dl.lst[1]) if len(msg.dl.lst) > 1 else []
+            except Exception:
+                _pl, _raw_args = [], []
+            _rid = _pl[0] if _pl else "0"
+            _matches = _lobby_state.__dict__.setdefault("matches", {})
+            def _room_targets(_room):
+                with _lobby_state.lock:
+                    _sess = list(_lobby_state.sessions.items())
+                _in = [(k, v) for k, v in _sess if _lobby_state.get_ctx(k) == str(_room)]
+                return _in if _in else _sess
+            def _push_room(_room, _sub, _payload, _delay=0.3):
+                def _go():
+                    _fr = _build_lobby_msg_frame([str(_sub), _payload], b5=0x24)
+                    for _k, _v in _room_targets(_room):
+                        try:
+                            _v["conn"].sendall(_fr)
+                            log_line(f"[{now_ts()}] RANKED_FLOW push {_sub} -> {_v.get('username')} ({_k}): {_payload}", log_fp=log_fp)
+                        except Exception as _e:
+                            log_line(f"[{now_ts()}] RANKED_FLOW push {_sub} -> {_k} FAILED: {_e}", log_fp=log_fp)
+                _thr.Timer(_delay, _go).start()
+            log_line(f"[{now_ts()}] RANKED_FLOW lobby msg {lobby_subtype} from {clt.username!r}: args={_raw_args}", log_fp=log_fp)
+            if lobby_subtype == 17:
+                _mid = _lobby_state.__dict__.get("next_match_id", 1)
+                _lobby_state.__dict__["next_match_id"] = _mid + 1
+                _matches[_rid] = {"id": _mid, "order": [], "values": {}, "players": [str(v.get("username")) for _k, v in _room_targets(_rid)]}
+                log_line(f"[{now_ts()}] RANKED_FLOW match {_mid} started in room {_rid}, players={_matches[_rid]['players']}", log_fp=log_fp)
+                # Round 72: log every room field that could carry the game mode (Extraction / Sabotage / Neutralisation)
+                try:
+                    for _rm in _lobby_state.get_rooms():
+                        if str(getattr(_rm, "group_id", "")) == str(_rid):
+                            _inf = bytes(_rm.info or b"")
+                            _matches[_rid]["modeinfo"] = _inf[:16].hex()
+                            log_line(f"[{now_ts()}] RANKED_FLOW MODE_INFO room={_rid} config=0x{int(_rm.config):x} start_args={_raw_args} info_head={_inf[:16].hex()} info_ascii={_inf[:48]!r}", log_fp=log_fp)
+                except Exception as _e:
+                    log_line(f"[{now_ts()}] RANKED_FLOW MODE_INFO failed: {_e!r}", log_fp=log_fp)
+                _push_room(_rid, 62, [str(_rid), str(_mid)])
+                return _lobby_reply(msg, lobby_subtype, [_rid])
+            if lobby_subtype == 30:
+                # [match id, ?, [player, max index, count, mask, [values]], ...]
+                _m = next((m for m in _matches.values() if str(m["id"]) == _rid), None)
+                if _m is not None:
+                    for _e in _raw_args[2:]:
+                        if isinstance(_e, list) and len(_e) >= 5:
+                            _nm = str(_e[0])
+                            if _nm not in _m["values"]:
+                                _m["order"].append(_nm)
+                            _m["values"][_nm] = _e[4]
+                    log_line(f"[{now_ts()}] RANKED_FLOW match {_m['id']} results stored: {_m['values']}", log_fp=log_fp)
+                else:
+                    log_line(f"[{now_ts()}] RANKED_FLOW SUBMIT_MATCH for unknown match {_rid}", log_fp=log_fp)
+                return _lobby_reply(msg, lobby_subtype, [_rid])
+            if lobby_subtype == 45:
+                _m = _matches.pop(_rid, None)
+                if _m is not None:
+                    if _m["order"]:
+                        # The game's results parser reads 14+ ints per player (scoGLClient::LobbyRcv_FinalMatchResults reads
+                        # arr[0],arr[1],arr[6..8],arr[12],arr[13]); the 4 submitted values left it reading past the array. Pad to 22.
+                        # SCCT_RANKED_DIAG=1 (default for now): put recognisable numbers in the unknown slots so the Game
+                        # Statistics screen shows which slot feeds which column (spies use arr[6]/arr[7], mercenaries arr[12]/arr[13]).
+                        _diag = os.environ.get("SCCT_RANKED_DIAG", "0").strip().lower() in ("1", "on", "true", "yes")
+                        _WIN, _LOSS = int(os.environ.get("SCCT_RANKED_WIN", "50")), int(os.environ.get("SCCT_RANKED_LOSS", "25"))
+                        _maxl = max(1, int(os.environ.get("SCCT_LADDER_MAX_LEVEL", "15")))
+                        _rows = []; _plan = []
+                        try:
+                            import json as _json
+                            _spath = pathlib.Path(__file__).resolve().parent.parent / "state" / "ladder_stats.json"
+                            _sdb = _json.loads(_spath.read_text(encoding="utf-8-sig")) if _spath.exists() else {}
+                        except Exception:
+                            _spath, _sdb = None, {}
+                        for _ix, _n in enumerate(_m["order"]):
+                            _arr = [str(x) for x in (_m["values"][_n] if isinstance(_m["values"][_n], list) else [])][:22]
+                            _arr += ["0"] * (22 - len(_arr))
+                            try: _res = int(_arr[1])
+                            except Exception: _res = 0
+                            _delta = _WIN if _res > 0 else (-_LOSS if _res < 0 else 0)
+                            _rk = "SPY" if _arr[0] == "0" else "SEN"
+                            # the client's Old Total comes from the role column (SPY_/SEN_), so the floor is applied on that
+                            _old = int(float((_sdb.get(_n) or {}).get(_rk + "_SCORE", 0) or 0))
+                            _new = max(0, _old + _delta)
+                            _plan.append((_n, _arr[0], _res, _delta, _arr[3]))
+                            if _diag:
+                                if _arr[0] == "0":
+                                    _arr[6] = str(600 + _ix); _arr[7] = str(700 + _ix); _arr[8] = "1"
+                                else:
+                                    _arr[8] = "0"; _arr[12] = str(1200 + _ix); _arr[13] = str(1300 + _ix)
+                            else:
+                                # screen mapping found in round 67: with arr[8]!=0 the "Game Results" column shows arr[7]
+                                _arr[7] = str(_new - _old); _arr[6] = str(_new); _arr[8] = "1"
+                            _rows.append([_n, _arr])
+                        # Round 72: which game mode was this? state/ranked_mode.txt (NEU / SAB / EXT) set by the operator; otherwise UNK
+                        _MODES = {"NEU": "NEU", "NEUTRALISATION": "NEU", "NEUTRALIZATION": "NEU", "SAB": "SAB", "SABOTAGE": "SAB", "EXT": "EXT", "EXTRACTION": "EXT"}
+                        # Round 78: automatic detection from the room info blob (first byte: 0x0d Extraction, 0x0e Sabotage,
+                        # 0x0f Neutralisation; seen on Cinema and Station). A fixed NEU/SAB/EXT in ranked_mode.txt still overrides it;
+                        # AUTO, an empty file or no file means "detect".
+                        _AUTO = {0x0d: "EXT", 0x0e: "SAB", 0x0f: "NEU"}
+                        try:
+                            _mf = pathlib.Path(__file__).resolve().parent.parent / "state" / "ranked_mode.txt"
+                            _mtxt = _mf.read_text(encoding="utf-8-sig").strip().upper() if _mf.exists() else ""
+                        except Exception:
+                            _mtxt = ""
+                        _mkey = _MODES.get(_mtxt)
+                        if _mkey is None:
+                            try:
+                                _mkey = _AUTO.get(int(str(_m.get("modeinfo", ""))[:2], 16), "UNK")
+                            except Exception:
+                                _mkey = "UNK"
+                            log_line(f"[{now_ts()}] RANKED_FLOW mode auto-detected: {_mkey} (info_head={_m.get('modeinfo')!r}, file={_mtxt!r})", log_fp=log_fp)
+                        _min_pl = int(os.environ.get("SCCT_RANKED_MIN_PLAYERS", "4"))
+                        # Round 79: a match that ends within seconds (everyone backed out to the lobby) is not a real match.
+                        _min_sec = int(os.environ.get("SCCT_RANKED_MIN_SECONDS", "30"))
+                        try: _maxsec = max(int(p_[4]) for p_ in _plan) if _plan else 0
+                        except Exception: _maxsec = 0
+                        if _plan and _maxsec < _min_sec:
+                            log_line(f"[{now_ts()}] RANKED_FLOW match {_m['id']} not recorded (too short: {_maxsec}s < {_min_sec}s)", log_fp=log_fp)
+                            _plan = []
+                        if len(_plan) >= _min_pl and any(p_[2] for p_ in _plan) and _spath is not None:
+                            def _apply(_plan=_plan, _spath=_spath, _mid=_m["id"], _mkey=_mkey):
+                                try:
+                                    _d = _json.loads(_spath.read_text(encoding="utf-8-sig")) if _spath.exists() else {}
+                                    for _n, _team, _res, _delta, _tm in _plan:
+                                        _st = _d.setdefault(_n, {})
+                                        _pre = "SPY" if _team == "0" else "SEN"
+                                        try: _t = max(0, int(_tm))
+                                        except Exception: _t = 0
+                                        for _k in ("GEN", _pre):
+                                            if _k != "GEN":
+                                                _st[_k + "_SCORE"] = max(0, int(_st.get(_k + "_SCORE", 0) or 0) + _delta)
+                                            _st[_k + "_GAMES"] = int(_st.get(_k + "_GAMES", 0) or 0) + 1
+                                            _st[_k + "_WON"] = int(_st.get(_k + "_WON", 0) or 0) + (1 if _res > 0 else 0)
+                                            _st[_k + "_TIME"] = int(_st.get(_k + "_TIME", 0) or 0) + _t
+                                    for _n, _team, _res, _delta, _tm in _plan:   # separate per-mode ledger: <MODE>_SCORE/GAMES/WON/TIME
+                                        _st = _d.setdefault(_n, {})
+                                        try: _t = max(0, int(_tm))
+                                        except Exception: _t = 0
+                                        _st[_mkey + "_SCORE"] = max(0, int(_st.get(_mkey + "_SCORE", 0) or 0) + _delta)
+                                        _st[_mkey + "_GAMES"] = int(_st.get(_mkey + "_GAMES", 0) or 0) + 1
+                                        _st[_mkey + "_WON"] = int(_st.get(_mkey + "_WON", 0) or 0) + (1 if _res > 0 else 0)
+                                        _st[_mkey + "_TIME"] = int(_st.get(_mkey + "_TIME", 0) or 0) + _t
+                                    for _st in _d.values():  # overall = spy + mercenary totals
+                                        _st["GEN_SCORE"] = int(_st.get("SPY_SCORE", 0) or 0) + int(_st.get("SEN_SCORE", 0) or 0)
+                                    _spath.write_text(_json.dumps(_d, indent=1), encoding="utf-8")
+                                    log_line(f"[{now_ts()}] RANKED_FLOW match {_mid} recorded in ladder_stats.json: {[(p_[0], p_[3]) for p_ in _plan]}", log_fp=log_fp)
+                                except Exception as _e:
+                                    log_line(f"[{now_ts()}] RANKED_FLOW recording failed: {_e!r}", log_fp=log_fp)
+                            # Round 77: applied right away. The results screen's Old Total comes from the client's cached "my stats" (the last query it
+                            # made, not the one right after the match), and the post-match query refreshes that cache for the NEXT match,
+                            # so it must already return the new totals (the old 30 s delay made every Old Total one match behind).
+                            _thr.Timer(float(os.environ.get("SCCT_RANKED_APPLY_DELAY", "0.1")), _apply).start()
+                        else:
+                            log_line(f"[{now_ts()}] RANKED_FLOW match {_m['id']} not recorded (players={len(_plan)}, min={_min_pl})", log_fp=log_fp)
+                        _final = [str(_m["id"]), "38", _rows]
+                    else:
+                        _final = [str(_m["id"]), "39", ["0"]]
+                    log_line(f"[{now_ts()}] RANKED_FLOW match {_m['id']} finished: {_final}", log_fp=log_fp)
+                    _push_room(_rid, 71, _final)
+                else:
+                    log_line(f"[{now_ts()}] RANKED_FLOW MATCH_FINISH for room {_rid} with no running match", log_fp=log_fp)
+                return _lobby_reply(msg, lobby_subtype, [_rid])
 
         if os.environ.get("SCCT_STRAY_FIX", "1").strip().lower() not in ("0", "off", "false", "no") and lobby_subtype in (15, 17, 31, 33, 34, 35, 44, 45, 70):
             # Round 32: the generic empty GSSUCCESS this server used to send for unhandled lobby messages is an
@@ -2999,8 +3406,9 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
         if removed_rooms:
             for room_entry in removed_rooms:
                 room = room_entry["room"]
-                for remove_frame in _removal_frames(room.group_id):
-                    _lobby_state.broadcast(remove_frame, log_fp=log_fp)
+                # Round 75: same treatment as a normal leave: removal repeated (0.8s / 2.5s) plus an authoritative room list,
+                # so a client that is mid-screen-change does not keep a dead room after its host disconnected.
+                _broadcast_removal(room.group_id, log_fp=log_fp)
                 log_line(
                     f"[{now_ts()}] ROUTER_WM LOBBY room removed on disconnect: id={room.group_id} name={room.group_name}",
                     log_fp=log_fp,
@@ -3149,7 +3557,7 @@ def main(argv: list[str] | None = None) -> int:
             # overhead (~20-50ms) makes any thread-based timing approach unreliable.
             # Sending here wins the race and causes the game to bundle KE2+LOGINWAITMODULE.
             pre_ke1_sent = False
-            if args._boot_ke1_bytes is not None:
+            if args._boot_ke1_bytes is not None and os.environ.get('SCCT_LADDER_PREKE1','0').strip()=='1' if os.environ.get('SCCT_LADDER_MODULE','0').strip()=='1' else args._boot_ke1_bytes is not None:
                 try:
                     conn.sendall(args._boot_ke1_bytes)
                     pre_ke1_sent = True

@@ -2,11 +2,11 @@
 
 A community server that brings the online lobby of **Tom Clancy's Splinter Cell: Chaos Theory (PS2, US, SLUS-21137)** back to life. It's built on [SPEARTECH/scops2_server_revive](https://github.com/SPEARTECH/scops2_server_revive), which in turn builds on [michal-kapala/ubi-gs](https://github.com/michal-kapala/ubi-gs).
 
-This fork adds fixes for the lobby and room list so that real PS2 consoles and PCSX2 players can see each other, join rooms and play full matches. It also adds the online menu's **friend list, game invites and Join Friend**.
+This fork adds fixes for the lobby and room list so that real PS2 consoles and PCSX2 players can see each other, join rooms and play full matches. It also adds the online menu's **friend list, game invites and Join Friend**, and a working **ranking** (ranked 2v2 matches with points, levels and a live leaderboard).
 
 ## Status
 
-Tested on a LAN with a real PS2 (via OPL) and two PCSX2 clients (3 players for lobby and matches; friend features tested with one PCSX2 and one real PS2). Working:
+Tested on a LAN with a real PS2 (via OPL) and up to three PCSX2 clients (full 2v2 matches, including ranked ones). Working:
 
 - Login, lobby selection and lobby join
 - Creating and joining rooms; rooms appear in other players' game lists
@@ -19,8 +19,11 @@ Tested on a LAN with a real PS2 (via OPL) and two PCSX2 clients (3 players for l
 - **Invites:** Invite Friend, "Invited" on the Online Menu, Game Invites, and joining from an invite
 - **Join Friend:** join a friend's room straight from the friend list (see Friend Slots below)
 - **News:** the Online menu's News screen shows your own message of the day (`state/motd.txt`)
+- **Ranked 2v2 matches:** points, levels, results screen and the in-game Ranking screen (see Ranking below)
+- **Live lobby player count:** the number on the Lobby Selection screen updates while you look at it
+- **Dead rooms disappear:** when a host's connection drops, their room is removed from everyone's list within a few seconds
 
-Not tested or not supported yet: 4 players at once, full-room refusal, and Internet play (everything above was tested on one LAN). Ranking, ignore lists and friend-request approval are not implemented.
+Not tested or not supported yet: Internet play (everything above was tested on one LAN), full-room refusal, disconnect/quit penalties in ranked matches, ignore lists and friend-request approval.
 
 ## Friends, invites and Friend Slots
 
@@ -33,6 +36,34 @@ Not tested or not supported yet: 4 players at once, full-room refusal, and Inter
 **Recommendation:** use Friend Slots 0 if players should join from the friend list, or send an invite first.
 
 Set `SCCT_FRIENDS=0` to turn all friend features off.
+
+## Ranking
+
+Ranked matches need **4 players (2v2)**. The server records the result when the match ends and the game's own Game Statistics and Ranking screens show it.
+
+- **Points:** a win is **+50**, a loss is **-25**, never below 0. Points are kept per role: a player has a **Spy** total and a **Mercenary** total, and the **Overall** total is Spy + Mercenary.
+- **Levels:** everyone starts at level 1 with 0 points; the cap is level 15. Leaving level L takes `50 x L x (L + 10)` points (550 to leave level 1), a curve fitted to the original server's ranking screenshots. The level shown is always the Overall level. `SCCT_LADDER_PTS_PER_LEVEL=<n>` switches to a simple linear curve.
+- **Revenge mode:** teams swap for round 2 and each round is scored on the role the player held in that round.
+- **Per-mode tracking:** the server records points, games, wins and time separately for **Neutralisation, Sabotage and Extraction** (`NEU_`, `SAB_`, `EXT_` keys in `state/ladder_stats.json`). The game's Ranking screen has no per-mode data (every mode tab shows the same Overall numbers; only the Spy/Mercenary switch changes them), so run `python tools/ladder_modes_report.py` for per-mode leaderboards (also written to `state/ladder_modes.txt`).
+- **Automatic mode detection:** the first byte of the room's info blob tells the mode (`0x0d` Extraction, `0x0e` Sabotage, `0x0f` Neutralisation). It does not depend on the map and was confirmed on three maps per mode. To force a mode, put `NEU`, `SAB` or `EXT` in `state/ranked_mode.txt`; `AUTO`, an empty file or no file means detect. The file is read after every match, so no restart is needed.
+- **Not recorded:** a draw (all results 0), a match with fewer than 4 players, and a match that ends within 30 seconds (everyone backed out to the lobby).
+- **How it runs:** the Ranking screen is served by a second instance of the same server on port 44002 (`SCCT_LADDER_MODULE=1`, started by `tools\start_online_capture_ext.ps1`). It reads `state/ladder_stats.json` on every query, so edits show up without a restart. Registered users in `state/users.json` are added at level 1 / 0 points.
+- **Known client quirk:** the "Old Total" on the results screen comes from the game's own cached copy of each player's stats, which it refreshes at login and only sometimes after a match. It can show an old number for some players. The server's totals are always right; logging out and in refreshes the display.
+- The in-game text "(the general ranking is updated twice an hour)" is fixed client text; this server updates the ranking immediately.
+
+Optional ranking settings:
+
+| Variable | Purpose |
+|---|---|
+| `SCCT_RANKED_FLOW=0` | turn match scoring off |
+| `SCCT_RANKED_WIN` / `SCCT_RANKED_LOSS` | points for a win / loss (default 50 / 25) |
+| `SCCT_RANKED_MIN_PLAYERS` | players needed to record a match (default 4) |
+| `SCCT_RANKED_MIN_SECONDS` | shortest match that counts (default 30) |
+| `SCCT_LADDER_MAX_LEVEL` | level cap (default 15) |
+| `SCCT_LADDER_PTS_PER_LEVEL` | use a linear level curve with this many points per level |
+| `SCCT_RANKED_APPLY_DELAY` | seconds between the match end and saving the points (default 0.1) |
+| `SCCT_LOBBY_COUNT_LIVE=0` | turn the live lobby player count off |
+| `SCCT_LOBBY_COUNT_POLL` | how often the count is checked, in seconds (default 2) |
 
 ## News (message of the day)
 
@@ -143,8 +174,8 @@ On every client, set the **DNS server manually to the server's IP**.
 
 ### PCSX2
 
-- Use **PCAP Bridged** on a **wired Ethernet** adapter so the emulated PS2 gets its own LAN address. Wi-Fi is unreliable, and two Wi-Fi machines may not be able to join each other (check the router for client isolation).
-- If the server runs on the same PC as PCSX2, bridge PCSX2 to a different adapter than the one carrying the server's IP.
+- Use **PCAP Bridged** so the emulated PS2 gets its own LAN address, with a different **PS2 Address** for every instance and the DNS set to the server's IP. Wi-Fi is unreliable (a real PS2 could not join PCSX2 rooms hosted over Wi-Fi), and two Wi-Fi machines may not be able to join each other (check the router for client isolation).
+- If the server runs on the same PC as PCSX2, do **not** bridge PCSX2 to the adapter carrying the server's IP: the instances then never get past DNAS. What worked: a **second wired adapter** (a cheap USB-to-Ethernet dongle) plugged into the same router and used only for PCSX2. In Windows give the dongle a fixed IPv4 address in the same subnet (for example `192.168.1.250/24`) with **no gateway** and an interface metric of 500 (Advanced, untick automatic metric) so Windows doesn't route normal traffic through it. Removing IPv4 from the dongle entirely makes PCSX2 report "No network adaptor detected". With this setup a real PS2 can join rooms hosted by PCSX2 and the reverse.
 - Sockets mode can join rooms but cannot host, because it reports `192.0.2.100` as its address.
 
 ## DNAS
@@ -169,7 +200,8 @@ So real consoles currently need a **patched ISO** that skips the DNAS check. PCS
 
 Any small Linux VPS (1 vCPU, 1–2 GB RAM) is enough. Atlanta, Dallas or Chicago are good central locations for North America. Before opening it up:
 
-- Restrict the DNS forwarder so it only answers the game's hostnames (an open resolver can be abused).
+- Restrict the DNS forwarder so it only answers the game's hostnames (an open resolver can be abused: outside hosts probed port 53 within hours on a test machine). Don't forward port 53 to the internet.
+- `state/users.json` stores passwords in plain text. Hash them (or at least keep the file private and out of git) before the server is public.
 - Open only the ports listed above.
 - Trim or rotate logs, since they contain players' IP addresses.
 - Players who host rooms need UDP 3658 and 10070-10080 forwarded on their own router.
@@ -179,11 +211,14 @@ Any small Linux VPS (1 vCPU, 1–2 GB RAM) is enough. Atlanta, Dallas or Chicago
 ```
 tools/ubigs_router_wm_server.py   lobby / wait-module server (main file)
 tools/ubigs_router_server.py      router (port 40000)
+tools/ladder_modes_report.py      per-mode leaderboards from state/ladder_stats.json
 tools/start_online_capture_ext.ps1  Windows start script for the whole stack
 run_test_keep.bat / run_test.bat  recommended settings / base settings
 run.sh                            Linux start script
 docs/ONLINE_FIXES.md              full technical write-up
 state/friends.json                saved friend lists (created at runtime; don't commit)
+state/ladder_stats.json           ranking data (created at runtime; don't commit)
+state/ranked_mode.txt             optional: force NEU / SAB / EXT, or AUTO
 ```
 
 ## Credits

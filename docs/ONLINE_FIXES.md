@@ -164,4 +164,27 @@ Friends persist in `state/friends.json` and update live:
 - Lobby ban/unban notifications (36/40) are no longer answered; the old generic reply left a stray message in the game's queue and later caused "Couldn't access lobby" after invites.
 - Tested with 2 players (PCSX2 and real PS2). Set `SCCT_FRIENDS=0` to disable.
 - Optional environment variables: `SCCT_FRIEND_UNKNOWN_REASON`, `SCCT_PEER_OFFLINE_REASON`, `SCCT_FRIEND_JOINABLE`, `SCCT_FRIEND_GAME`, `SCCT_PLAYER_GROUP_GET`, `SCCT_PGG_WRAP` (`raw` default, `typed` = old reply), `SCCT_PGG_MODE`, `SCCT_PGG_LOBBY_KEY`, `SCCT_BAN_REPLY`, `SCCT_INVITE_REFRESH`.
-- Not implemented: ignore lists, friend-request approval, ranking.
+- Not implemented: ignore lists, friend-request approval.
+
+
+## Ranking, ranked matches and per-mode tracking (v7)
+
+**Ranking screen.** The game asks the proxy module on port 44002 for `ladderquery`. A second instance of `ubigs_router_wm_server.py` with `SCCT_LADDER_MODULE=1` answers it (the old text-protocol stub made the game hang up with "No CHALLENGE received"; `$UseOldProxyWm = $true` in the start script goes back to it). Columns the client requests: `GEN_/SPY_/SEN_` + `LEVEL, SCORE, GAMES, WON, WINRATIO, TIME`, `ALIAS`, `GLOBAL_RANK`/`QUERY_RANK`, `NB_DISC`. There are no per-mode columns: the Neutralisation/Sabotage/Extraction tabs show the same Overall data and only the Spy/Mercenary switch changes the numbers. Data lives in `state/ladder_stats.json` and is read on every query. `GEN_SCORE` is always `SPY_SCORE + SEN_SCORE`.
+
+**Ranked match flow (lobby port 40005).** `START_MATCH` (17) -> `MATCH_STARTED` (62) pushed to the four players. Each client sends `SUBMIT_MATCH` (30) with per-player values `[team (0 spy / 1 merc), result (1 win / -1 loss / 0 draw), present, seconds]`; the last submission wins (the game briefly submits inverted or draw values before the final one). `MATCH_FINISH` (45) -> `FINAL_MATCH_RESULTS` (71). The result rows are 22 ints per player: `arr[6]` = new total, `arr[7]` = points gained, `arr[8]` = 1 (the client reads `arr[0], arr[1], arr[6..8], arr[12], arr[13]`; the 4 submitted values must be padded to 22 or it reads past the array).
+
+**Scoring.** +50 win, -25 loss on the role score the player held in that round (`SPY_` if team 0, else `SEN_`), floor 0. Games, wins and time are kept per role and overall. Level curve: leaving level L needs `50*L*(L+10)` points, cap 15. Not recorded: all-zero results (draw), fewer than 4 players, matches shorter than `SCCT_RANKED_MIN_SECONDS` (30).
+
+**Results screen.** "Old Total" is the client's cached copy of its own stats (spy or mercenary column), refreshed at login (ladderquery ids 1-4) and sometimes after a match; "New Total" is Old + Results, computed by the client. The server data is correct even when the cached Old Total on screen is stale.
+
+**Game mode detection.** The first byte of the 96-byte room info blob: `0x0d` Extraction, `0x0e` Sabotage, `0x0f` Neutralisation, independent of the map (Neutralisation on Cinema, Station, Schermerhorn; Sabotage on Station, Mount Hospital, Museum; Extraction on Station, Deftech Bellew, Warehouse). The blob is logged at match start as `MODE_INFO`. A per-mode ledger `<MODE>_SCORE/GAMES/WON/TIME` is kept next to the role totals; `tools/ladder_modes_report.py` prints it. `state/ranked_mode.txt` (`NEU`/`SAB`/`EXT`) overrides detection, `AUTO`/empty/missing detects; an unknown byte records `UNK`.
+
+**Live lobby count.** A watcher thread (started at first login) polls every 2 s and pushes a fresh lobby list frame over each player's lobby connection whenever the count of players in the lobby changes, so the number on the Lobby Selection screen updates without re-entering. `SCCT_LOBBY_COUNT_LIVE=0` disables it.
+
+**Dead rooms.** When a host's connection drops, the server sends three removal frames plus an authoritative room-list push (`_broadcast_removal`) so the room disappears from every client's list.
+
+**Networking note (PS2 joining PCSX2 hosts).** Bridging PCSX2 to the server PC's own Ethernet adapter breaks DNAS and server reach; Wi-Fi bridging stops a real PS2 from joining. A second wired adapter (USB-to-Ethernet) on the same router, used only by PCSX2 (fixed IP in the LAN subnet, no gateway, interface metric 500, a unique "PS2 Address" per instance, DNS = server) works for all combinations.
+
+**Environment variables:** `SCCT_LADDER_MODULE`, `SCCT_LADDER_REPLY`, `SCCT_LADDER_MAX_LEVEL`, `SCCT_LADDER_PTS_PER_LEVEL`, `SCCT_LADDER_PREKE1`, `SCCT_RANKED_FLOW`, `SCCT_RANKED_WIN`, `SCCT_RANKED_LOSS`, `SCCT_RANKED_MIN_PLAYERS`, `SCCT_RANKED_MIN_SECONDS`, `SCCT_RANKED_APPLY_DELAY`, `SCCT_RANKED_DIAG`, `SCCT_LOBBY_COUNT_LIVE`, `SCCT_LOBBY_COUNT_POLL`.
+
+**Test results.** Ranked 2v2 on a real PS2 plus three PCSX2 instances, all three modes on three maps each, both team sides, Revenge (teams swap, scored per round), floors at 0, spy+merc=overall, live lobby count in both directions, dead-room removal after a host drops.

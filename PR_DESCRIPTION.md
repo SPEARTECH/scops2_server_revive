@@ -1,12 +1,11 @@
-# Lobby/room fixes for Chaos Theory PS2 (tested with real PS2 + PCSX2, 3 players)
+# Lobby/room fixes, friends, and a working ranking for Chaos Theory PS2 (tested with real PS2 + PCSX2)
 
-- Fixes lobby leave/rejoin ("Couldn't Access Lobby"), stale rooms, map changes in the game list, game join refusal for removed rooms, and the lobby player count.
-- Root cause: stray/untyped replies break the client's reply queue; notifications (34/35/44/70) now get no reply, 15/17/31/33/45 get typed replies, missing-room joins get a proper failure.
+- Lobby leave/rejoin ("Couldn't Access Lobby"), stale rooms, map changes in the game list, join refusal for removed rooms and the lobby player count are fixed (stray/untyped replies were breaking the client's reply queue).
+- Friend list, game invites, Join Friend and the News screen work.
+- **New: ranking.** Ranked 2v2 matches score +50/-25 per role (Spy / Mercenary, Overall = sum), levels up to 15, Revenge supported, results and Ranking screens show the numbers. Points, games, wins and time are also tracked per mode (Neutralisation / Sabotage / Extraction), with the mode detected automatically from the room data; `tools/ladder_modes_report.py` prints per-mode leaderboards.
+- **New:** the lobby player count updates live; a room whose host disconnects is removed from every player's list; matches that end within 30 seconds are not scored.
 - Router (40000): wait-module address in the captured JOINWAIT reply is re-encoded with the real --wm-ip/--wm-port.
-- Full details, env settings, test results, DNAS findings: docs/ONLINE_FIXES.md
+- Networking note for PCSX2 on the server PC (second wired adapter) in the README. Full details, env settings, findings and test results: docs/ONLINE_FIXES.md
 
-Files: tools/ubigs_router_wm_server.py, tools/ubigs_router_server.py, run_test.bat, run_test_keep.bat, docs/.
-Not included on purpose: logs, state/users.json, certs, local IPs (run.sh, ps1, gsinit).
-
-
-Also adds persistent friend list support (add/remove, live online/offline icons), game invites (Invite Friend, Game Invites, Cancel Invite) and Join Friend from the friend list. Rooms with Friend Slots 3 can only be joined by invited friends (use Friend Slots 0 to join from the friend list); see docs/ONLINE_FIXES.md. Tested with 2 players (PCSX2 and a real PS2).
+Files: tools/ubigs_router_wm_server.py, tools/ubigs_router_server.py, tools/ladder_modes_report.py, tools/start_online_capture_ext.ps1 (starts the ranking module on 44002; set HostIP), run_test.bat, run_test_keep.bat, docs/, README.md.
+Not included on purpose: logs, state/ (users, friends, ladder data), certs.
