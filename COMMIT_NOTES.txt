@@ -1,15 +1,19 @@
-Suggested commit title:
-  Original-disc fix: even-length NAT datagrams; LAN-only DNS/HTTP; KE1 variant
+Copy these files over your clone (same paths), then:
 
-Changes since the last push (700c68f, 2026-11-01 07:41):
-- tools/nat2/udp_reply_server.py (new): NAT replies padded so every SRP datagram
-  (12 B header + message) is even length; the original PS2 disc hung on odd lengths.
-  SCCT_NAT_EVEN=1 (default). Other knobs: SCCT_NAT_PORTID_LIMIT, SCCT_NAT_ADDRESS_DELAY_MS,
-  SCCT_NAT_NO_REPEAT_ACK, SCCT_NAT_NO_ADDRESS, SCCT_NAT_GAP_MS.
-- tools/net_utils.py, dns_override_forwarder.py, gs_http_server.py: is_lan_client();
-  DNS and HTTP ignore non-LAN clients unless SCCT_ALLOW_PUBLIC=1.
-- tools/ubigs_router_server.py: optional KE1 variant (SCCT_KE1_VARIANT).
-- tools/start_online_capture_ext.ps1, run_*.bat, gsinit_nat4.php: test launchers.
-- tools/sniff_ps2.py + run_sniff_ps2*.bat: packet sniffers for a PS2 on the LAN.
-Not included on purpose: README.md (local copy is empty), dnasrep_test/ (binary of unknown
-origin and licence), logs/, state/, venv/.
+  git add README.md tools ubi-gs-new run_nat_even.bat run_nat2_test.bat run_public_test.bat
+  git commit -m "Internet play: public-IP split-horizon, NAT public address, port-forwarding docs, ubi-gs-new for the NAT service"
+  git push
+
+What changed
+- tools/net_utils.py, dns_override_forwarder.py, gs_http_server.py, ubigs_router_server.py, ubigs_router_wm_server.py:
+  SCCT_PUBLIC_IP split-horizon (outside clients get the public IP; DNS is answer-only for them; gsinit rewritten;
+  lobby JOIN_ROOM ack and router/wait-module hosts chosen per client).
+- tools/nat2/udp_reply_server.py: even-length replies; SCCT_NAT_PUBLIC_ADDR reports the public IP for LAN players.
+- tools/start_online_capture_ext.ps1: SCCT_NAT_V2, SCCT_NAT_PORTS, SCCT_GSINIT_FILE hooks (HostIP default left at 192.168.1.100).
+- ubi-gs-new/: the newer ubi-gs snapshot (MIT) that tools/nat2/udp_reply_server.py imports. It was missing from the repo,
+  so the original-disc NAT service could not start from a fresh clone. Needs Python 3.11+ (typing.Self).
+- run_public_test.bat (put your public IP in it), run_nat_even.bat, run_nat2_test.bat.
+- README.md: port forwarding section, internet test results, Friend Slots 1/2 results, requirements.
+
+Do NOT commit: state/users.json (plaintext passwords), state/shared_router_rsa.json, tools/certs/*.key, venv/, logs/,
+dnasrep_test/ (binary of unknown licence + private keys), and the empty local README.md on the PC.

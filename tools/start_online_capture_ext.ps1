@@ -1,6 +1,6 @@
 param(
   [string]$BindIP = '0.0.0.0',
-  [string]$HostIP = '192.168.1.113',
+  [string]$HostIP = '192.168.1.100',
   [string]$TlsCertCN = 'gate1.us.dnas.playstation.org',
   [string]$UpstreamDNS = '1.1.1.1:53',
   [ValidateSet('u32be','u32le','u16be','u16le','str','ack')]

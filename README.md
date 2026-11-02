@@ -8,6 +8,8 @@ This fork adds fixes for the lobby and room list so that real PS2 consoles and P
 
 ## Status
 
+> **Playing over the internet requires port forwarding on your router.** See [Port forwarding is required](#port-forwarding-is-required-for-internet-play). Playing on one LAN needs none.
+
 Tested on a LAN with real PS2 consoles (via OPL, and with the original disc) and up to three PCSX2 clients (full 2v2 matches, including ranked ones with PCSX2). Working:
 
 - **Original unpatched disc on a stock PS2** (fat and slim): login, account creation, lobby, creating and joining rooms, 1v1 matches against PCSX2 (see below)
@@ -26,7 +28,29 @@ Tested on a LAN with real PS2 consoles (via OPL, and with the original disc) and
 - **Live lobby player count:** the number on the Lobby Selection screen updates while you look at it
 - **Dead rooms disappear:** when a host's connection drops, their room is removed from everyone's list within a few seconds
 
-Not tested or not supported yet: **internet play between consoles in different homes** (everything above was tested on one LAN), ranked 2v2 on real consoles since the original-disc changes (only unranked "Free" matches were played), Friend List and Quick Join on the original disc, a PAL disc, full-room refusal, disconnect/quit penalties in ranked matches, ignore lists and friend-request approval.
+**Internet play (tested):** with the server on a home PC and a real PS2 on another network (and PCSX2 on the server's network), players joined each other's rooms in both directions, played unranked 1v1 matches to the end (Cinema and Station Sabotage), and joined through the Games List, the friend list and game invites. See "Port forwarding is required" below and "Hosting from a home PC".
+
+Not tested or not supported yet: ranked matches over the internet and ranked 2v2 on the original disc (only unranked "Free" matches were played; unranked games record no stats), 4-player games over the internet, a PCSX2 joiner on a different network, Quick Join on the original disc, a PAL disc, full-room refusal, disconnect/quit penalties in ranked matches, ignore lists and friend-request approval.
+
+## Port forwarding is required for internet play
+
+**Nobody outside your home network can connect unless you forward ports on your router.** This is the single most common reason an internet test fails. Playing on one LAN needs no forwarding at all; everything below is only for players on other networks.
+
+Do this on the router of **whoever runs the server** and on the router of **whoever hosts a room** (they can be different people):
+
+| Who | Forward to | Protocol and ports |
+|---|---|---|
+| Server host | the server PC (give it a fixed LAN IP) | **TCP** 80, 443, 40000, 40005, 44001, 44002 |
+| Server host | the server PC | **UDP** 53, 45000-45003 |
+| Whoever hosts a room (a console or PCSX2) | that console or PCSX2's own LAN IP | **UDP** 3658 and 10070-10080 |
+
+- Only one machine on a network can receive the game ports (UDP 3658, 10070-10080) at a time, so only one player per household can host. A player who only **joins** a room does not need to forward anything on their own router.
+- Do not rely on UPnP, and do not use the router's DMZ (it exposes every port on the PC). Forward exactly the ports above.
+- A console plugged straight into the modem (no router) needs no forwarding.
+- The server PC's firewall must also allow those ports.
+- Start the server with `run_public_test.bat` (set your public IP in it) so outside players are told your public address instead of your LAN address. See "Hosting from a home PC".
+- Check it from a phone on mobile data (not Wi-Fi): open `http://<your public IP>/gsinit.php?dp=SPLINTERCELL3PS2US&user=T`. If you get a page of server addresses, TCP 80 works. The server log (`logs/gs_http_80.log`) should show the request from the phone's address.
+- Remove the forwards when you finish testing; internet bots find open ports within hours.
 
 ## Original disc support (no patched ISO)
 
@@ -69,7 +93,7 @@ DNS (53) and HTTP (80) now ignore any client that isn't on a private, loopback o
 - **Invite Friend:** the host presses X on an online friend. The friend sees "Invited" on the Online Menu and joins from **Game Invites** (or from the friend list). When they join, the host's "Cancel Invite" goes back to "Invite".
 - **Join Friend:** a friend who is hosting a room is shown as joinable; press X on them in the friend list to join their room.
 
-**Friend Slots:** a room created with **Friend Slots 3** has no public slots, so it is hidden from the Games List and can only be joined by friends the host has **invited**. Pressing Join Friend on such a room without an invite fails (the game leaves again about a second after joining). With **Friend Slots 0**, Join Friend works in both directions. This looks like the game's own design (reserved slots are for invited friends); it is not fully confirmed and may be explored further.
+**Friend Slots:** a room created with **Friend Slots 3** has no public slots, so it is hidden from the Games List and can only be joined by friends the host has **invited**. Pressing Join Friend on such a room without an invite fails (the game leaves again about a second after joining). With **Friend Slots 0**, Join Friend works in both directions. **Tested over the internet with a 1v1:** Friend Slots **1** and **2** both leave the room visible in the Games List and joinable from the Games List and from the friend list (the two players were friends). Only **3** hides the room. The game writes the slot count into the room data (two bytes change with the setting), so the setting reaches the server. Whether slots 1 and 2 hold seats back for invited friends once a room is nearly full was not tested (it needs a 4-player game with a non-friend). This looks like the game's own design (reserved slots are for invited friends); it is not fully confirmed and may be explored further.
 **Recommendation:** use Friend Slots 0 if players should join from the friend list, or send an invite first.
 
 Set `SCCT_FRIENDS=0` to turn all friend features off.
@@ -155,10 +179,10 @@ See `docs/ONLINE_FIXES.md` for the complete write-up, client-side findings and t
 ## Requirements
 
 - Windows 10/11 (or Linux with `run.sh`)
-- Python 3.9+ with `pip install rsa dnslib`
+- Python **3.11+** with `pip install rsa dnslib` (the NAT service in `ubi-gs-new/` uses `typing.Self`)
 - OpenSSL that still supports TLS 1.0 and 3DES (for the DNAS gate on port 443). The Windows start script searches common locations such as Git for Windows, MSYS2 and OpenSSL-Win64.
 - A fixed LAN IP for the server (DHCP reservation recommended)
-- Free ports 53, 80, 443, 40000, 40005, 44001, 44002 and 45000
+- Free ports 53, 80, 443, 40000, 40005, 44001, 44002 and 45000-45003
 
 ## Quick start (Windows)
 
@@ -214,6 +238,9 @@ On every client, set the **DNS server manually to the server's IP**.
 - Use **PCAP Bridged** so the emulated PS2 gets its own LAN address, with a different **PS2 Address** for every instance and the DNS set to the server's IP. Wi-Fi is unreliable (a real PS2 could not join PCSX2 rooms hosted over Wi-Fi), and two Wi-Fi machines may not be able to join each other (check the router for client isolation).
 - If the server runs on the same PC as PCSX2, do **not** bridge PCSX2 to the adapter carrying the server's IP: the instances then never get past DNAS. What worked: a **second wired adapter** (a cheap USB-to-Ethernet dongle) plugged into the same router and used only for PCSX2. In Windows give the dongle a fixed IPv4 address in the same subnet (for example `192.168.1.250/24`) with **no gateway** and an interface metric of 500 (Advanced, untick automatic metric) so Windows doesn't route normal traffic through it. Removing IPv4 from the dongle entirely makes PCSX2 report "No network adaptor detected". With this setup a real PS2 can join rooms hosted by PCSX2 and the reverse.
 - Sockets mode can join rooms but cannot host, because it reports `192.0.2.100` as its address.
+- **Check your gateway for internet play.** Open **Settings -> Network & HDD -> Ethernet -> Intercept DHCP** and set **Gateway Address** to **your own router's address**, with **Auto** unticked. With Auto, PCSX2 copies the gateway from the Windows adapter it is bridged to. A USB-to-Ethernet adapter set up with no gateway (as described above) therefore gives the PS2 a blank gateway, and the game cannot send anything outside your own subnet. Play on the LAN keeps working, so the problem only shows when someone joins from another network: the joiner sees "The game is no longer available", and a packet capture shows their packets arriving while the PCSX2 console never replies.
+  - **Find your own gateway with `ipconfig`:** open Command Prompt, run `ipconfig`, and read the **Default Gateway** line under your main adapter (the one connected to your router, usually Ethernet or Wi-Fi). Use that address. `192.168.1.1` and `192.168.0.1` are common, but yours may differ, so don't copy an address from this README. A bridged adapter that has no gateway shows a blank Default Gateway; use the router's address from your main adapter instead.
+  - Restart the game in PCSX2 after changing it. The network settings are only read at startup.
 
 ## DNAS
 
@@ -237,21 +264,37 @@ Notes:
 - **Room not visible to others:** check the log for `CREATE_ROOM` and for the rooms push; confirm both clients have the same DNS and can ping each other. A room with Friend Slots 3 is hidden from the games list on purpose; invite the friend instead.
 - **"Game is no longer available" when joining:** the host is unreachable from the joiner (client isolation, Sockets mode, firewall) or the room was already closed. From the friend list it can also mean the room has Friend Slots 3 and the friend wasn't invited.
 - **Friend shows as offline:** the friend must be logged in to the same server and be in your friend list on both sides.
+- **"The game is no longer available" only when the other player is on a different network:** on a PCSX2 host, check the gateway (see PCSX2 above, and run `ipconfig` to find yours). Also check that the host's router forwards UDP 3658 and 10070-10080 to the host console or PC.
 - **Port in use:** the start script stops listeners it knows about; close other programs using ports 53, 80 or 443.
 - **Logs:** everything is in `logs\`. `router_wm_40005.log` is the main one.
 
+## Hosting from a home PC (tested)
+
+Internet tests were run with the server on a home PC (behind a consumer router with the forwards above) and a real PS2 on another network. What worked: account creation, login, lobby and room list; joining rooms in both directions (PCSX2 hosting and the PS2 hosting); unranked 1v1 matches (Cinema and Station Sabotage) played to the end; joining through the friend list and game invites; Friend Slots 0, 1 and 2. Not yet tested: ranked matches (stats writes), 4-player games, a PCSX2 joiner on a different network, and a PAL disc.
+
+Start the server with `run_public_test.bat` (copy it, put your public IP in `SCCT_PUBLIC_IP`). It sets:
+
+| Variable | Purpose |
+|---|---|
+| `SCCT_ALLOW_PUBLIC=1` | let outside clients through the LAN-only filter |
+| `SCCT_PUBLIC_IP=<your public IP>` | outside clients get this address (DNS answers, gsinit, router and lobby replies, and a LAN-hosted room's address) instead of the LAN one; DNS for outside clients is answer-only (everything else is refused) |
+| `SCCT_NAT_PUBLIC_ADDR=1` | the NAT service reports the public address for LAN players, so rooms hosted on the LAN can be joined from outside; LAN players then reach each other through the router (NAT loopback), so leave it off for pure LAN sessions |
+
+The port forwards are listed in "Port forwarding is required" near the top.
+
+**PCSX2 players:** if your PCSX2 adapter has no gateway, a console on it can't send packets off the local network, and internet joins time out with "The game is no longer available" (see the PCSX2 note under Connecting clients).
+
 ## Hosting on the Internet
 
-A small VPS (1 vCPU, 1–2 GB RAM) is enough for the Python services. Internet play between different homes is **untested**. Because the DNAS replacement used here is Windows-only, a hosted setup needs a **Windows** server (for example Vultr's Windows plans) or a Linux build or Wine setup for the replacement, which has not been verified. Before opening it up:
+A small VPS (1 vCPU, 1–2 GB RAM) is enough for the Python services. Internet play between different homes has only had the limited test above. Because the DNAS replacement used here is Windows-only, a hosted setup needs a **Windows** server (for example Vultr's Windows plans) or a Linux build or Wine setup for the replacement, which has not been verified. Before opening it up:
 
-- Set `SCCT_ALLOW_PUBLIC=1` (the LAN-only filter otherwise ignores outside consoles) and replace the hard-coded `192.168.1.113` with the server's public IP in the DNS overrides and the advertised address.
-- The NAT service hands out the addresses it observes; whether two consoles behind different home routers can reach each other through it is unconfirmed.
-
-- Restrict the DNS forwarder so it only answers the game's hostnames (an open resolver can be abused: outside hosts probed ports 53 and 80 within hours on a test machine). An "answer overrides only" mode does not exist yet, so don't forward port 53 to the internet until it does.
+- Set `SCCT_ALLOW_PUBLIC=1` (the LAN-only filter otherwise ignores outside consoles) and `SCCT_PUBLIC_IP` to the server's public IP; outside clients are then told that address (see "Hosting from a home PC").
+- The NAT service reports the address it observes (or the public IP with `SCCT_NAT_PUBLIC_ADDR=1` for LAN players). A real PS2 behind a different network reaching a PCSX2 host worked in the home test; two consoles both behind home routers have not been tried.
+- DNS for outside clients is answer-only: it answers the game's override hostnames and refuses everything else, so it is not an open resolver. Bots still probe ports 53 and 80 within hours.
 - `state/users.json` stores passwords in plain text. Hash them (or at least keep the file private and out of git) before the server is public.
-- Open only the ports listed above. Don't use a router DMZ: it exposes every port on the PC.
+- Open only the ports listed under "Port forwarding is required". Don't use a router DMZ.
 - Trim or rotate logs, since they contain players' IP addresses.
-- Players who host rooms need UDP 3658 and 10070-10080 forwarded on their own router.
+- Players who host rooms need UDP 3658 and 10070-10080 forwarded on their own router (see "Port forwarding is required").
 
 ## Repository layout
 
@@ -259,13 +302,13 @@ A small VPS (1 vCPU, 1–2 GB RAM) is enough for the Python services. Internet p
 tools/ubigs_router_wm_server.py   lobby / wait-module server (main file)
 tools/ubigs_router_server.py      router (port 40000), optional KE1 variant
 tools/nat2/udp_reply_server.py    NAT service on UDP 45000+ (even-length replies)
-tools/net_utils.py                is_lan_client() used by the DNS and HTTP servers
+tools/net_utils.py                LAN/outside client checks and public-IP selection (SCCT_PUBLIC_IP)
 tools/dns_override_forwarder.py   DNS overrides (LAN-only by default)
 tools/gs_http_server.py           gsinit HTTP server (LAN-only by default)
-tools/sniff_ps2.py                packet sniffer for a console on the LAN
 run_nat_even.bat                  start the stack for the original disc (NAT even-length)
 run_nat2_test.bat                 sets SCCT_DNAS_EXTERNAL / SCCT_KE1_VARIANT / SCCT_NAT_V2
-run_sniff_ps2.bat / _slim.bat     sniffers for a fat / slim PS2
+run_public_test.bat               start the stack for internet play (edit the public IP)
+ubi-gs-new/                       newer ubi-gs snapshot used by the NAT service (MIT, see its LICENSE)
 tools/ladder_modes_report.py      per-mode leaderboards from state/ladder_stats.json
 tools/start_online_capture_ext.ps1  Windows start script for the whole stack
 run_test_keep.bat / run_test.bat  recommended settings / base settings

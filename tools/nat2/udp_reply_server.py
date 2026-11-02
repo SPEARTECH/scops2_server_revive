@@ -64,6 +64,8 @@ NO_ADDRESS = os.environ.get("SCCT_NAT_NO_ADDRESS", "0") == "1"
 # odd-length datagram (45 B) and handled even ones (44/46 B); PCSX2 handles both. PORT_ID: pick a ping id that gives an
 # even length. ADDRESS: if odd, write the port with a leading '+' (atoi/strtol/sscanf accept it, no length change otherwise).
 EVEN_LEN = os.environ.get("SCCT_NAT_EVEN", "1") != "0"
+PUBLIC_ADDR = os.environ.get("SCCT_NAT_PUBLIC_ADDR", "0") == "1"
+PUBLIC_IP = os.environ.get("SCCT_PUBLIC_IP", "").strip()
 CLIENTS: list = []
 LOG_FP = None
 
@@ -143,9 +145,22 @@ def handle_ping(data: bytes, addr: tuple[str, int], now: float):
     if ADDRESS_DELAY_S > 0:
         log(f"  waiting {ADDRESS_DELAY_S*1000:.0f} ms before ADDRESS")
         time.sleep(ADDRESS_DELAY_S)
-    msg, _ = nat_reply(r["msg"], gsm.NAT_MSG.ADDRESS, utils.ipv4_to_u32_be(addr[0]), addr[1])
+    # The game copies this address into the room info it creates, and other players dial it. For internet play with
+    # the server on a home PC, a LAN client must be reported with the PUBLIC address (SCCT_NAT_PUBLIC_ADDR=1 and
+    # SCCT_PUBLIC_IP set), otherwise outside players receive a 192.168.x.x host address. LAN-only play then needs
+    # NAT loopback on the router, so leave this off for pure LAN sessions.
+    rep_ip = addr[0]
+    if PUBLIC_ADDR and PUBLIC_IP:
+        try:
+            import ipaddress as _ipa
+            _a = _ipa.ip_address(rep_ip)
+            if _a.is_private or _a.is_loopback or _a.is_link_local:
+                rep_ip = PUBLIC_IP
+        except ValueError:
+            pass
+    msg, _ = nat_reply(r["msg"], gsm.NAT_MSG.ADDRESS, utils.ipv4_to_u32_be(rep_ip), addr[1])
     out = bytes(srp.SRPResponse(None, clt, msg))
-    log(f"  -> ADDRESS socket={r['sock']} {addr[0]}:{addr[1]} ({len(out)} bytes) to {clt.addr}:{clt.port}")
+    log(f"  -> ADDRESS socket={r['sock']} {rep_ip}:{addr[1]} ({len(out)} bytes) to {clt.addr}:{clt.port}" + (f" (observed {addr[0]})" if rep_ip != addr[0] else ""))
     return [(out, (clt.addr, clt.port))]
 
 

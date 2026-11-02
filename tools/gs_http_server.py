@@ -26,13 +26,18 @@ from __future__ import annotations
 
 import argparse
 import datetime as _dt
+import os
 import pathlib
+import re
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import TextIO
 from urllib.parse import parse_qs, urlparse
 
-from net_utils import is_lan_client
+from net_utils import is_lan_client, is_private_addr
+
+# Private IPv4 literals in the gsinit text (the LAN address of this server).
+_PRIVATE_IPV4 = re.compile(r"\b(?:10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2})\b")
 
 
 def _guess_content_type(path: str) -> str:
@@ -138,6 +143,10 @@ class _Handler(BaseHTTPRequestHandler):
             except OSError as e:
                 self._send_text(500, f"ERROR reading gsinit file: {e}\n")
                 return
+            _pub = os.environ.get("SCCT_PUBLIC_IP", "").strip()
+            if _pub and not is_private_addr(client_ip):
+                # Outside client: advertise the public address instead of the LAN one.
+                text = _PRIVATE_IPV4.sub(_pub, text)
             self._send_text(200, text + ("\n" if not text.endswith("\n") else ""))
             cfg.handled += 1
         else:

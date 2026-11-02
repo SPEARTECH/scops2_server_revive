@@ -24,6 +24,8 @@ import time
 import traceback
 from typing import TextIO
 
+from net_utils import public_ip_for, is_private_addr
+
 from ubigs_common import (
     ClientState,
     decode_gsm_message,
@@ -2496,6 +2498,15 @@ def handle_message(
                     extra = ""
                 else:
                     extra = target.ip_addr or ""
+                    # Hosted from a home PC: an outside joiner cannot reach a LAN-hosted room's private address, so hand
+                    # it the server's public IP instead (the host's router must forward UDP 3658 and 10070-10080).
+                    _pub24 = os.environ.get("SCCT_PUBLIC_IP", "").strip()
+                    try:
+                        if _pub24 and extra and is_private_addr(extra) and not is_private_addr(clt.addr[0]):
+                            log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM outside joiner {clt.addr[0]}: host address {extra} -> public {_pub24}", log_fp=log_fp)
+                            extra = _pub24
+                    except Exception:
+                        pass
                 ack = gsm.GSMResponse(msg)
                 ack.header.property = gsm.PROPERTY.GS
                 ack.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
@@ -3188,6 +3199,9 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
     conn.settimeout(float(args.idle_timeout))
 
     src_ip, src_port = addr
+    # Outside clients (SCCT_PUBLIC_IP set) must be told the public address, not the LAN one.
+    _proxy_ip = public_ip_for(src_ip, str(args.proxy_ip))
+    _ct34_host = public_ip_for(src_ip, str(args.ct34_host))
     local_ip, local_port = conn.getsockname()
     log_line(f"\n[{now_ts()}] ROUTER_WM {src_ip}:{src_port} -> {local_ip}:{local_port} CONNECT pre_ke1={'yes' if pre_ke1_sent else 'no'}", log_fp=log_fp)
 
@@ -3300,13 +3314,13 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                         msg,
                         frame_bytes=bytes(frame),
                         log_fp=log_fp,
-                        proxy_addr=(args.proxy_ip, int(args.proxy_port)),
+                        proxy_addr=(_proxy_ip, int(args.proxy_port)),
                         keyex2_mode=str(args.keyex2_mode),
                         post_ke2_push=str(args.post_ke2_push),
                         ct34_enable=bool(args.ct34_enable),
                         ct34_mode=str(args.ct34_mode),
                         ct34_base=str(args.ct34_base),
-                        ct34_host=str(args.ct34_host),
+                        ct34_host=_ct34_host,
                         ct34_port=int(args.ct34_port),
                         ct34_id=int(args.ct34_id),
                         ct34_num_a=int(args.ct34_num_a),

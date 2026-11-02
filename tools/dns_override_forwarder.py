@@ -28,7 +28,7 @@ import sys
 from dataclasses import dataclass
 from typing import TextIO
 
-from net_utils import get_primary_lan_ip, is_lan_client
+from net_utils import get_primary_lan_ip, is_lan_client, is_private_addr, public_ip_for
 
 from dnslib import A, DNSHeader, DNSQuestion, DNSRecord, QTYPE, RR  # type: ignore
 
@@ -271,6 +271,7 @@ def main(argv: list[str]) -> int:
         except Exception:
             # Not DNS
             continue
+        _outside = not is_private_addr(client[0])  # only possible with SCCT_ALLOW_PUBLIC=1
 
         # Only handle standard queries with exactly one question; forward the rest.
         qname = None
@@ -317,6 +318,7 @@ def main(argv: list[str]) -> int:
                 ip = suffix_match.ip
             else:
                 ip = override_all_ip
+            ip = public_ip_for(client[0], ip)  # outside clients get SCCT_PUBLIC_IP
             reply = DNSRecord(DNSHeader(id=req.header.id, qr=1, aa=1, ra=1), q=req.q)
             if qtype == "A":
                 reply.add_answer(RR(rname=req.q.qname, rtype=QTYPE.A, rclass=1, ttl=int(args.ttl), rdata=A(ip)))
@@ -342,6 +344,14 @@ def main(argv: list[str]) -> int:
                     src = "all"
                 log_line(f"  -> OVERRIDE({src}) AAAA {qname} = (no data)", log_fp=log_fp)
             handled += 1
+            continue
+
+        # Outside clients only get the override answers above; never act as an open resolver for them.
+        if _outside:
+            refused = DNSRecord(DNSHeader(id=req.header.id, qr=1, ra=1, rcode=5), q=req.q)
+            sock.sendto(refused.pack(), client)
+            if args.log:
+                log_line("  -> REFUSED (outside client, not an override)", log_fp=log_fp)
             continue
 
         # Forward to upstream and relay the response.

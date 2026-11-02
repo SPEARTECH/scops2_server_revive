@@ -40,6 +40,7 @@ from ubigs_common import (
 )
 
 from ubigs_userdb import UserDB
+from net_utils import public_ip_for
 
 
 def _load_or_create_fixed_rsa_keypair(path: str, *, log_fp: TextIO | None):
@@ -924,6 +925,9 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
     conn.settimeout(float(args.idle_timeout))
 
     src_ip, src_port = addr
+    # Outside clients (SCCT_PUBLIC_IP set) must be told the public address, not the LAN one.
+    _wm_ip = public_ip_for(src_ip, str(args.wm_ip))
+    _ct34_host = public_ip_for(src_ip, str(args.ct34_host))
     local_ip, local_port = conn.getsockname()
     log_line(f"\n[{now_ts()}] ROUTER {src_ip}:{src_port} -> {local_ip}:{local_port} CONNECT", log_fp=log_fp)
 
@@ -1101,12 +1105,12 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                     if msg.header.type == gsm.MESSAGE_TYPE.JOINWAITMODULE:
                         handled = handle_joinwaitmodule(
                             msg,
-                            wait_module=(args.wm_ip, int(args.wm_port)),
+                            wait_module=(_wm_ip, int(args.wm_port)),
                             joinwait_format=str(args.joinwait_format),
                             ct34_enable=bool(args.ct34_enable),
                             ct34_mode=str(args.ct34_mode),
                             ct34_base=str(args.ct34_base),
-                            ct34_host=str(args.ct34_host),
+                            ct34_host=_ct34_host,
                             ct34_port=int(args.ct34_port),
                             ct34_id=int(args.ct34_id),
                             ct34_num_a=int(args.ct34_num_a),
@@ -1122,7 +1126,7 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                             clt,
                             msg,
                             frame_bytes=bytes(frame),
-                            wait_module=(args.wm_ip, int(args.wm_port)),
+                            wait_module=(_wm_ip, int(args.wm_port)),
                             keyex2_mode=str(args.keyex2_mode),
                             post_ke2_push=str(args.post_ke2_push),
                             post_ke2_replay_frames=args._post_ke2_replay_frames,
@@ -1130,7 +1134,7 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                             ct34_enable=bool(args.ct34_enable),
                             ct34_mode=str(args.ct34_mode),
                             ct34_base=str(args.ct34_base),
-                            ct34_host=str(args.ct34_host),
+                            ct34_host=_ct34_host,
                             ct34_port=int(args.ct34_port),
                             ct34_id=int(args.ct34_id),
                             ct34_num_a=int(args.ct34_num_a),
@@ -1222,7 +1226,7 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                             fallback_extras.append(
                                 _build_joinwait_success(
                                     msg,
-                                    wait_module=(args.wm_ip, int(args.wm_port)),
+                                    wait_module=(_wm_ip, int(args.wm_port)),
                                     joinwait_format=str(args.joinwait_format),
                                 )
                             )
