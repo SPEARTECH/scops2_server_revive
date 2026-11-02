@@ -1,6 +1,6 @@
 Copy these files over your clone (same paths), then:
 
-  git add README.md tools ubi-gs-new run_nat_even.bat run_nat2_test.bat run_public_test.bat
+  git add README.md tools ubi-gs-new "SCOPS Server.bat" scops_stop.ps1 run_nat_even.bat run_nat2_test.bat run_public_test.bat
   git commit -m "Internet play: public-IP split-horizon, NAT public address, port-forwarding docs, ubi-gs-new for the NAT service"
   git push
 
@@ -12,6 +12,7 @@ What changed
 - tools/start_online_capture_ext.ps1: SCCT_NAT_V2, SCCT_NAT_PORTS, SCCT_GSINIT_FILE hooks (HostIP default left at 192.168.1.100).
 - ubi-gs-new/: the newer ubi-gs snapshot (MIT) that tools/nat2/udp_reply_server.py imports. It was missing from the repo,
   so the original-disc NAT service could not start from a fresh clone. Needs Python 3.11+ (typing.Self).
+- SCOPS Server.bat + scops_stop.ps1: one-click launcher (stack + DNAS) with clean stop; the README has a section for it.
 - run_public_test.bat (put your public IP in it), run_nat_even.bat, run_nat2_test.bat.
 - README.md: port forwarding section, internet test results, Friend Slots 1/2 results, requirements.
 
