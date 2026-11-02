@@ -184,6 +184,18 @@ See `docs/ONLINE_FIXES.md` for the complete write-up, client-side findings and t
 - A fixed LAN IP for the server (DHCP reservation recommended)
 - Free ports 53, 80, 443, 40000, 40005, 44001, 44002 and 45000-45003
 
+## One-click launcher (Windows, original disc)
+
+`SCOPS Server.bat` starts the server stack **and** the DNAS answer in one go, and stops everything again:
+
+1. One time: set `HostIP` in `tools\start_online_capture_ext.ps1` to the server PC's LAN IP, put `dnasrep.exe` and its `gate` and `certs` folders in `dnasrep_test\` (see DNAS below), and for internet play put your public IP in `run_public_test.bat`.
+2. Double-click `SCOPS Server.bat` and accept the administrator prompt (the server needs it).
+3. Choose **I** (internet play, `run_public_test.bat`) or **L** (LAN only, `run_nat_even.bat`). It picks Internet after 10 seconds.
+4. It starts the stack in its own window, waits until the lobby server (port 40005) is listening, then starts DNAS on port 443 in a second window.
+5. To stop, press any key in the launcher window (or close it). `scops_stop.ps1` then closes the server's Python processes, `dnasrep` and their windows, and writes what it stopped to `logs\scops_stop.log`. It only touches the server's own processes (matched by the `tools\...py` script names), not other Python programs.
+
+Internet play also needs port forwarding, see above.
+
 ## Quick start (Windows)
 
 1. Clone this repository.
@@ -308,6 +320,8 @@ tools/gs_http_server.py           gsinit HTTP server (LAN-only by default)
 run_nat_even.bat                  start the stack for the original disc (NAT even-length)
 run_nat2_test.bat                 sets SCCT_DNAS_EXTERNAL / SCCT_KE1_VARIANT / SCCT_NAT_V2
 run_public_test.bat               start the stack for internet play (edit the public IP)
+SCOPS Server.bat                  one-click launcher: stack + DNAS, press a key to stop everything
+scops_stop.ps1                    used by the launcher to stop the server's processes
 ubi-gs-new/                       newer ubi-gs snapshot used by the NAT service (MIT, see its LICENSE)
 tools/ladder_modes_report.py      per-mode leaderboards from state/ladder_stats.json
 tools/start_online_capture_ext.ps1  Windows start script for the whole stack
