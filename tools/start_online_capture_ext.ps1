@@ -1,6 +1,6 @@
 param(
   [string]$BindIP = '0.0.0.0',
-  [string]$HostIP = '192.168.1.100',
+  [string]$HostIP = '192.168.1.113',
   [string]$TlsCertCN = 'gate1.us.dnas.playstation.org',
   [string]$UpstreamDNS = '1.1.1.1:53',
   [ValidateSet('u32be','u32le','u16be','u16le','str','ack')]
@@ -146,6 +146,7 @@ Write-Host "Using OpenSSL: $openssl" -ForegroundColor DarkGray
 $gsinitFile = 'gsinit.php'
 if($GsinitMode -eq 'diag') { $gsinitFile = 'gsinit_diag_localweb.php' }
 elseif($GsinitMode -eq 'superset') { $gsinitFile = 'gsinit_superset.php' }
+if($env:SCCT_GSINIT_FILE) { $gsinitFile = $env:SCCT_GSINIT_FILE; Write-Host "SCCT_GSINIT_FILE: serving $gsinitFile" -ForegroundColor Yellow }
 
 New-Item -ItemType Directory -Force -Path (Join-Path $root 'logs') | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $root 'captures\tcp') | Out-Null
@@ -221,6 +222,7 @@ $ports = @(80,443,40000,40005,44000,44001,44002,45000,6667,6668,27900,27901,2891
 Write-Host 'Stopping existing listeners on key ports...' -ForegroundColor Cyan
 $manualUdpPorts = @(3658,4400,41006) + (10070..10080)
 $ubiUdpReplyPorts = @(45000,45001)
+if($env:SCCT_NAT_PORTS) { $ubiUdpReplyPorts = @($env:SCCT_NAT_PORTS.Split(',') | ForEach-Object { [int]$_.Trim() }); Write-Host "SCCT_NAT_PORTS: NAT reply ports $($ubiUdpReplyPorts -join ',')" -ForegroundColor Yellow }
 $gamespyUdpEchoPorts = @(27900,27901,28910,29900,29901,29920)
 $udpPorts = @(53,19341) + $manualUdpPorts
 foreach($p in $ubiUdpReplyPorts) { $udpPorts += $p }
@@ -361,6 +363,15 @@ Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -
 ) | Out-Null
 
 # UDP reply service for ubi.com connectivity/NAT
+if($env:SCCT_NAT_V2 -eq '1') {
+  Write-Host 'SCCT_NAT_V2=1: using the GSNAT v2 responder (PORT_ID -> ping -> ADDRESS) on UDP 45000.' -ForegroundColor Yellow
+  Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -ArgumentList @(
+    'tools/nat2/udp_reply_server.py',
+    '--bind', $BindIP,
+    '--ports', '45000',
+    '--log-file', 'logs/udp_45000_reply.log'
+  ) | Out-Null
+} else {
 Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -ArgumentList @(
   'tools/udp_reply_server.py',
   '--bind', $BindIP,
@@ -370,6 +381,7 @@ Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -
   '--scct12-extra', $Scct12Extra,
   '--log-file', 'logs/udp_45000_reply.log'
 ) | Out-Null
+}
 
 # GameSpy-style UDP discovery/echo
 Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -ArgumentList @(

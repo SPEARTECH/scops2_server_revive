@@ -28,7 +28,7 @@ import sys
 from dataclasses import dataclass
 from typing import TextIO
 
-from net_utils import get_primary_lan_ip
+from net_utils import get_primary_lan_ip, is_lan_client
 
 from dnslib import A, DNSHeader, DNSQuestion, DNSRecord, QTYPE, RR  # type: ignore
 
@@ -262,6 +262,9 @@ def main(argv: list[str]) -> int:
             break
         except OSError:
             continue
+
+        if not is_lan_client(client[0]):
+            continue  # ignore non-LAN sources silently (no open resolver); SCCT_ALLOW_PUBLIC=1 disables this
 
         try:
             req = DNSRecord.parse(data)

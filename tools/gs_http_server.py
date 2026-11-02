@@ -32,6 +32,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import TextIO
 from urllib.parse import parse_qs, urlparse
 
+from net_utils import is_lan_client
+
 
 def _guess_content_type(path: str) -> str:
     lower = path.lower()
@@ -75,6 +77,13 @@ def log_line(msg: str, *, log_fp: TextIO | None = None) -> None:
     if log_fp is not None:
         log_fp.write(msg + "\n")
         log_fp.flush()
+
+
+class _LanOnlyServer(ThreadingHTTPServer):
+    """Drops connections from non-LAN addresses before any request is read (SCCT_ALLOW_PUBLIC=1 disables)."""
+
+    def verify_request(self, request, client_address) -> bool:  # noqa: N802
+        return is_lan_client(client_address[0])
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -234,7 +243,7 @@ def main(argv: list[str]) -> int:
             print(f"ERROR: failed to open log file: {e}")
             return 2
 
-    httpd = ThreadingHTTPServer((args.bind, int(args.port)), _Handler)
+    httpd = _LanOnlyServer((args.bind, int(args.port)), _Handler)
     httpd._cfg = _Config(
         gsinit_path=gsinit_path,
         max_requests=int(args.max_requests),

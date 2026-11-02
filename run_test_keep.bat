@@ -1,5 +1,5 @@
 @echo off
-rem Recommended settings (round 37)
+rem Round 33: typed 33, refusal for missing room
 set SCCT_CREATE_FULL=1
 set SCCT_CLOSE_ON_MEMBER_LEAVE=0
 set SCCT_ROOM_MEMBER_LEAVE=1
