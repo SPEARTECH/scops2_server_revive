@@ -1,13 +1,16 @@
 # Splinter Cell: Chaos Theory (PS2) – Online Server Revival- GROK and Claude helped with this
 
-A community server that brings the online lobby of **Tom Clancy's Splinter Cell: Chaos Theory (PS2, US, SLUS-21137)** back to life. It's built on [SPEARTECH/scops2_server_revive](https://github.com/SPEARTECH/scops2_server_revive), which in turn builds on [michal-kapala/ubi-gs](https://github.com/michal-kapala/ubi-gs).
+A community server that brings the online lobby of **Tom Clancy's Splinter Cell: Chaos Theory (PS2, US, SLUS-21137)** back to life. **Update (1-2 Nov 2026): the original, unpatched disc now connects** on a stock PS2, with no patched ISO. See [Original disc support](#original-disc-support-no-patched-iso) below.
+
+It's built on [SPEARTECH/scops2_server_revive](https://github.com/SPEARTECH/scops2_server_revive), which in turn builds on [michal-kapala/ubi-gs](https://github.com/michal-kapala/ubi-gs).
 
 This fork adds fixes for the lobby and room list so that real PS2 consoles and PCSX2 players can see each other, join rooms and play full matches. It also adds the online menu's **friend list, game invites and Join Friend**, and a working **ranking** (ranked 2v2 matches with points, levels and a live leaderboard).
 
 ## Status
 
-Tested on a LAN with a real PS2 (via OPL) and up to three PCSX2 clients (full 2v2 matches, including ranked ones). Working:
+Tested on a LAN with real PS2 consoles (via OPL, and with the original disc) and up to three PCSX2 clients (full 2v2 matches, including ranked ones with PCSX2). Working:
 
+- **Original unpatched disc on a stock PS2** (fat and slim): login, account creation, lobby, creating and joining rooms, 1v1 matches against PCSX2 (see below)
 - Login, lobby selection and lobby join
 - Creating and joining rooms; rooms appear in other players' game lists
 - Map and setting changes show up in the game list
@@ -23,7 +26,41 @@ Tested on a LAN with a real PS2 (via OPL) and up to three PCSX2 clients (full 2v
 - **Live lobby player count:** the number on the Lobby Selection screen updates while you look at it
 - **Dead rooms disappear:** when a host's connection drops, their room is removed from everyone's list within a few seconds
 
-Not tested or not supported yet: Internet play (everything above was tested on one LAN), full-room refusal, disconnect/quit penalties in ranked matches, ignore lists and friend-request approval.
+Not tested or not supported yet: **internet play between consoles in different homes** (everything above was tested on one LAN), ranked 2v2 on real consoles since the original-disc changes (only unranked "Free" matches were played), Friend List and Quick Join on the original disc, a PAL disc, full-room refusal, disconnect/quit penalties in ranked matches, ignore lists and friend-request approval.
+
+## Original disc support (no patched ISO)
+
+Until now a real PS2 needed a patched ISO that skipped the DNAS check. A real PS2 now goes online with the **original, unmodified US disc (SLUS-21137)**, from a physical disc, from an unpatched ISO through OPL, or on PCSX2.
+
+**What was wrong.** The console reached the "Cannot access" / frozen screen right after the NAT check on UDP 45000: it hung on the **first odd-length SRP datagram** (12-byte header + message) from the NAT service. PCSX2 tolerates odd lengths, which is why the problem only showed on real hardware. That correlation is strong (every odd-length reply was followed by a hang, and every run with even lengths worked), but why the console reacts this way has not been verified.
+
+**The fix** (`tools/nat2/udp_reply_server.py`, on by default):
+
+- The NAT replies (`PORT_ID`, then `ADDRESS` per socket) are built so that the whole datagram, header included, is an **even length** (the logs show 44 or 46 bytes). For `PORT_ID` the ping-id string is re-drawn until the length is even (up to 64 tries). If an `ADDRESS` reply is still odd, the port is written with a leading `+`. Whether the game parses the `+` is unverified, but login works either way.
+- The server prints `even-length datagrams: on` at startup. Set `SCCT_NAT_EVEN=0` to restore the old behaviour.
+- Other NAT knobs kept for testing: `SCCT_NAT_PORTID_LIMIT`, `SCCT_NAT_ADDRESS_DELAY_MS`, `SCCT_NAT_NO_REPEAT_ACK`, `SCCT_NAT_NO_ADDRESS`, `SCCT_NAT_GAP_MS`.
+- `tools/ubigs_router_server.py` also has an optional key-exchange variant, `SCCT_KE1_VARIANT` (default `0`, i.e. unchanged behaviour).
+
+**Tested (1-2 Nov 2026, all on one LAN):** a fat PS2 using an unpatched ISO through OPL and using the physical disc, a PS2 slim with the physical disc, and PCSX2. This included new account creation, news, rooms visible and joinable, a 1v1 on Cinema, and a PS2 slim vs PCSX2 match on Museum (Neutralisation). Only unranked "Free" matches were played. Not tested: ranked matches, Friend List, Quick Join, two real consoles playing each other at the same time.
+
+### Running with the original disc
+
+1. Start the server with `run_nat_even.bat`. It sets `SCCT_NAT_EVEN=1` and calls `run_nat2_test.bat`, which sets `SCCT_DNAS_EXTERNAL=1`, `SCCT_KE1_VARIANT=0` and `SCCT_NAT_V2=1` and then starts the stack through `run_test_keep.bat`.
+2. Wait about 15 seconds, then start the DNAS replacement **afterwards** (see "DNAS" below). Starting the server stops other listeners on port 443, so the replacement has to start second.
+3. On the console set **manual DNS to the server's IP**.
+
+**If you launch from OPL instead of the disc, you MUST enable OPL compatibility modes 2, 4 and 6 for the game. This applies to both a normal (original) ISO and the patched ISO.**
+
+### LAN-only by default
+
+DNS (53) and HTTP (80) now ignore any client that isn't on a private, loopback or link-local address (`is_lan_client()` in `tools/net_utils.py`, used by `tools/dns_override_forwarder.py` and `tools/gs_http_server.py`). Set `SCCT_ALLOW_PUBLIC=1` to allow outside clients, for example on a hosted server.
+
+- The filter **drops silently**, so a quiet log doesn't prove nobody tried to connect.
+- It does **not** cover the router (40000), lobby (40005) or ladder (44002) yet. Outside IPs were seen connecting to port 40000 on a test PC that was in the router's DMZ. Don't put the server PC in a DMZ; forward only the ports you need.
+
+### Packet sniffers
+
+`tools/sniff_ps2.py` with `run_sniff_ps2.bat` (fat PS2) and `run_sniff_ps2_slim.bat` (slim, `--ps2 192.168.1.82`) capture a console's traffic to the server. Edit the addresses for your network and run as Administrator.
 
 ## Friends, invites and Friend Slots
 
@@ -81,7 +118,7 @@ The game client talks to several Ubisoft "GS" services (router, lobby, persisten
 | Router | 40000 |
 | Lobby / wait module | 40005 |
 | Persistent data proxies | 44001, 44002 |
-| NAT probe / UDP reply | 45000, 45001 (UDP) |
+| NAT probe / UDP reply | 45000-45003 (UDP) |
 
 Players join each other's rooms by **direct client-to-client connections**. The server only runs the lobby and the room list, so the player hosting a room must be reachable by the others.
 
@@ -168,8 +205,8 @@ On every client, set the **DNS server manually to the server's IP**.
 
 ### Real PS2 (OPL)
 
-- Use the patched ISO (see "DNAS" below).
-- In OPL, enable **compatibility modes 2, 4 and 6** for the game. This produces the identifier that lets PS2 and PCSX2 players match each other.
+- The **original disc or an unpatched ISO now works** (see "Original disc support"). A patched ISO still works too.
+- In OPL, enable **compatibility modes 2, 4 and 6** for the game. This is required for **both a normal ISO and the patched ISO**, and it produces the identifier that lets PS2 and PCSX2 players match each other.
 - In the PS2 network settings, use manual DNS pointing to the server.
 
 ### PCSX2
@@ -180,12 +217,19 @@ On every client, set the **DNS server manually to the server's IP**.
 
 ## DNAS
 
-Real PS2 hardware authenticates with Sony's DNAS before going online. The original, unpatched disc fails against this server (error -610 with a self-signed certificate). With the DNASrep certificate chain the console accepts the TLS handshake, but there is no stored reply for this game, so it ends in error -864:
+Real PS2 hardware authenticates with Sony's DNAS before going online. This project does not patch the game; it answers the DNAS check itself:
 
-- Game ID `0d1eed8952a5dfa6`, query type `01180000`
-- A captured packet would be needed to allow unpatched discs
+1. **DNS:** the DNS forwarder points `*.dnas.playstation.org`, `*.ubisoft.com`, `*.gamespy.com`, `*.gamespy.net` and `*.ubi.com` at the server.
+2. **HTTPS 443:** a DNAS replacement (`dnasrep.exe`) answers the console's request. Started with `-docroot gate -certdir certs -dns= -https :443 -default-region us -force-success=fallback`, it answers every title that has no captured packet with the gateway's `success.raw` (41 bytes). The console accepts it with no further checks that were visible in the logs.
+3. The TLS certificates it loads (`gate1.{jp,eu,us}.dnas.playstation.org`) **expired on 2026-04-16** and the console still connected.
 
-So real consoles currently need a **patched ISO** that skips the DNAS check. PCSX2 doesn't need this. Details of the investigation are in `docs/ONLINE_FIXES.md`.
+Earlier attempts with a self-signed certificate (error -610) and with the DNASrep chain but no stored reply (error -864; game ID `0d1eed8952a5dfa6`, query type `01180000`) are superseded by the `force-success` fallback above.
+
+Notes:
+
+- `dnasrep.exe` is **Windows only**, and it is **not in this repository**: its origin, author and licence are not confirmed. Related public projects that replay captured DNAS packets: [FogNo23/DNASrep](https://github.com/FogNo23/DNASrep) (AGPL-3.0) and forks such as [Sporesirius/DNASrep](https://github.com/Sporesirius/DNASrep). Whether those are the source of the binary used here is unknown.
+- PCSX2 doesn't need DNAS.
+- Details of the investigation are in `docs/ONLINE_FIXES.md`.
 
 ## Troubleshooting
 
@@ -198,11 +242,14 @@ So real consoles currently need a **patched ISO** that skips the DNAS check. PCS
 
 ## Hosting on the Internet
 
-Any small Linux VPS (1 vCPU, 1–2 GB RAM) is enough. Atlanta, Dallas or Chicago are good central locations for North America. Before opening it up:
+A small VPS (1 vCPU, 1–2 GB RAM) is enough for the Python services. Internet play between different homes is **untested**. Because the DNAS replacement used here is Windows-only, a hosted setup needs a **Windows** server (for example Vultr's Windows plans) or a Linux build or Wine setup for the replacement, which has not been verified. Before opening it up:
 
-- Restrict the DNS forwarder so it only answers the game's hostnames (an open resolver can be abused: outside hosts probed port 53 within hours on a test machine). Don't forward port 53 to the internet.
+- Set `SCCT_ALLOW_PUBLIC=1` (the LAN-only filter otherwise ignores outside consoles) and replace the hard-coded `192.168.1.113` with the server's public IP in the DNS overrides and the advertised address.
+- The NAT service hands out the addresses it observes; whether two consoles behind different home routers can reach each other through it is unconfirmed.
+
+- Restrict the DNS forwarder so it only answers the game's hostnames (an open resolver can be abused: outside hosts probed ports 53 and 80 within hours on a test machine). An "answer overrides only" mode does not exist yet, so don't forward port 53 to the internet until it does.
 - `state/users.json` stores passwords in plain text. Hash them (or at least keep the file private and out of git) before the server is public.
-- Open only the ports listed above.
+- Open only the ports listed above. Don't use a router DMZ: it exposes every port on the PC.
 - Trim or rotate logs, since they contain players' IP addresses.
 - Players who host rooms need UDP 3658 and 10070-10080 forwarded on their own router.
 
@@ -210,7 +257,15 @@ Any small Linux VPS (1 vCPU, 1–2 GB RAM) is enough. Atlanta, Dallas or Chicago
 
 ```
 tools/ubigs_router_wm_server.py   lobby / wait-module server (main file)
-tools/ubigs_router_server.py      router (port 40000)
+tools/ubigs_router_server.py      router (port 40000), optional KE1 variant
+tools/nat2/udp_reply_server.py    NAT service on UDP 45000+ (even-length replies)
+tools/net_utils.py                is_lan_client() used by the DNS and HTTP servers
+tools/dns_override_forwarder.py   DNS overrides (LAN-only by default)
+tools/gs_http_server.py           gsinit HTTP server (LAN-only by default)
+tools/sniff_ps2.py                packet sniffer for a console on the LAN
+run_nat_even.bat                  start the stack for the original disc (NAT even-length)
+run_nat2_test.bat                 sets SCCT_DNAS_EXTERNAL / SCCT_KE1_VARIANT / SCCT_NAT_V2
+run_sniff_ps2.bat / _slim.bat     sniffers for a fat / slim PS2
 tools/ladder_modes_report.py      per-mode leaderboards from state/ladder_stats.json
 tools/start_online_capture_ext.ps1  Windows start script for the whole stack
 run_test_keep.bat / run_test.bat  recommended settings / base settings
@@ -227,5 +282,6 @@ state/ranked_mode.txt             optional: force NEU / SAB / EXT, or AUTO
 - [michal-kapala/ubi-gs](https://github.com/michal-kapala/ubi-gs) – Ubisoft GS server implementation
 - [DigitalCyberSoft/ubi-gs-go](https://github.com/DigitalCyberSoft/ubi-gs-go) – reference server behaviour
 - DNASrep and the DNAS-forever community – DNAS research
+- The original-disc fix was found by analysing real-console traffic and logs
 
 This project is for preservation of a game whose official servers are offline. It doesn't include any game files, ISOs or Sony code.
