@@ -5,6 +5,6 @@ rem Edit SCCT_PUBLIC_IP if your public IP changes.
 rem SCCT_NAT_PUBLIC_ADDR=1: the NAT service reports the PUBLIC address for LAN players too, so rooms hosted here can be
 rem joined from outside. LAN-only play then goes through the router (NAT loopback); remove it for pure LAN sessions.
 set SCCT_ALLOW_PUBLIC=1
-set SCCT_PUBLIC_IP=YOUR.PUBLIC.IP.HERE
+set SCCT_PUBLIC_IP=24.69.254.96
 set SCCT_NAT_PUBLIC_ADDR=1
 call "%~dp0run_nat_even.bat"
