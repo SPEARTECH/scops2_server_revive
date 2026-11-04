@@ -139,3 +139,21 @@ GS HTTP server listening
 [2026-11-04 10:16:04.864] HTTP 5.187.38.30:50296  GET /SDK/webLanguage?
 [2026-11-04 10:33:26.402] HTTP 43.160.241.129:47038  GET /?
 [2026-11-04 10:37:43.887] HTTP 198.235.24.213:55435  GET /?
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs\gs_http_80.log
+  ctrl+c to stop
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs\gs_http_80.log
+  ctrl+c to stop
+[2026-11-04 15:37:47.190] HTTP 38.27.30.232:60822  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=SNK
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'SNK'
+[2026-11-04 15:38:41.121] HTTP 24.69.254.96:50798  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=DOR-DOR
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'DOR-DOR'

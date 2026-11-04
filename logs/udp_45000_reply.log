@@ -2039,3 +2039,175 @@ UDP reply server listening
 [2026-11-04 07:43:05.365] PING from 38.27.30.232:10073 id=987f2c7e
 [2026-11-04 07:43:05.366]   -> bare ACK to 38.27.30.232:10070 (socket 4)
 [2026-11-04 07:45:35.475] expired client 38.27.30.232:10070
+[2026-11-04 12:42:17.705] GSNAT v3 listening
+[2026-11-04 12:42:17.716]   PORT_ID limit: all  gap: 25 ms
+[2026-11-04 12:42:17.723]   ADDRESS delay: 0 ms  repeat-ping ACKs: on  ADDRESS: sent  even-length datagrams: on
+[2026-11-04 12:42:17.723]   bind: 0.0.0.0  ports: 45000
+[2026-11-04 12:42:17.723]   ubi-gs modules: C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new
+[2026-11-04 12:42:17.723]   RELAY: joiner ports 3658, 10070, 10071, 10072, 10073, 10074, 10075, 10076, 10077, 10078, 10079, 10080 -> host:3658 from :45000; control 127.0.0.1:45099; idle 600s
+[2026-11-04 15:35:51.137] GSNAT v3 listening
+[2026-11-04 15:35:51.139]   PORT_ID limit: all  gap: 25 ms
+[2026-11-04 15:35:51.139]   ADDRESS delay: 0 ms  repeat-ping ACKs: on  ADDRESS: sent  even-length datagrams: on
+[2026-11-04 15:35:51.139]   bind: 0.0.0.0  ports: 45000
+[2026-11-04 15:35:51.139]   ubi-gs modules: C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new
+[2026-11-04 15:35:51.139]   RELAY: joiner ports 3658, 10070, 10071, 10072, 10073, 10074, 10075, 10076, 10077, 10078, 10079, 10080 -> host:3658 from :45000; control 127.0.0.1:45099; idle 600s
+[2026-11-04 15:37:50.379] SRP 20B from 38.27.30.232:10070 flags=['SYN'] seg=0x0 ack=0x7325 data_size=8
+[2026-11-04 15:37:50.381]   added client 38.27.30.232:10070
+[2026-11-04 15:37:50.381]   -> SYN+ACK (20 bytes)
+[2026-11-04 15:37:50.424] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x0 data_size=0
+[2026-11-04 15:37:50.442]   bare ACK from client (no reply needed)
+[2026-11-04 15:37:50.457] SRP 548B from 38.27.30.232:10070 flags=[] seg=0x0 ack=0x0 data_size=208
+[2026-11-04 15:37:50.457]   data region 208B holds 4 message(s)
+[2026-11-04 15:37:50.459]   NAT request socket=1: ['1', ['1', 'SNK', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 15:37:50.459]   -> PORT_ID socket=1 ping_id=0x1aa0ec69 port=45000 (44 bytes)
+[2026-11-04 15:37:50.459]   NAT request socket=2: ['1', ['2', 'SNK', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 15:37:50.459]   -> PORT_ID socket=2 ping_id=0xb47b37f3 port=45000 (46 bytes)
+[2026-11-04 15:37:50.461]   NAT request socket=3: ['1', ['3', 'SNK', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 15:37:50.461]   -> PORT_ID socket=3 ping_id=0xa7a428a9 port=45000 (46 bytes)
+[2026-11-04 15:37:50.461]   NAT request socket=4: ['1', ['4', 'SNK', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 15:37:50.461]   -> PORT_ID socket=4 ping_id=0x3a3b1381 port=45000 (44 bytes)
+[2026-11-04 15:37:50.538] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x1 data_size=0
+[2026-11-04 15:37:50.538]   bare ACK from client (no reply needed)
+[2026-11-04 15:37:50.538] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x2 data_size=0
+[2026-11-04 15:37:50.538]   bare ACK from client (no reply needed)
+[2026-11-04 15:37:50.538] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x3 data_size=0
+[2026-11-04 15:37:50.538]   bare ACK from client (no reply needed)
+[2026-11-04 15:37:50.538] PING from 38.27.30.232:3658 id=1aa0ec69
+[2026-11-04 15:37:50.540]   -> ADDRESS socket=1 38.27.30.232:3658 (44 bytes) to 38.27.30.232:10070
+[2026-11-04 15:37:50.540] PING from 38.27.30.232:3658 id=1aa0ec69
+[2026-11-04 15:37:50.540]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 15:37:50.541] PING from 38.27.30.232:3658 id=1aa0ec69
+[2026-11-04 15:37:50.541]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 15:37:50.557] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x4 data_size=0
+[2026-11-04 15:37:50.558]   bare ACK from client (no reply needed)
+[2026-11-04 15:37:50.558] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x5 data_size=0
+[2026-11-04 15:37:50.559]   bare ACK from client (no reply needed)
+[2026-11-04 15:37:50.559] PING from 38.27.30.232:10071 id=b47b37f3
+[2026-11-04 15:37:50.560]   -> ADDRESS socket=2 38.27.30.232:10071 (44 bytes) to 38.27.30.232:10070
+[2026-11-04 15:37:50.560] PING from 38.27.30.232:10071 id=b47b37f3
+[2026-11-04 15:37:50.561]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 15:37:50.561] PING from 38.27.30.232:10071 id=b47b37f3
+[2026-11-04 15:37:50.562]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 15:37:50.591] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x6 data_size=0
+[2026-11-04 15:37:50.591]   bare ACK from client (no reply needed)
+[2026-11-04 15:37:50.591] PING from 38.27.30.232:10072 id=a7a428a9
+[2026-11-04 15:37:50.592]   -> ADDRESS socket=3 38.27.30.232:10072 (44 bytes) to 38.27.30.232:10070
+[2026-11-04 15:37:50.593] PING from 38.27.30.232:10072 id=a7a428a9
+[2026-11-04 15:37:50.593]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 15:37:50.593] PING from 38.27.30.232:10072 id=a7a428a9
+[2026-11-04 15:37:50.593]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 15:37:50.624] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x7 data_size=0
+[2026-11-04 15:37:50.624]   bare ACK from client (no reply needed)
+[2026-11-04 15:37:50.624] PING from 38.27.30.232:10073 id=3a3b1381
+[2026-11-04 15:37:50.625]   -> ADDRESS socket=4 38.27.30.232:10073 (44 bytes) to 38.27.30.232:10070
+[2026-11-04 15:37:50.625] PING from 38.27.30.232:10073 id=3a3b1381
+[2026-11-04 15:37:50.625]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 15:37:50.625] PING from 38.27.30.232:10073 id=3a3b1381
+[2026-11-04 15:37:50.625]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 15:37:50.657] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x8 data_size=0
+[2026-11-04 15:37:50.659]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:15.349] PING from 38.27.30.232:3658 id=1aa0ec69
+[2026-11-04 15:38:15.350]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 15:38:15.351] PING from 38.27.30.232:10073 id=3a3b1381
+[2026-11-04 15:38:15.352]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 15:38:15.352] PING from 38.27.30.232:10071 id=b47b37f3
+[2026-11-04 15:38:15.352]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 15:38:15.353] PING from 38.27.30.232:10072 id=a7a428a9
+[2026-11-04 15:38:15.353]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 15:38:40.341] PING from 38.27.30.232:3658 id=1aa0ec69
+[2026-11-04 15:38:40.343]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 15:38:40.343] PING from 38.27.30.232:10071 id=b47b37f3
+[2026-11-04 15:38:40.343]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 15:38:40.343] PING from 38.27.30.232:10072 id=a7a428a9
+[2026-11-04 15:38:40.344]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 15:38:40.345] PING from 38.27.30.232:10073 id=3a3b1381
+[2026-11-04 15:38:40.345]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 15:38:41.779] SRP 20B from 24.69.254.96:10070 flags=['SYN'] seg=0x0 ack=0x0 data_size=8
+[2026-11-04 15:38:41.780]   added client 24.69.254.96:10070
+[2026-11-04 15:38:41.781]   -> SYN+ACK (20 bytes)
+[2026-11-04 15:38:41.891] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x0 data_size=0
+[2026-11-04 15:38:41.892]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:41.924] SRP 548B from 24.69.254.96:10070 flags=[] seg=0x0 ack=0x160 data_size=224
+[2026-11-04 15:38:41.924]   data region 224B holds 4 message(s)
+[2026-11-04 15:38:41.924]   NAT request socket=1: ['1', ['1', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 15:38:41.926]   -> PORT_ID socket=1 ping_id=0xb6706e4e port=45000 (46 bytes)
+[2026-11-04 15:38:41.926]   NAT request socket=2: ['1', ['2', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 15:38:41.926]   -> PORT_ID socket=2 ping_id=0x85283125 port=45000 (46 bytes)
+[2026-11-04 15:38:41.928]   NAT request socket=3: ['1', ['3', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 15:38:41.928]   -> PORT_ID socket=3 ping_id=0xa40741d4 port=45000 (46 bytes)
+[2026-11-04 15:38:41.928]   NAT request socket=4: ['1', ['4', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 15:38:41.928]   -> PORT_ID socket=4 ping_id=0x22fb73c8 port=45000 (44 bytes)
+[2026-11-04 15:38:42.025] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x1 data_size=0
+[2026-11-04 15:38:42.025]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:42.058] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x2 data_size=0
+[2026-11-04 15:38:42.058]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:42.058] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x3 data_size=0
+[2026-11-04 15:38:42.058]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:42.060] PING from 24.69.254.96:3658 id=b6706e4e
+[2026-11-04 15:38:42.060]   -> ADDRESS socket=1 24.69.254.96:3658 (44 bytes) to 24.69.254.96:10070
+[2026-11-04 15:38:42.060] PING from 24.69.254.96:3658 id=b6706e4e
+[2026-11-04 15:38:42.060]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 15:38:42.061] PING from 24.69.254.96:3658 id=b6706e4e
+[2026-11-04 15:38:42.061]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 15:38:42.091] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x4 data_size=0
+[2026-11-04 15:38:42.092]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:42.093] PING from 24.69.254.96:10071 id=85283125
+[2026-11-04 15:38:42.093]   -> ADDRESS socket=2 24.69.254.96:10071 (44 bytes) to 24.69.254.96:10070
+[2026-11-04 15:38:42.095] PING from 24.69.254.96:10071 id=85283125
+[2026-11-04 15:38:42.095]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 15:38:42.095] PING from 24.69.254.96:10071 id=85283125
+[2026-11-04 15:38:42.095]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 15:38:42.126] PING from 24.69.254.96:10072 id=a40741d4
+[2026-11-04 15:38:42.126]   -> ADDRESS socket=3 24.69.254.96:10072 (44 bytes) to 24.69.254.96:10070
+[2026-11-04 15:38:42.128] PING from 24.69.254.96:10072 id=a40741d4
+[2026-11-04 15:38:42.128]   -> bare ACK to 24.69.254.96:10070 (socket 3)
+[2026-11-04 15:38:42.129] PING from 24.69.254.96:10072 id=a40741d4
+[2026-11-04 15:38:42.130]   -> bare ACK to 24.69.254.96:10070 (socket 3)
+[2026-11-04 15:38:42.157] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x5 data_size=0
+[2026-11-04 15:38:42.157]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:42.159] PING from 24.69.254.96:10073 id=22fb73c8
+[2026-11-04 15:38:42.159]   -> ADDRESS socket=4 24.69.254.96:10073 (44 bytes) to 24.69.254.96:10070
+[2026-11-04 15:38:42.159] PING from 24.69.254.96:10073 id=22fb73c8
+[2026-11-04 15:38:42.159]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 15:38:42.161] PING from 24.69.254.96:10073 id=22fb73c8
+[2026-11-04 15:38:42.161]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 15:38:42.192] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x6 data_size=0
+[2026-11-04 15:38:42.193]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:42.225] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x7 data_size=0
+[2026-11-04 15:38:42.225]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:42.258] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x8 data_size=0
+[2026-11-04 15:38:42.258]   bare ACK from client (no reply needed)
+[2026-11-04 15:38:57.198] RELAY ctrl: map joiner 24.69.254.96 (DOR-DOR) -> host 38.27.30.232 room 100
+[2026-11-04 15:39:02.442] RELAY ctrl: unmap_any 24.69.254.96 (entries dropped: ['24.69.254.96'])
+[2026-11-04 15:39:05.334] PING from 38.27.30.232:3658 id=1aa0ec69
+[2026-11-04 15:39:05.334]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 15:39:05.336] PING from 38.27.30.232:10071 id=b47b37f3
+[2026-11-04 15:39:05.336]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 15:39:05.336] PING from 38.27.30.232:10072 id=a7a428a9
+[2026-11-04 15:39:05.336]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 15:39:05.336] PING from 38.27.30.232:10073 id=3a3b1381
+[2026-11-04 15:39:05.337]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 15:39:06.099] PING from 24.69.254.96:3658 id=b6706e4e
+[2026-11-04 15:39:06.099]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 15:39:07.099] PING from 24.69.254.96:10071 id=85283125
+[2026-11-04 15:39:07.100]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 15:39:07.102] PING from 24.69.254.96:10073 id=22fb73c8
+[2026-11-04 15:39:07.102]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 15:39:07.103] PING from 24.69.254.96:10072 id=a40741d4
+[2026-11-04 15:39:07.104]   -> bare ACK to 24.69.254.96:10070 (socket 3)
+[2026-11-04 15:39:30.326] PING from 38.27.30.232:3658 id=1aa0ec69
+[2026-11-04 15:39:30.327]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 15:39:30.328] PING from 38.27.30.232:10071 id=b47b37f3
+[2026-11-04 15:39:30.328]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 15:39:30.328] PING from 38.27.30.232:10072 id=a7a428a9
+[2026-11-04 15:39:30.328]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 15:39:30.329] PING from 38.27.30.232:10073 id=3a3b1381
+[2026-11-04 15:39:30.330]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 15:39:34.110] PING from 24.69.254.96:3658 id=b6706e4e
+[2026-11-04 15:39:34.143]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 15:39:34.143] PING from 24.69.254.96:10073 id=22fb73c8
+[2026-11-04 15:39:34.145]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 15:39:34.152] PING from 24.69.254.96:10071 id=85283125
+[2026-11-04 15:39:34.154]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 15:39:34.156] PING from 24.69.254.96:10072 id=a40741d4
+[2026-11-04 15:39:34.156]   -> bare ACK to 24.69.254.96:10070 (socket 3)
