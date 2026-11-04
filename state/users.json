@@ -45,6 +45,11 @@
       "dp": "SC3PS2US1.0",
       "password": "CCCCCC"
     },
+    "DOR-DOR": {
+      "created_ts": 1793804903,
+      "dp": "SC3PS2US1.0",
+      "password": "123456"
+    },
     "EEE": {
       "created_ts": 1773612880,
       "dp": "SC3PS2US1.0",
@@ -249,6 +254,11 @@
       "created_ts": 1773787767,
       "dp": "SC3PS2US1.0",
       "password": "AAAAAA"
+    },
+    "SNK": {
+      "created_ts": 1793805001,
+      "dp": "SC3PS2US1.0",
+      "password": "ABCDEFG"
     },
     "SSS": {
       "created_ts": 1773589005,
