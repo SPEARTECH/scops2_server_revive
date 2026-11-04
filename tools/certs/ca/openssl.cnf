@@ -20,10 +20,10 @@ DNS.1 = gate1.us.dnas.playstation.org
 default_ca = CA_default
 
 [ CA_default ]
-dir = E:/GAMING/SCOPS2_RE/tools/certs/ca
-database = E:/GAMING/SCOPS2_RE/tools/certs/ca/index.txt
-new_certs_dir = E:/GAMING/SCOPS2_RE/tools/certs/ca/newcerts
-serial = E:/GAMING/SCOPS2_RE/tools/certs/ca/serial
+dir = C:/Users/Administrator/Desktop/GITHUB/scops2_server_revive-gs-Connect/tools/certs/ca
+database = C:/Users/Administrator/Desktop/GITHUB/scops2_server_revive-gs-Connect/tools/certs/ca/index.txt
+new_certs_dir = C:/Users/Administrator/Desktop/GITHUB/scops2_server_revive-gs-Connect/tools/certs/ca/newcerts
+serial = C:/Users/Administrator/Desktop/GITHUB/scops2_server_revive-gs-Connect/tools/certs/ca/serial
 default_md = sha1
 policy = policy_any
 x509_extensions = v3_req
