@@ -620,8 +620,19 @@ def handle_message(
                 log_line(f"[{now_ts()}] ROUTER LOGIN REJECT: no username parsed", log_fp=log_fp)
                 login_ok = False
             elif userdb.get_user(username) is None:
-                log_line(f"[{now_ts()}] ROUTER LOGIN REJECT: user={username!r} not found", log_fp=log_fp)
-                login_ok = False
+                # SCCT_AUTO_REGISTER=1: unknown user logging in with a password gets an account on the spot
+                # (fresh server / new VPS without the old state/users.json). Default off: reject as before.
+                if os.environ.get("SCCT_AUTO_REGISTER", "0").strip() == "1" and password:
+                    try:
+                        userdb.upsert_user(username=username, password=password, dp=dp)
+                        userdb.save()
+                        log_line(f"[{now_ts()}] ROUTER LOGIN AUTO-REGISTER: created user={username!r} (SCCT_AUTO_REGISTER=1)", log_fp=log_fp)
+                    except Exception as e:
+                        log_line(f"[{now_ts()}] ROUTER LOGIN AUTO-REGISTER failed for user={username!r}: {e}", log_fp=log_fp)
+                        login_ok = False
+                else:
+                    log_line(f"[{now_ts()}] ROUTER LOGIN REJECT: user={username!r} not found", log_fp=log_fp)
+                    login_ok = False
             elif password is not None and not userdb.check_password(username=username, password=password):
                 log_line(f"[{now_ts()}] ROUTER LOGIN REJECT: wrong password for user={username!r}", log_fp=log_fp)
                 login_ok = False

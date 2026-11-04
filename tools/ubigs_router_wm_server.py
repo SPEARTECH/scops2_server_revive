@@ -1393,10 +1393,22 @@ def handle_message(
             msg.header.property == gsm.PROPERTY.GS_ENCRYPT and msg.dl is None
         )
         if userdb is not None and not login_encrypted_unparsed:
+            try:
+                userdb.load()  # pick up accounts the router (40000) just created
+            except Exception:
+                pass
             if username is None:
                 login_ok = False
             elif userdb.get_user(username) is None:
-                login_ok = False
+                if os.environ.get("SCCT_AUTO_REGISTER", "0").strip() == "1" and password:
+                    try:
+                        userdb.upsert_user(username=username, password=password)
+                        userdb.save()
+                        log_line(f"[{now_ts()}] ROUTER_WM LOGIN AUTO-REGISTER: created user={username!r}", log_fp=log_fp)
+                    except Exception:
+                        login_ok = False
+                else:
+                    login_ok = False
             elif password is not None and not userdb.check_password(username=username, password=password):
                 login_ok = False
 
