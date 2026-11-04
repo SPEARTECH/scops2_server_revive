@@ -9,10 +9,12 @@ The console keeps one hole open by itself: after login it pings the GSNAT servic
 ~25 s, so packets from `<server>:45000` always reach `<console>:3658`. The relay uses that hole.
 
 ## How it works
-1. `ubigs_router_wm_server.py` answers JOIN_ROOM for an **outside joiner whose public IP differs from the host's** with
-   the relay address (`SCCT_RELAY_IP`, default `SCCT_PUBLIC_IP`) in the ack and in both address slots of the room-level
-   GROUP_INFO(53) blob, and tells the relay `joiner -> host` over loopback UDP (`SCCT_RELAY_CTRL_PORT`, default 45099).
-   Same-LAN joiners (same public IP as the host) and LAN clients keep the direct address.
+1. `ubigs_router_wm_server.py` advertises every room created by an **outside (public-IP) host** with the relay address
+   (`SCCT_RELAY_IP`, default `SCCT_PUBLIC_IP`) in fields 18/19 and in both address slots of the 96-byte info blob, from
+   CREATE_ROOM on (the game dials the address from its room list, not from the JOIN_ROOM reply - test of 2026-11-04
+   15:38: the reply alone produced no traffic to the relay). The real host address is kept in `room.real_ip_addr`. On
+   JOIN_ROOM by anyone but the host, the relay is told `joiner -> real host` over loopback UDP (`SCCT_RELAY_CTRL_PORT`,
+   default 45099); the host's own JOIN_ROOM ack still carries its real address. Rooms created by LAN clients stay direct.
 2. `tools/nat2/udp_reply_server.py --relay-ports 3658,10070-10080` listens on the game ports. A joiner datagram is sent
    to `host:3658` **from 45000**; whatever the host sends back to 45000 from its game socket (not a 4-byte NAT ping, not
    its SRP session on 10070) is sent to the joiner from the relay port the joiner used.

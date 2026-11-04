@@ -196,6 +196,7 @@ class LobbyState:
                     "parent_id": room.parent_id,
                     "ip_addr": room.ip_addr,
                     "alt_ip_addr": room.alt_ip_addr,
+                    "real_ip_addr": getattr(room, "real_ip_addr", ""),
                     "info_b64": info_b64,
                     "nb_players": room.nb_players,
                     "max_visitors": room.max_visitors,
@@ -236,6 +237,8 @@ class LobbyState:
                 room.parent_id = int(info.get("parent_id", 1))
                 room.ip_addr = info.get("ip_addr", "")
                 room.alt_ip_addr = info.get("alt_ip_addr", "")
+                if info.get("real_ip_addr"):
+                    room.real_ip_addr = info.get("real_ip_addr")
                 room.nb_players = int(info.get("nb_players", 1))
                 room.max_visitors = int(info.get("max_visitors", 8))
                 room.nb_visitors = int(info.get("nb_visitors", 0))
@@ -921,19 +924,35 @@ def _relay_notify(payload: dict, *, log_fp=None) -> None:
         log_line(f"[{now_ts()}] RELAY ctrl send failed: {e!r}", log_fp=log_fp)
 
 
+def _room_host_ip(room) -> str:
+    """The host's real address (room.ip_addr holds the relay address for a relay-advertised room)."""
+    return str(getattr(room, "real_ip_addr", "") or getattr(room, "ip_addr", "") or "")
+
+
+def _relay_room_at_create(room, creator_ip: str, *, log_fp=None) -> bool:
+    """SCCT_RELAY=1: a room hosted by an outside (public) client is advertised with the relay address everywhere
+    (fields 18/19 and both blob slots), because the game dials the address from its room list, not from the
+    JOIN_ROOM reply. The real host address is kept in room.real_ip_addr for the relay mapping."""
+    if not _relay_enabled():
+        return False
+    rip = _relay_ip()
+    if not rip or not creator_ip or is_private_addr(creator_ip):
+        return False
+    room.real_ip_addr = creator_ip
+    room.ip_addr = rip
+    room.alt_ip_addr = rip
+    room.info = _rewrite_room_blob(room.info, rip)
+    log_line(f"[{now_ts()}] ROUTER_WM CREATE_ROOM relay: room by {room.master} at {creator_ip} advertised as {rip} (blob slots rewritten)", log_fp=log_fp)
+    return True
+
+
 def _relay_for_joiner(joiner_ip: str, room, is_host: bool) -> str:
     """Relay address this joiner should dial for `room`, or '' for a direct connection."""
     if not _relay_enabled() or is_host or room is None:
         return ""
-    rip = _relay_ip()
-    host_ip = str(getattr(room, "ip_addr", "") or "")
-    if not rip or not host_ip:
-        return ""
-    if is_private_addr(joiner_ip) or is_private_addr(host_ip):
-        return ""   # LAN side of a home-hosted server: direct
-    if joiner_ip == host_ip:
-        return ""   # same public IP as the host: same LAN, the blob's private slot works
-    return rip
+    if not getattr(room, "real_ip_addr", ""):
+        return ""   # room not relay-advertised (LAN host): direct
+    return str(room.ip_addr or _relay_ip())
 
 
 def _rewrite_room_blob(blob: bytes, ip: str) -> bytes:
@@ -2349,6 +2368,7 @@ def handle_message(
             creator_ip = clt.addr[0] if hasattr(clt, 'addr') and clt.addr else ""
             room.ip_addr = creator_ip
             room.alt_ip_addr = creator_ip
+            _relay_room_at_create(room, creator_ip, log_fp=log_fp)
             _apply_room_overrides(room, log_fp=log_fp)
 
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
@@ -2548,8 +2568,8 @@ def handle_message(
                     _host24 = False
                 _relay24 = _relay_for_joiner(str(clt.addr[0]), target, _host24)
                 if _relay24:
-                    _relay_notify({"op": "map", "joiner": str(clt.addr[0]), "host": str(target.ip_addr), "room": str(target.group_id), "user": str(clt.username or "")}, log_fp=log_fp)
-                    log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM relay: joiner {clt.username}@{clt.addr[0]} dials {_relay24} for room {target.group_id} (host {target.ip_addr})", log_fp=log_fp)
+                    _relay_notify({"op": "map", "joiner": str(clt.addr[0]), "host": _room_host_ip(target), "room": str(target.group_id), "user": str(clt.username or "")}, log_fp=log_fp)
+                    log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM relay: joiner {clt.username}@{clt.addr[0]} dials {_relay24} for room {target.group_id} (host {_room_host_ip(target)})", log_fp=log_fp)
                 if _host24 and os.environ.get("SCCT_NEW_GROUP_TO_CREATOR", "").strip().lower() in ("1", "on", "true", "yes", "late"):
                     # Round 25: the client only sets its current room from NEW_GROUP(54) AFTER it has processed the
                     # CREATE_ROOM reply (it queues a pending "created room" event there). The JOIN_ROOM reply is
@@ -2585,7 +2605,7 @@ def handle_message(
                 elif mode == "empty":
                     extra = ""
                 else:
-                    extra = target.ip_addr or ""
+                    extra = (_room_host_ip(target) if _host24 else target.ip_addr) or ""
                     # Hosted from a home PC: an outside joiner cannot reach a LAN-hosted room's private address, so hand
                     # it the server's public IP instead (the host's router must forward UDP 3658 and 10070-10080).
                     _pub24 = os.environ.get("SCCT_PUBLIC_IP", "").strip()
@@ -2821,6 +2841,8 @@ def handle_message(
                                 if str(_inf["room"].group_id) == _rid:
                                     _room = _inf["room"]
                                     _room.info = bytes(_blob)
+                                    if getattr(_room, "real_ip_addr", ""):
+                                        _room.info = _rewrite_room_blob(_room.info, str(_room.ip_addr))  # keep the relay address after a map/settings change
                                     break
                             if _room is not None:
                                 _lobby_state._save_rooms_to_file()
@@ -2877,6 +2899,7 @@ def handle_message(
                     _is_host = (
                         str(r.master).lower() in (str(clt.username or "").lower(), _sess_user.lower())
                         or str(getattr(r, "ip_addr", "")) == str(clt.addr[0])
+                        or _room_host_ip(r) == str(clt.addr[0])
                         or (_lobby_state.rooms.get(r.group_id) or {}).get("owner_key") == sk
                     )
                     log_line(f"[{now_ts()}] ROUTER_WM GROUP_LEAVE room={leave_id} master={r.master} room_ip={getattr(r,'ip_addr','')} sender={clt.username!r}/{_sess_user!r}@{clt.addr[0]} sk={sk} host_match={_is_host}", log_fp=log_fp)
