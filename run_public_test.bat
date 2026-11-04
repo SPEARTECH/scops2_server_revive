@@ -7,4 +7,7 @@ rem joined from outside. LAN-only play then goes through the router (NAT loopbac
 set SCCT_ALLOW_PUBLIC=1
 set SCCT_PUBLIC_IP=38.49.212.120
 set SCCT_NAT_PUBLIC_ADDR=1
+rem SCCT_RELAY=1: outside joiners behind a different NAT than the host are routed through this server (UDP relay on
+rem 3658/10070-10080 -> host via 45000). Needs no port forwarding on the host's side. SCCT_RELAY_IP defaults to SCCT_PUBLIC_IP.
+set SCCT_RELAY=1
 call "%~dp0run_nat_even.bat"

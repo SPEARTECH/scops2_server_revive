@@ -222,10 +222,173 @@ def handle_segment(data: bytes, addr: tuple[str, int], now: float, nat_port: int
     return packets
 
 
+# ─── UDP relay (SCCT_RELAY) ─────────────────────────────────────────────────────────────────────────────────────
+# A console behind a port-restricted NAT / inbound-filtering ISP can only be reached from the exact server endpoint it
+# keeps talking to: this service on 45000, which the game pings from its 3658 socket every ~25 s. The relay uses that
+# hole. The lobby server (ubigs_router_wm_server.py, SCCT_RELAY=1) hands an outside joiner the relay's address instead
+# of the host's and tells this process "joiner J -> host H" over the control port. Joiner traffic arriving on the relay
+# ports (3658, 10070-10080) is forwarded to H:3658 FROM 45000; whatever H sends back to 45000 from its game socket is
+# forwarded to J from the relay port J used. v1: one relayed joiner per host (the host sees every relayed peer as
+# <relay>:45000, so a second joiner would collide).
+RELAY_PORTS: list[int] = []
+RELAY_CTRL_PORT = 0
+RELAY_HOST_PORT = int(os.environ.get("SCCT_RELAY_HOST_PORT", "3658"))
+RELAY_IDLE_S = float(os.environ.get("SCCT_RELAY_IDLE_S", "600"))
+RELAY_MAP: dict = {}        # joiner_ip -> {"host": host_ip, "room": ..., "user": ..., "ts": t}
+RELAY_HOSTS: dict = {}      # host_ip -> {"joiner": (ip, port), "sock": relay socket, "rx": n, "tx": n, "last": t, "first": t}
+RELAY_UNMAPPED_LOGGED: set = set()
+RELAY_SNAPSHOT = os.environ.get("SCCT_RELAY_SNAPSHOT", "state/relay_map.json")
+NAT_MAIN_SOCK = None        # the 45000 socket (host-facing side of the relay)
+
+
+def _parse_port_list(spec: str) -> list[int]:
+    out: list[int] = []
+    for part in str(spec).replace(";", ",").split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            lo, hi = part.split("-", 1)
+            out.extend(range(int(lo), int(hi) + 1))
+        else:
+            out.append(int(part))
+    return out
+
+
+def relay_snapshot() -> None:
+    if not RELAY_SNAPSHOT:
+        return
+    try:
+        import json as _json
+        p = pathlib.Path(RELAY_SNAPSHOT)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        snap = {
+            "map": RELAY_MAP,
+            "hosts": {h: {"joiner": list(v["joiner"]), "relay_port": v["sock"].getsockname()[1], "rx": v["rx"], "tx": v["tx"]}
+                      for h, v in RELAY_HOSTS.items()},
+            "ts": now_ts(),
+        }
+        p.write_text(_json.dumps(snap, indent=2), encoding="utf-8")
+    except Exception as e:
+        log(f"RELAY snapshot failed: {e!r}")
+
+
+def relay_control(data: bytes, addr: tuple[str, int]) -> None:
+    """Control messages from the lobby server (JSON, one per datagram, loopback only)."""
+    import json as _json
+    try:
+        m = _json.loads(data.decode("utf-8", errors="replace"))
+    except Exception as e:
+        log(f"RELAY ctrl: bad message from {addr[0]}:{addr[1]}: {e!r}")
+        return
+    op = str(m.get("op", ""))
+    if op == "map":
+        j, h = str(m.get("joiner", "")), str(m.get("host", ""))
+        if not j or not h:
+            log(f"RELAY ctrl: map without joiner/host: {m}")
+            return
+        RELAY_MAP[j] = {"host": h, "room": m.get("room"), "user": m.get("user"), "ts": now_ts()}
+        RELAY_UNMAPPED_LOGGED.discard(j)
+        log(f"RELAY ctrl: map joiner {j} ({m.get('user')}) -> host {h} room {m.get('room')}")
+    elif op == "unmap":
+        j = str(m.get("joiner", ""))
+        ent = RELAY_MAP.pop(j, None)
+        if ent is not None:
+            h = ent["host"]
+            hv = RELAY_HOSTS.get(h)
+            if hv is not None and hv["joiner"][0] == j:
+                RELAY_HOSTS.pop(h, None)
+            log(f"RELAY ctrl: unmap joiner {j} (was -> {h})")
+    elif op == "unmap_host":
+        h = str(m.get("host", ""))
+        gone = [j for j, e in RELAY_MAP.items() if e["host"] == h]
+        for j in gone:
+            RELAY_MAP.pop(j, None)
+        RELAY_HOSTS.pop(h, None)
+        log(f"RELAY ctrl: unmap host {h} (joiners dropped: {gone})")
+    elif op == "unmap_any":
+        ip = str(m.get("ip", ""))
+        gone = [j for j, e in RELAY_MAP.items() if j == ip or e["host"] == ip]
+        for j in gone:
+            RELAY_MAP.pop(j, None)
+        RELAY_HOSTS.pop(ip, None)
+        for h, hv in list(RELAY_HOSTS.items()):
+            if hv["joiner"][0] == ip:
+                RELAY_HOSTS.pop(h, None)
+        if gone:
+            log(f"RELAY ctrl: unmap_any {ip} (entries dropped: {gone})")
+    elif op == "clear":
+        RELAY_MAP.clear()
+        RELAY_HOSTS.clear()
+        log("RELAY ctrl: cleared")
+    else:
+        log(f"RELAY ctrl: unknown op {op!r}: {m}")
+    relay_snapshot()
+
+
+def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], now: float) -> None:
+    """Datagram from an outside joiner on a relay port -> host:3658 from 45000."""
+    ent = RELAY_MAP.get(addr[0])
+    if ent is None:
+        if addr[0] not in RELAY_UNMAPPED_LOGGED:
+            RELAY_UNMAPPED_LOGGED.add(addr[0])
+            log(f"RELAY drop: {len(data)}B on :{sock.getsockname()[1]} from {addr[0]}:{addr[1]} - no mapping from the lobby server (logged once)")
+        return
+    host = ent["host"]
+    hv = RELAY_HOSTS.get(host)
+    if hv is None or hv["joiner"] != addr or hv["sock"] is not sock:
+        if hv is not None and hv["joiner"][0] != addr[0]:
+            log(f"RELAY host {host}: joiner changes {hv['joiner'][0]} -> {addr[0]} (v1 relays one joiner per host)")
+        hv = {"joiner": addr, "sock": sock, "rx": 0, "tx": 0, "last": now, "first": now}
+        RELAY_HOSTS[host] = hv
+        log(f"RELAY host {host}: joiner {addr[0]}:{addr[1]} via relay port {sock.getsockname()[1]} -> {host}:{RELAY_HOST_PORT} from {NAT_MAIN_SOCK.getsockname()[1]}")
+    hv["rx"] += 1
+    hv["last"] = now
+    try:
+        NAT_MAIN_SOCK.sendto(data, (host, RELAY_HOST_PORT))
+    except OSError as e:
+        log(f"RELAY -> host {host} send failed: {e}")
+        return
+    if hv["rx"] in (1, 2, 5, 10, 50) or hv["rx"] % 500 == 0:
+        log(f"RELAY J->H {addr[0]}:{addr[1]} -> {host}:{RELAY_HOST_PORT} {len(data)}B (#{hv['rx']})")
+
+
+def relay_from_host(data: bytes, addr: tuple[str, int], now: float) -> bool:
+    """Datagram on 45000 from a relayed host's game socket -> its joiner. Returns True if consumed."""
+    hv = RELAY_HOSTS.get(addr[0])
+    if hv is None:
+        return False
+    hv["tx"] += 1
+    hv["last"] = now
+    try:
+        hv["sock"].sendto(data, hv["joiner"])
+    except OSError as e:
+        log(f"RELAY -> joiner {hv['joiner']} send failed: {e}")
+        return True
+    if hv["tx"] in (1, 2, 5, 10, 50) or hv["tx"] % 500 == 0:
+        log(f"RELAY H->J {addr[0]}:{addr[1]} -> {hv['joiner'][0]}:{hv['joiner'][1]} {len(data)}B (#{hv['tx']}) from :{hv['sock'].getsockname()[1]}")
+    return True
+
+
+def relay_expire(now: float) -> None:
+    for h, hv in list(RELAY_HOSTS.items()):
+        if now - hv["last"] > RELAY_IDLE_S:
+            RELAY_HOSTS.pop(h, None)
+            log(f"RELAY host {h}: idle {RELAY_IDLE_S:.0f}s, flow dropped (rx={hv['rx']} tx={hv['tx']})")
+
+
 def handle_packet(data: bytes, addr: tuple[str, int], now: float, nat_port: int):
+    if len(data) == 4:
+        return handle_ping(data, addr, now)
+    # Relayed host: anything from its game socket that is not a NAT ping and not its SRP control session (10070) is
+    # game data for its joiner. The SRP session is looked up first so the NAT handshake keeps working unchanged.
+    if RELAY_HOSTS and addr[0] in RELAY_HOSTS and client.NatClient.find(addr, CLIENTS) is None \
+            and not (len(data) >= srp.SRP_HEADER_SIZE and (data[6] | (data[7] << 8)) & srp.SRPHeaderFlags.SYN.value
+                     and (data[6] | (data[7] << 8)) & srp.SRPHeaderFlags.SRP_ID.value == srp.SRPHeaderFlags.SRP_ID.value):
+        # (an SRP SYN with the SRP_ID bits is a new NAT session, not game data)
+        if relay_from_host(data, addr, now):
+            return []
     if len(data) < srp.SRP_HEADER_SIZE:
-        if len(data) == 4:
-            return handle_ping(data, addr, now)
         log(f"ignored {len(data)}B datagram from {addr[0]}:{addr[1]}: {data.hex()}")
         return []
     return handle_segment(data, addr, now, nat_port)
@@ -239,7 +402,12 @@ def main(argv=None) -> int:
     ap.add_argument("--max-bytes", type=int, default=1024)  # accepted for compatibility
     ap.add_argument("--reply-mode", default="srp_nat")      # accepted for compatibility
     ap.add_argument("--log-file", default="logs/udp_45000_reply.log")
+    ap.add_argument("--relay-ports", default=os.environ.get("SCCT_RELAY_PORTS", ""),
+                    help="UDP relay: joiner-facing ports, e.g. 3658,10070-10080 (empty = relay off)")
+    ap.add_argument("--relay-ctrl-port", type=int, default=int(os.environ.get("SCCT_RELAY_CTRL_PORT", "45099")),
+                    help="loopback UDP control port the lobby server talks to (default 45099)")
     args, _ = ap.parse_known_args(argv)
+    global RELAY_PORTS, RELAY_CTRL_PORT, NAT_MAIN_SOCK
     if args.log_file:
         p = pathlib.Path(args.log_file)
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -251,22 +419,52 @@ def main(argv=None) -> int:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((args.bind, port))
         socks[s] = port
+        if NAT_MAIN_SOCK is None:
+            NAT_MAIN_SOCK = s
+    relay_socks: dict = {}
+    ctrl_sock = None
+    RELAY_PORTS = _parse_port_list(args.relay_ports) if str(args.relay_ports).strip() else []
+    if RELAY_PORTS:
+        RELAY_CTRL_PORT = int(args.relay_ctrl_port)
+        for port in RELAY_PORTS:
+            rs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            rs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            rs.bind((args.bind, port))
+            relay_socks[rs] = port
+        ctrl_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        ctrl_sock.bind(("127.0.0.1", RELAY_CTRL_PORT))
     log("GSNAT v3 listening")
     log(f"  PORT_ID limit: {PORTID_LIMIT or 'all'}  gap: {GAP_S*1000:.0f} ms")
     log(f"  ADDRESS delay: {ADDRESS_DELAY_S*1000:.0f} ms  repeat-ping ACKs: {'off' if NO_REPEAT_ACK else 'on'}  ADDRESS: {'NEVER' if NO_ADDRESS else 'sent'}  even-length datagrams: {'on' if EVEN_LEN else 'off'}")
     log(f"  bind: {args.bind}  ports: {', '.join(str(p) for p in ports)}")
     log(f"  ubi-gs modules: {NEW_UBIGS}")
+    if RELAY_PORTS:
+        log(f"  RELAY: joiner ports {', '.join(str(p) for p in RELAY_PORTS)} -> host:{RELAY_HOST_PORT} from :{socks[NAT_MAIN_SOCK]}; control 127.0.0.1:{RELAY_CTRL_PORT}; idle {RELAY_IDLE_S:.0f}s")
+    else:
+        log("  RELAY: off")
+    all_socks = list(socks) + list(relay_socks) + ([ctrl_sock] if ctrl_sock is not None else [])
     while True:
-        r, _, _ = select.select(list(socks), [], [], 10.0)
+        r, _, _ = select.select(all_socks, [], [], 10.0)
         now = time.monotonic()
         for c in [c for c in CLIENTS if now - c.last_seen > CLIENT_TIMEOUT]:
             CLIENTS.remove(c)
             log(f"expired client {c.addr}:{c.port}")
+        if RELAY_HOSTS:
+            relay_expire(now)
         for s in r:
             try:
                 data, addr = s.recvfrom(2048)
             except OSError as e:
                 log(f"recv error: {e}")
+                continue
+            if s is ctrl_sock:
+                relay_control(data, addr)
+                continue
+            if s in relay_socks:
+                try:
+                    relay_from_joiner(s, data, addr, now)
+                except Exception as e:
+                    log(f"RELAY error from {addr[0]}:{addr[1]}: {e!r}")
                 continue
             try:
                 packets = handle_packet(data, addr, now, socks[s])

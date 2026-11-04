@@ -891,6 +891,77 @@ def _lobby_list_frame(count=None):
     return _build_lobby_msg_frame([str(53), ["1", str(0x100), ["0"], [lobby1.to_list()]]], b5=0x14)
 
 
+# ─── UDP relay (SCCT_RELAY=1) ───────────────────────────────────────────────────────────────────────────────────
+# Outside joiners whose public IP differs from the host's are told to dial the relay (SCCT_RELAY_IP, default
+# SCCT_PUBLIC_IP) instead of the host; the NAT responder (tools/nat2/udp_reply_server.py --relay-ports) forwards their
+# traffic to the host through the hole the host's own NAT pings keep open. The mapping is sent over a loopback UDP
+# control port (SCCT_RELAY_CTRL_PORT, default 45099).
+_RELAY_SOCK = None
+
+
+def _relay_enabled() -> bool:
+    return os.environ.get("SCCT_RELAY", "0").strip().lower() in ("1", "on", "true", "yes")
+
+
+def _relay_ip() -> str:
+    return (os.environ.get("SCCT_RELAY_IP", "").strip() or os.environ.get("SCCT_PUBLIC_IP", "").strip())
+
+
+def _relay_notify(payload: dict, *, log_fp=None) -> None:
+    global _RELAY_SOCK
+    if not _relay_enabled():
+        return
+    try:
+        if _RELAY_SOCK is None:
+            _RELAY_SOCK = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        port = int(os.environ.get("SCCT_RELAY_CTRL_PORT", "45099"))
+        _RELAY_SOCK.sendto(json.dumps(payload).encode("utf-8"), ("127.0.0.1", port))
+        log_line(f"[{now_ts()}] RELAY ctrl -> {payload}", log_fp=log_fp)
+    except Exception as e:
+        log_line(f"[{now_ts()}] RELAY ctrl send failed: {e!r}", log_fp=log_fp)
+
+
+def _relay_for_joiner(joiner_ip: str, room, is_host: bool) -> str:
+    """Relay address this joiner should dial for `room`, or '' for a direct connection."""
+    if not _relay_enabled() or is_host or room is None:
+        return ""
+    rip = _relay_ip()
+    host_ip = str(getattr(room, "ip_addr", "") or "")
+    if not rip or not host_ip:
+        return ""
+    if is_private_addr(joiner_ip) or is_private_addr(host_ip):
+        return ""   # LAN side of a home-hosted server: direct
+    if joiner_ip == host_ip:
+        return ""   # same public IP as the host: same LAN, the blob's private slot works
+    return rip
+
+
+def _rewrite_room_blob(blob: bytes, ip: str) -> bytes:
+    """Replace both address slots of the 96-byte room info blob (ASCII at 48/72, binary at 64/88; ports kept)."""
+    try:
+        if not isinstance(blob, (bytes, bytearray)) or len(blob) != 96:
+            return blob
+        b = bytearray(blob)
+        raw = socket.inet_aton(ip)
+        txt = ip.encode("ascii")[:15].ljust(16, b"\x00")
+        b[48:64] = txt
+        b[64:68] = raw
+        b[72:88] = txt
+        b[88:92] = raw
+        return bytes(b)
+    except Exception:
+        return blob
+
+
+def _room_list_via_relay(room, relay_ip: str) -> list:
+    """room.to_list() with the host address (fields 18/19 and the info blob) replaced by the relay address."""
+    lst = list(room.to_list())
+    if len(lst) >= 20:
+        lst[10] = _rewrite_room_blob(lst[10], relay_ip)
+        lst[18] = relay_ip
+        lst[19] = relay_ip
+    return lst
+
 def _build_lobby_msg_frame(dl_list, b5=0x24):
     """Build a raw LOBBY_MSG frame with GS property for broadcasting.
 
@@ -2475,6 +2546,10 @@ def handle_message(
                                or (_lobby_state.rooms.get(target.group_id) or {}).get("owner_key") == _sk24)
                 except Exception:
                     _host24 = False
+                _relay24 = _relay_for_joiner(str(clt.addr[0]), target, _host24)
+                if _relay24:
+                    _relay_notify({"op": "map", "joiner": str(clt.addr[0]), "host": str(target.ip_addr), "room": str(target.group_id), "user": str(clt.username or "")}, log_fp=log_fp)
+                    log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM relay: joiner {clt.username}@{clt.addr[0]} dials {_relay24} for room {target.group_id} (host {target.ip_addr})", log_fp=log_fp)
                 if _host24 and os.environ.get("SCCT_NEW_GROUP_TO_CREATOR", "").strip().lower() in ("1", "on", "true", "yes", "late"):
                     # Round 25: the client only sets its current room from NEW_GROUP(54) AFTER it has processed the
                     # CREATE_ROOM reply (it queues a pending "created room" event there). The JOIN_ROOM reply is
@@ -2496,7 +2571,8 @@ def handle_message(
                     # for the room, which is the "game is no longer available" refusal.
                     try:
                         _fl = str(sub[2]) if len(sub) > 2 else "128"
-                        _gi = _build_lobby_msg_frame([str(53), [str(target.group_id), _fl, target.to_list(), [], []]], b5=0x24)
+                        _gi_room = _room_list_via_relay(target, _relay24) if _relay24 else target.to_list()
+                        _gi = _build_lobby_msg_frame([str(53), [str(target.group_id), _fl, _gi_room, [], []]], b5=0x24)
                         conn.sendall(_gi)
                         log_line(f"[{now_ts()}] ROUTER_WM JOIN_ROOM joiner {clt.username}: room-level GROUP_INFO(53) sent before ack (room {target.group_id} flags={_fl})", log_fp=log_fp)
                     except Exception as _egi:
@@ -2519,6 +2595,8 @@ def handle_message(
                             extra = _pub24
                     except Exception:
                         pass
+                    if _relay24:
+                        extra = _relay24
                 ack = gsm.GSMResponse(msg)
                 ack.header.property = gsm.PROPERTY.GS
                 ack.header.type = gsm.MESSAGE_TYPE.LOBBY_MSG
@@ -2772,6 +2850,8 @@ def handle_message(
         if lobby_subtype == 8:
             # LOBBY_MSG.GROUP_LEAVE — player leaving a room/lobby
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
+            if _relay_enabled() and not is_private_addr(str(clt.addr[0])):
+                _relay_notify({"op": "unmap_any", "ip": str(clt.addr[0]), "why": "GROUP_LEAVE", "user": str(clt.username or "")}, log_fp=log_fp)
             _lobby_state.clear_ctx(sk)
             removed = _lobby_state.remove_room_by_owner(sk)
             for room_entry in removed:
@@ -3443,6 +3523,8 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
             conn.close()
         except Exception:
             pass
+        if _relay_enabled() and removed_rooms and not is_private_addr(str(src_ip)):
+            _relay_notify({"op": "unmap_host", "host": str(src_ip), "why": "disconnect"}, log_fp=log_fp)
         log_line(f"[{now_ts()}] ROUTER_WM {src_ip}:{src_port} DISCONNECT", log_fp=log_fp)
 
 
