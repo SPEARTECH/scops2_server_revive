@@ -11,7 +11,22 @@ Remove the rule afterwards:
 """
 import socket, select, sys, time
 
+def parse_ports(args):
+    out = []
+    for a in args:
+        for part in a.split(","):
+            part = part.strip()
+            if "-" in part:
+                lo, hi = part.split("-", 1)
+                out += list(range(int(lo), int(hi) + 1))
+            elif part:
+                out.append(int(part))
+    return out
+
+# usage: udp_dmz_listen.py [--ports 3658,10070-10080]   (default: the SCCT game ports)
 PORTS = [3658] + list(range(10070, 10081))
+if "--ports" in sys.argv:
+    PORTS = parse_ports(sys.argv[sys.argv.index("--ports") + 1:])
 
 socks = []
 for p in PORTS:

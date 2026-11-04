@@ -12,7 +12,18 @@ if len(sys.argv) < 2:
     print(__doc__)
     sys.exit(2)
 target = sys.argv[1]
+# usage: udp_dmz_send.py <ip> [--ports 3658,10070-10080]
 PORTS = [3658] + list(range(10070, 10081))
+if "--ports" in sys.argv:
+    PORTS = []
+    for a in sys.argv[sys.argv.index("--ports") + 1:]:
+        for part in a.split(","):
+            part = part.strip()
+            if "-" in part:
+                lo, hi = part.split("-", 1)
+                PORTS += list(range(int(lo), int(hi) + 1))
+            elif part:
+                PORTS.append(int(part))
 ok = 0
 for p in PORTS:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
