@@ -281,7 +281,9 @@ RELAY_HOLES = [int(x) for x in os.environ.get("SCCT_RELAY_HOLES", "").replace(";
 # NEEDED (the first hole, or one a live joiner link uses) has seen no host traffic for SCCT_RELAY_HOLE_STALE_S seconds,
 # at most one every SCCT_RELAY_HOLE_MIN_S seconds per console. Typical session: login, game link, match start, match end.
 HOLE_STALE_S = float(os.environ.get("SCCT_RELAY_HOLE_STALE_S", "12"))
-HOLE_MIN_S = float(os.environ.get("SCCT_RELAY_HOLE_MIN_S", "8"))
+# A steer does not make the console ping at once (it only re-targets its 25 s cycle), so a steered hole counts as fresh
+# for HOLE_MIN_S and steers are at least HOLE_MIN_S apart per console.
+HOLE_MIN_S = float(os.environ.get("SCCT_RELAY_HOLE_MIN_S", "30"))
 HOLE_SOCKS: dict = {}       # port -> socket (bound hole ports)
 HOST_TRAFFIC: dict = {}     # host ip -> {hole port: monotonic time of the last datagram from that host's 3658 on it}
 LINK_IDLE_S = 5.0           # a joiner endpoint silent for longer is not "live"
@@ -405,8 +407,8 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
             log(f"RELAY host {host}: joiner {addr[0]} now also sends from port {addr[1]} (replies follow the last sender)")
         hv["joiner"] = addr
         hv["sock"] = sock
+    prev_t = hv["eps"][addr][1] if addr in hv["eps"] else None
     hv["eps"][addr] = (sock, now)
-    hv.setdefault("ep_rx", {})[addr] = hv.setdefault("ep_rx", {}).get(addr, 0) + 1
     hv["rx"] += 1
     hv["last"] = now
     # host destination port for this joiner endpoint: first endpoint -> 3658, later ones -> alt host sockets (if enabled)
@@ -428,11 +430,12 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
     src_sock, src_port = NAT_MAIN_SOCK, NAT_MAIN_SOCK.getsockname()[1]
     if RELAY_HOLES:
         hport = RELAY_HOST_PORT
-        src_port = pick_hole_port(hv, addr, now)
+        src_port = pick_hole_port(hv, addr, now, prev_t)
         src_sock = HOLE_SOCKS[src_port]
         if hv.get("src_logged", {}).get(addr) != src_port:
             hv.setdefault("src_logged", {})[addr] = src_port
             log(f"RELAY host {host}: joiner link {addr[0]}:{addr[1]} <-> host:{hport} via hole port {src_port}")
+    hv.setdefault("ep_rx", {})[addr] = hv.setdefault("ep_rx", {}).get(addr, 0) + 1
     try:
         src_sock.sendto(data, (host, hport))
     except OSError as e:
@@ -511,10 +514,11 @@ def hole_steering(now: float) -> None:
         needed = {RELAY_HOLES[0]}
         if hv is not None:
             needed |= {p for e, p in hv.get("src", {}).items() if e in hv["eps"]}
+        steered = getattr(clt, "hole_steer_time", {})
         if clt.hole_target is None:
             target = RELAY_HOLES[0]
         else:
-            stale = [(now - traffic.get(p, 0.0), p) for p in needed if p != clt.hole_target]
+            stale = [(now - max(traffic.get(p, 0.0), steered.get(p, 0.0)), p) for p in needed if p != clt.hole_target]
             stale = [(age, p) for age, p in stale if age > HOLE_STALE_S]
             if not stale:
                 continue
@@ -526,6 +530,9 @@ def hole_steering(now: float) -> None:
             clt.hole_target = target
             clt.hole_last = now
             clt.hole_count += 1
+            if not hasattr(clt, "hole_steer_time"):
+                clt.hole_steer_time = {}
+            clt.hole_steer_time[target] = now
             log(f"HOLE steer #{clt.hole_count}: {clt.addr} socket 1 -> ping port {target} (needed {sorted(needed)}; " +
                 ", ".join(f"{p}: {now - traffic[p]:.0f}s ago" if p in traffic else f"{p}: never" for p in RELAY_HOLES) + ")")
             if clt.hole_count >= 9:
@@ -537,14 +544,21 @@ def hole_steering(now: float) -> None:
             clt.reqs.pop(k, None)
 
 
-def pick_hole_port(hv: dict, ep, now: float) -> int:
+def pick_hole_port(hv: dict, ep, now: float, prev_t=None) -> int:
     """Source hole port for a joiner endpoint. The first hole is shared until one endpoint on it is established
     (the join probe and the room link arrive 1 s apart and the host copes with both from one source); a later endpoint
-    (the game link) gets a hole no live endpoint uses, so the host sees it as a distinct peer."""
+    (the game link) gets a hole no live endpoint uses, so the host sees it as a distinct peer.
+    An endpoint that never got established (the 2-packet probe) and reappears after idling is treated as a new link:
+    the client reuses port numbers across roles (2026-11-04 17:48: the probe's port came back as the game link and
+    inherited the room link's hole, so the host merged the two links)."""
     src = hv.setdefault("src", {})
-    if ep in src:
-        return src[ep]
     counts = hv.setdefault("ep_rx", {})
+    if ep in src:
+        if counts.get(ep, 0) >= LINK_ESTABLISHED or prev_t is None or now - prev_t <= LINK_IDLE_S:
+            return src[ep]
+        old = src.pop(ep)
+        counts[ep] = 0
+        log(f"RELAY host: endpoint {ep[0]}:{ep[1]} reappears after {now - prev_t:.0f}s idle without having been established; re-allocating (was hole {old})")
     live = {e for e, (sk, t) in hv["eps"].items() if e != ep and now - t <= LINK_IDLE_S and e in src}
     busy = {src[e] for e in live if counts.get(e, 0) >= LINK_ESTABLISHED}
     free = [p for p in RELAY_HOLES if p not in busy]
