@@ -61,3 +61,9 @@ same-LAN sessions.
   established is re-allocated when it reappears after idling.
 - "Revenge" rematch: the host's game sends GROUP_LEAVE for the room right after starting; the relay mapping must not be
   dropped on lobby leaves (only on the host's disconnect / idle expiry, `SCCT_RELAY_UNMAP_ON_LEAVE=1` restores the old behaviour).
+
+## 2026-11-05 15:09 - neither joiner could join (hole sharing / re-allocation)
+
+- COOLDOR's room link (10073) exchanged 3 packets on hole 45001, idled 7 s (normal in the lobby), and on resuming was moved to 45002 by the "re-evaluate a never-established endpoint" rule (established = 20 packets). The host then saw an unknown peer from VPS:45002 and COOLDOR timed out after ~27 s.
+- DORDOR's join request (62736) was put on 45001 too (slot 0 "free" because COOLDOR's links were idle and not "established"), so the host saw it as COOLDOR's peer and both joiners' replies were misrouted. DORDOR gave up after 5 s.
+- Fix: `pick_slot` now gives every joiner endpoint (ip, port) its own hole for the whole session (mirrors a direct path, where the host keys the peer by (ip, port) and copes with port reuse itself); no sharing, no re-allocation. Only when all holes are taken does a new endpoint take over the longest-idle one. Pre-open raised to 6 holes so two joiners' probe+room+game links are all open at join time.

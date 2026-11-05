@@ -319,13 +319,13 @@ HOLE_KEEPALIVE_PAYLOAD = bytes.fromhex(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE
 HOLE_DEAD_S = float(os.environ.get("SCCT_RELAY_HOLE_DEAD_S", "15"))
 # Pre-open this many holes per console right after login (one per ping cycle, each confirmed by its ping before the
 # next steer) and keep them warm with keepalives, so joiners' room and game links find open holes immediately.
-HOLE_PREOPEN = int(os.environ.get("SCCT_RELAY_HOLE_PREOPEN", "4"))
+HOLE_PREOPEN = int(os.environ.get("SCCT_RELAY_HOLE_PREOPEN", "6"))
 RELAY_TRAFFIC: dict = {}    # host ip -> {hole port: time of the last datagram the relay sent through it (joiner data or keepalive)}
 KA_STATE: dict = {}         # keepalive counters for consoles that have no joiner flow yet (pre-opened holes)
 LINK_SUMMARY_S = float(os.environ.get("SCCT_RELAY_LINK_SUMMARY_S", "30"))   # per-link activity summary interval (0 = off)
 LAST_SUMMARY = 0.0
 LINK_IDLE_S = 5.0           # a joiner endpoint silent for longer is not "live"
-LINK_ESTABLISHED = 20       # packets from an endpoint before a later endpoint gets its own hole (probe + room link share)
+LINK_ESTABLISHED = 20       # (no longer used by pick_slot: every joiner endpoint keeps a dedicated hole)
 RELAY_IDLE_S = float(os.environ.get("SCCT_RELAY_IDLE_S", "300"))   # flow dropped after this long without traffic (mappings no longer follow lobby leaves)
 RELAY_MAP: dict = {}        # joiner_ip -> {"host": host_ip, "room": ..., "user": ..., "ts": t}
 RELAY_HOSTS: dict = {}      # host_ip -> {"joiner": (ip, port), "sock": relay socket, "rx": n, "tx": n, "last": t, "first": t}
@@ -705,29 +705,29 @@ def hole_keepalive(now: float) -> None:
 
 
 def pick_slot(hv: dict, ep, now: float, prev_t, nslots: int) -> int:
-    """Link slot (0..nslots-1) for a joiner endpoint. Slot 0 is shared until an endpoint on it is established (the join
-    probe and the room link arrive 1 s apart and the host copes with both from one source); a later endpoint gets a slot
-    no established endpoint holds. Established endpoints keep their slot for good (links are resumed after idling);
-    a never-established endpoint that reappears after idling is re-evaluated (the client reuses port numbers across roles)."""
+    """One dedicated hole slot per joiner endpoint (ip, port), kept until the joiner is reset (GROUP_LEAVE) or the flow
+    expires. This mirrors a direct path: the host keys its peer by the joiner's (ip, port) for the whole session and copes
+    by itself with the client reusing a port across roles (probe link -> game link), so the relay must present one fixed
+    source port per joiner endpoint. The earlier "share slot 0 until established / re-evaluate after idling" rule broke
+    both joins on 2026-11-05 15:09: COOLDOR's room link (3 packets, then quiet 7 s - normal in the lobby) was moved from
+    hole 45001 to 45002 when it resumed, so the host saw a new unknown peer and COOLDOR timed out; and DORDOR's join
+    request was put on 45001 as well, where the host already had COOLDOR's peer, and the replies of both were misrouted."""
     slots = hv.setdefault("slot", {})
-    counts = hv.setdefault("ep_rx", {})
     if ep in slots:
-        if counts.get(ep, 0) >= LINK_ESTABLISHED or prev_t is None or now - prev_t <= LINK_IDLE_S:
-            return slots[ep]
-        old = slots.pop(ep)
-        counts[ep] = 0
-        log(f"RELAY host: endpoint {ep[0]}:{ep[1]} reappears after {now - prev_t:.0f}s idle without having been established; re-allocating (was slot {old})")
-    # slots in use: established links, plus any link of ANOTHER joiner that is sending right now (only a joiner's own
-    # short probe may share a slot with its room link)
-    held = {slots[e] for e in slots if e in hv["eps"] and (counts.get(e, 0) >= LINK_ESTABLISHED
-            or (e[0] != ep[0] and now - hv["eps"][e][1] <= LINK_IDLE_S))}
+        return slots[ep]
+    held = set(slots.values())
     free = [i for i in range(nslots) if i not in held]
     if free:
         slot = free[0]
     else:
+        # exhausted: take over the slot of the endpoint idle the longest (a probe link that finished long ago, or a
+        # peer the host has dropped since)
         lru = min(slots, key=lambda e: hv["eps"][e][1] if e in hv["eps"] else 0.0)
-        slot = slots[lru]
-        log(f"RELAY host: more links than slots, {ep[0]}:{ep[1]} shares slot {slot} with {lru[0]}:{lru[1]}")
+        slot = slots.pop(lru)
+        idle = now - hv["eps"][lru][1] if lru in hv["eps"] else 0.0
+        hv.get("src", {}).pop(lru, None)
+        hv.get("src_logged", {}).pop(lru, None)
+        log(f"RELAY host: all {nslots} holes in use, {ep[0]}:{ep[1]} takes over hole slot {slot} from {lru[0]}:{lru[1]} (idle {idle:.0f}s)")
     slots[ep] = slot
     return slot
 
