@@ -233,6 +233,8 @@ def handle_segment(data: bytes, addr: tuple[str, int], now: float, nat_port: int
 RELAY_PORTS: list[int] = []
 RELAY_CTRL_PORT = 0
 RELAY_HOST_PORT = int(os.environ.get("SCCT_RELAY_HOST_PORT", "3658"))
+# Source port of the game's SRP/NAT control session (never relayed).
+RELAY_SRP_PORT = int(os.environ.get("SCCT_RELAY_SRP_PORT", "10070"))
 RELAY_IDLE_S = float(os.environ.get("SCCT_RELAY_IDLE_S", "600"))
 RELAY_MAP: dict = {}        # joiner_ip -> {"host": host_ip, "room": ..., "user": ..., "ts": t}
 RELAY_HOSTS: dict = {}      # host_ip -> {"joiner": (ip, port), "sock": relay socket, "rx": n, "tx": n, "last": t, "first": t}
@@ -408,12 +410,16 @@ def relay_expire(now: float) -> None:
 def handle_packet(data: bytes, addr: tuple[str, int], now: float, nat_port: int):
     if len(data) == 4:
         return handle_ping(data, addr, now)
-    # Relayed host: anything from its game socket that is not a NAT ping and not its SRP control session (10070) is
-    # game data for its joiner. The SRP session is looked up first so the NAT handshake keeps working unchanged.
-    if RELAY_HOSTS and addr[0] in RELAY_HOSTS and client.NatClient.find(addr, CLIENTS) is None \
-            and not (len(data) >= srp.SRP_HEADER_SIZE and (data[6] | (data[7] << 8)) & srp.SRPHeaderFlags.SYN.value
-                     and (data[6] | (data[7] << 8)) & srp.SRPHeaderFlags.SRP_ID.value == srp.SRPHeaderFlags.SRP_ID.value):
-        # (an SRP SYN with the SRP_ID bits is a new NAT session, not game data)
+    # Relayed host: anything from it that is not a 4-byte NAT ping and does not come from its SRP control port is game
+    # data for its joiner. Classification is by SOURCE PORT only: the game's SRP/NAT session always runs on 10070, the
+    # game sockets (3658, 10071-10073) only ever send pings to this service. Inspecting the scrambled game payload for
+    # SRP flag bits misfired on 2026-11-04 16:48 (a game packet "looked like" an SRP SYN, the host's game socket was
+    # registered as a NAT client and every later packet from it went to the SRP parser instead of the joiner).
+    if RELAY_HOSTS and addr[0] in RELAY_HOSTS and addr[1] != RELAY_SRP_PORT:
+        stale = client.NatClient.find(addr, CLIENTS)
+        if stale is not None:
+            CLIENTS.remove(stale)
+            log(f"RELAY: dropped stray NAT-client entry for game socket {addr[0]}:{addr[1]}")
         if relay_from_host(data, addr, now):
             return []
     if len(data) < srp.SRP_HEADER_SIZE:
