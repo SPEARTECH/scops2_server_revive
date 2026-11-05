@@ -137,6 +137,10 @@ def handle_ping(data: bytes, addr: tuple[str, int], now: float, nat_port: int = 
         r["hit"] = hit
         if r.get("port"):
             HOST_TRAFFIC.setdefault(addr[0], {})[r["port"]] = now
+            ext = HOST_EXT.setdefault(addr[0], {})
+            if ext.get(r["port"]) != addr[1]:
+                log(f"  hole {r['port']}: {addr[0]} socket 1 shows external port {addr[1]}" + (f" (was {ext[r['port']]})" if r["port"] in ext else ""))
+                ext[r["port"]] = addr[1]
         if hit <= 2 or hit % 50 == 0:
             log(f"  HOLE PING #{hit}: {addr[0]}:{addr[1]} reached port {r.get('port')}")
         return [(srp.ack_segment(clt), (clt.addr, clt.port))]
@@ -291,6 +295,10 @@ HOLE_PORT_BASE = int(os.environ.get("SCCT_RELAY_HOLE_PORT_BASE", "10071"))
 HOLE_MIN_S = float(os.environ.get("SCCT_RELAY_HOLE_MIN_S", "30"))
 HOLE_SOCKS: dict = {}       # port -> socket (bound hole ports)
 HOST_TRAFFIC: dict = {}     # host ip -> {hole port: monotonic time of the last datagram from that host's 3658 on it}
+# host ip -> {hole port: external port the host's 3658 socket shows on that hole}. A router may give a re-created
+# mapping a different external port (2026-11-04 18:26: 3658 became 1096 on two holes while the third kept 3658).
+HOST_EXT: dict = {}
+HOLE_OPEN_MIN_S = float(os.environ.get("SCCT_RELAY_HOLE_OPEN_MIN_S", "15"))   # interval between the login steers that open every hole
 LINK_IDLE_S = 5.0           # a joiner endpoint silent for longer is not "live"
 LINK_ESTABLISHED = 20       # packets from an endpoint before a later endpoint gets its own hole (probe + room link share)
 RELAY_IDLE_S = float(os.environ.get("SCCT_RELAY_IDLE_S", "300"))   # flow dropped after this long without traffic (mappings no longer follow lobby leaves)
@@ -441,6 +449,12 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
             hv.setdefault("src_logged", {})[addr] = src_port
             log(f"RELAY host {host}: joiner link {addr[0]}:{addr[1]} <-> host:{hport} via hole port {src_port}")
     hv.setdefault("ep_rx", {})[addr] = hv.setdefault("ep_rx", {}).get(addr, 0) + 1
+    if RELAY_HOLES:
+        ext = HOST_EXT.get(host, {})
+        hport = ext.get(src_port) or (next(iter(ext.values())) if ext else RELAY_HOST_PORT)
+        if hv.get("dst_logged", {}).get(src_port) != hport:
+            hv.setdefault("dst_logged", {})[src_port] = hport
+            log(f"RELAY host {host}: hole {src_port} -> external port {hport}" + ("" if src_port in ext else " (not yet observed on this hole; guessing)"))
     try:
         src_sock.sendto(data, (host, hport))
     except OSError as e:
@@ -461,6 +475,10 @@ def relay_from_host(data: bytes, addr: tuple[str, int], now: float, nat_port: in
     cands = []
     if RELAY_HOLES and nat_port in RELAY_HOLES:
         HOST_TRAFFIC.setdefault(addr[0], {})[nat_port] = now
+        ext = HOST_EXT.setdefault(addr[0], {})
+        if ext.get(nat_port) != addr[1]:
+            log(f"RELAY host {addr[0]}: game data on hole {nat_port} from external port {addr[1]}" + (f" (was {ext[nat_port]})" if nat_port in ext else ""))
+            ext[nat_port] = addr[1]
         # multi-hole: the hole port the reply arrived on identifies the joiner link
         owners = [e for e, p in hv.get("src", {}).items() if p == nat_port and e in hv["eps"]]
         if owners:
@@ -504,6 +522,7 @@ def relay_expire(now: float) -> None:
     for h, hv in list(RELAY_HOSTS.items()):
         if now - hv["last"] > RELAY_IDLE_S:
             RELAY_HOSTS.pop(h, None)
+            HOST_EXT.pop(h, None)
             log(f"RELAY host {h}: idle {RELAY_IDLE_S:.0f}s, flow dropped (rx={hv['rx']} tx={hv['tx']})")
 
 
@@ -512,7 +531,10 @@ def hole_steering(now: float) -> None:
     main = NAT_MAIN_SOCK
     for clt in list(CLIENTS):
         msg = getattr(clt, "hole_msg", None)
-        if msg is None or now - clt.hole_last < HOLE_MIN_S:
+        if msg is None or now - clt.hole_last < HOLE_OPEN_MIN_S:
+            continue
+        never0 = [p for p in RELAY_HOLES if p not in HOST_TRAFFIC.get(clt.addr, {}) and p not in getattr(clt, "hole_steer_time", {})]
+        if not never0 and now - clt.hole_last < HOLE_MIN_S:
             continue
         if clt.hole_count >= HOLE_BUDGET:
             if not getattr(clt, "hole_budget_logged", False):
@@ -525,8 +547,14 @@ def hole_steering(now: float) -> None:
         if hv is not None:
             needed |= {p for e, p in hv.get("src", {}).items() if e in hv["eps"]}
         steered = getattr(clt, "hole_steer_time", {})
+        never = [p for p in RELAY_HOLES if p not in traffic and p not in steered]
         if clt.hole_target is None:
             target = RELAY_HOLES[0]
+        elif never:
+            # open the remaining holes right after login (shorter interval), so links can use any of them at once
+            if now - clt.hole_last < HOLE_OPEN_MIN_S:
+                continue
+            target = never[0]
         else:
             stale = [(now - max(traffic.get(p, 0.0), steered.get(p, 0.0)), p) for p in needed if p != clt.hole_target]
             stale = [(age, p) for age, p in stale if age > HOLE_STALE_S]
