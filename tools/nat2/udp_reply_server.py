@@ -322,6 +322,8 @@ HOLE_DEAD_S = float(os.environ.get("SCCT_RELAY_HOLE_DEAD_S", "15"))
 HOLE_PREOPEN = int(os.environ.get("SCCT_RELAY_HOLE_PREOPEN", "4"))
 RELAY_TRAFFIC: dict = {}    # host ip -> {hole port: time of the last datagram the relay sent through it (joiner data or keepalive)}
 KA_STATE: dict = {}         # keepalive counters for consoles that have no joiner flow yet (pre-opened holes)
+LINK_SUMMARY_S = float(os.environ.get("SCCT_RELAY_LINK_SUMMARY_S", "30"))   # per-link activity summary interval (0 = off)
+LAST_SUMMARY = 0.0
 LINK_IDLE_S = 5.0           # a joiner endpoint silent for longer is not "live"
 LINK_ESTABLISHED = 20       # packets from an endpoint before a later endpoint gets its own hole (probe + room link share)
 RELAY_IDLE_S = float(os.environ.get("SCCT_RELAY_IDLE_S", "300"))   # flow dropped after this long without traffic (mappings no longer follow lobby leaves)
@@ -553,6 +555,7 @@ def relay_from_host(data: bytes, addr: tuple[str, int], now: float, nat_port: in
         log(f"RELAY DUMP H->J {addr[0]}:{addr[1]} -> {dest[0]}:{dest[1]} {len(data)}B: {data[:64].hex(' ')}")
     try:
         dsock.sendto(data, dest)
+        hv.setdefault("ep_tx", {})[dest] = hv.setdefault("ep_tx", {}).get(dest, 0) + 1
     except OSError as e:
         log(f"RELAY -> joiner {hv['joiner']} send failed: {e}")
         return True
@@ -570,6 +573,29 @@ def relay_from_host(data: bytes, addr: tuple[str, int], now: float, nat_port: in
     if hv["tx"] in (1, 2, 5, 10, 50) or hv["tx"] % 500 == 0:
         log(f"RELAY H->J {addr[0]}:{addr[1]} -> {dest[0]}:{dest[1]} {len(data)}B (#{hv['tx']}) from :{dsock.getsockname()[1]}")
     return True
+
+
+def link_summary(now: float) -> None:
+    """Every LINK_SUMMARY_S: one line per host flow with each joiner link's packets in/out since the last summary."""
+    global LAST_SUMMARY
+    if LINK_SUMMARY_S <= 0 or now - LAST_SUMMARY < LINK_SUMMARY_S:
+        return
+    LAST_SUMMARY = now
+    for host, hv in RELAY_HOSTS.items():
+        rx, tx = hv.setdefault("ep_rx", {}), hv.setdefault("ep_tx", {})
+        prev = hv.setdefault("sum_prev", {})
+        parts = []
+        for ep in sorted(hv["eps"], key=lambda e: hv["eps"][e][1], reverse=True):
+            r, t = rx.get(ep, 0), tx.get(ep, 0)
+            pr, pt = prev.get(ep, (0, 0))
+            prev[ep] = (r, t)
+            dr, dt = r - pr, t - pt
+            if dr == 0 and dt == 0 and now - hv["eps"][ep][1] > LINK_SUMMARY_S:
+                continue
+            hole = hv.get("src", {}).get(ep, "?")
+            parts.append(f"{ep[0]}:{ep[1]}@{hole} in={dr} out={dt} idle={now - hv['eps'][ep][1]:.0f}s")
+        if parts:
+            log(f"RELAY links host {host}: " + " | ".join(parts))
 
 
 def relay_expire(now: float) -> None:
@@ -813,6 +839,7 @@ def main(argv=None) -> int:
                     d.pop(c.addr, None)
         if RELAY_HOSTS:
             relay_expire(now)
+            link_summary(now)
         for s in r:
             try:
                 data, addr = s.recvfrom(2048)
