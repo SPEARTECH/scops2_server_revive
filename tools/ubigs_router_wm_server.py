@@ -2850,8 +2850,27 @@ def handle_message(
                             _sk31 = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
                             _all = _lobby_state.get_rooms()
                             _fr = _build_lobby_msg_frame([str(53), ["1", str(0x100), ["1"], [r.to_list() for r in _all]]], b5=0x24)
-                            _lobby_state.broadcast(_fr, exclude_key=_sk31, log_fp=log_fp)
-                            log_line(f"[{now_ts()}] ROUTER_WM ROOM_UPDATE room {_rid}: info replaced ({len(_blob)}B), room list pushed", log_fp=log_fp)
+                            # Players already inside this room get the change from the host over their game connection. Pushing
+                            # the lobby room list to them makes the client open a NEW game connection to the host (seen 2026-11-04:
+                            # a second connect from another socket 2 s after each ROOM_UPDATE; through the relay the two
+                            # connections collide and the joiner drops ~60 s later). SCCT_ROOM_UPDATE_TO_MEMBERS=1 restores the old push.
+                            _skip31 = {_sk31}
+                            if os.environ.get("SCCT_ROOM_UPDATE_TO_MEMBERS", "0").strip().lower() not in ("1", "on", "true", "yes"):
+                                try:
+                                    with _lobby_state.lock:
+                                        _ctx31 = dict(_lobby_state.__dict__.get("ctx", {}))
+                                    _skip31 |= {k for k, v in _ctx31.items() if str(v) == str(_rid)}
+                                except Exception:
+                                    pass
+                            with _lobby_state.lock:
+                                _targets31 = [(k, sess) for k, sess in _lobby_state.sessions.items() if k not in _skip31]
+                            for _k31, _sess31 in _targets31:
+                                try:
+                                    _sess31["conn"].sendall(_fr)
+                                    log_line(f"[{now_ts()}] LOBBY_BROADCAST(room_update) -> {_k31} len={len(_fr)}", log_fp=log_fp)
+                                except Exception as _e31b:
+                                    log_line(f"[{now_ts()}] LOBBY_BROADCAST(room_update) -> {_k31} FAILED: {_e31b}", log_fp=log_fp)
+                            log_line(f"[{now_ts()}] ROUTER_WM ROOM_UPDATE room {_rid}: info replaced ({len(_blob)}B), room list pushed to {len(_targets31)} session(s), {len(_skip31) - 1} member(s) skipped", log_fp=log_fp)
                         else:
                             log_line(f"[{now_ts()}] ROUTER_WM ROOM_UPDATE room {_rid} not found", log_fp=log_fp)
                 except Exception as _e31:

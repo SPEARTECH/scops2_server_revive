@@ -42,3 +42,11 @@ socket (34-byte opener, 18-byte retries every 200 ms for 5 s) and Windows droppe
 Two players behind the same public IP joining each other with the relay on is not supported yet (v1): the room list can only
 carry one address and the relay cannot tell the two consoles apart. Join from different networks, or turn the relay off for
 same-LAN sessions.
+
+## Findings 2026-11-04 (first relayed joins)
+- Joins through the relay work in both directions (COOLDOR into SNK's room and SNK into COOLDOR's room, `subtype=34`).
+- The joiner uses one socket for a short probe (34 B / 66 B exchange), then another for the room session (58 B connect,
+  ~1 KB room download, 18-byte keepalives every 200 ms). Packets are `[u16 LE length][payload …0xbd]`.
+- Each ROOM_UPDATE (31) pushed to a player inside the room made that client open ANOTHER game connection to the host from a
+  third socket; through the relay both arrive from `<relay>:45000`, replies were split between them and the joiner dropped
+  ~60 s later. The server no longer pushes the room list to the room's own members (`SCCT_ROOM_UPDATE_TO_MEMBERS=1` to revert).
