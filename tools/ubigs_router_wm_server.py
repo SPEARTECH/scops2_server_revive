@@ -2891,7 +2891,10 @@ def handle_message(
         if lobby_subtype == 8:
             # LOBBY_MSG.GROUP_LEAVE — player leaving a room/lobby
             sk = session_key or f"{clt.addr[0]}:{clt.addr[1]}"
-            if _relay_enabled() and not is_private_addr(str(clt.addr[0])):
+            # No relay unmap here: in "revenge" mode the host's game sends GROUP_LEAVE for the room 3 s after starting the
+            # rematch while the game link stays up (2026-11-04 18:07); dropping the mapping then cut the joiner off. The room
+            # is a lobby construct; the relay flow lives on traffic (idle expiry) and is dropped on the host's disconnect.
+            if _relay_enabled() and os.environ.get("SCCT_RELAY_UNMAP_ON_LEAVE", "0").strip() == "1" and not is_private_addr(str(clt.addr[0])):
                 _relay_notify({"op": "unmap_any", "ip": str(clt.addr[0]), "why": "GROUP_LEAVE", "user": str(clt.username or "")}, log_fp=log_fp)
             _lobby_state.clear_ctx(sk)
             removed = _lobby_state.remove_room_by_owner(sk)

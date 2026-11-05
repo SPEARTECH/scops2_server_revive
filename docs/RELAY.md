@@ -50,3 +50,14 @@ same-LAN sessions.
 - Each ROOM_UPDATE (31) pushed to a player inside the room made that client open ANOTHER game connection to the host from a
   third socket; through the relay both arrive from `<relay>:45000`, replies were split between them and the joiner dropped
   ~60 s later. The server no longer pushes the room list to the room's own members (`SCCT_ROOM_UPDATE_TO_MEMBERS=1` to revert).
+
+## Findings 2026-11-04 (evening)
+- Multi-hole mode works: the console's 3658 socket follows an unsolicited PORT_ID (it replaces the ping target), so the
+  service steers it on demand between 45001/45002 and each joiner link gets its own source port. Three matches in a row
+  with map/mode changes and team swaps played through the relay.
+- The console stops reacting after ~11 unsolicited PORT_IDs (SRP receive window 536 B); steers are therefore on demand
+  only (stale needed hole), at least 30 s apart, and the count is logged (`HOLE steer #N`).
+- The client reuses local ports across roles (probe port later used for the game link): an endpoint that was never
+  established is re-allocated when it reappears after idling.
+- "Revenge" rematch: the host's game sends GROUP_LEAVE for the room right after starting; the relay mapping must not be
+  dropped on lobby leaves (only on the host's disconnect / idle expiry, `SCCT_RELAY_UNMAP_ON_LEAVE=1` restores the old behaviour).
