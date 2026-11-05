@@ -32,3 +32,13 @@ The console keeps one hole open by itself: after login it pings the GSNAT servic
 `run_public_test.bat` sets `SCCT_RELAY=1`; `start_online_capture_ext.ps1` then starts the NAT responder with the relay
 ports instead of the `udp_log_server` and forces `SCCT_NAT_V2=1`. `nat_type_probe.py` in `tools/nat_check/` tells you
 whether a player's NAT is cone or port-restricted.
+
+## Firewall (VPS)
+The relay ports must be open on the server's own firewall: `open_ports.ps1` now adds UDP 3658 and 10070-10080 (and ICMP
+echo, which the game uses for its ping display). Test of 2026-11-04 16:03: PCSX2 dialed `<relay>:3658` from its 10072
+socket (34-byte opener, 18-byte retries every 200 ms for 5 s) and Windows dropped every packet because the rule was missing.
+
+## Same NAT
+Two players behind the same public IP joining each other with the relay on is not supported yet (v1): the room list can only
+carry one address and the relay cannot tell the two consoles apart. Join from different networks, or turn the relay off for
+same-LAN sessions.

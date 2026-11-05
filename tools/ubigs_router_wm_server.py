@@ -2898,8 +2898,8 @@ def handle_message(
                         pass
                     _is_host = (
                         str(r.master).lower() in (str(clt.username or "").lower(), _sess_user.lower())
-                        or str(getattr(r, "ip_addr", "")) == str(clt.addr[0])
-                        or _room_host_ip(r) == str(clt.addr[0])
+                        or (is_private_addr(str(clt.addr[0])) and str(getattr(r, "ip_addr", "")) == str(clt.addr[0]))
+                        # (an address match only counts on a LAN: two players behind one NAT share a public IP)
                         or (_lobby_state.rooms.get(r.group_id) or {}).get("owner_key") == sk
                     )
                     log_line(f"[{now_ts()}] ROUTER_WM GROUP_LEAVE room={leave_id} master={r.master} room_ip={getattr(r,'ip_addr','')} sender={clt.username!r}/{_sess_user!r}@{clt.addr[0]} sk={sk} host_match={_is_host}", log_fp=log_fp)
