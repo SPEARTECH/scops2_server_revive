@@ -123,15 +123,21 @@ def split_messages(data: bytes):
     return out
 
 
-def handle_ping(data: bytes, addr: tuple[str, int], now: float):
+def handle_ping(data: bytes, addr: tuple[str, int], now: float, nat_port: int = 45000):
     pid = utils.read_u32_be(data)
-    log(f"PING from {addr[0]}:{addr[1]} id={data.hex()}")
+    log(f"PING from {addr[0]}:{addr[1]} id={data.hex()}" + (f" on :{nat_port}" if nat_port != 45000 else ""))
     found = find_by_ping(pid)
     if found is None:
         log(f"  unknown ping id {data.hex()} (no matching NAT request)")
         return []
     clt, r = found
     clt.last_seen = now
+    if r.get("extra"):
+        hit = r.get("hit", 0) + 1
+        r["hit"] = hit
+        if hit <= 3 or hit % 20 == 0:
+            log(f"  EXTRA-HOLE PING #{hit}: {addr[0]}:{addr[1]} reached port {r.get('port')} -> second NAT hole works for this host")
+        return [(srp.ack_segment(clt), (clt.addr, clt.port))]
     if not r["pending"]:
         if NO_REPEAT_ACK:
             log(f"  repeat ping ignored (socket {r['sock']})")
@@ -161,7 +167,18 @@ def handle_ping(data: bytes, addr: tuple[str, int], now: float):
     msg, _ = nat_reply(r["msg"], gsm.NAT_MSG.ADDRESS, utils.ipv4_to_u32_be(rep_ip), addr[1])
     out = bytes(srp.SRPResponse(None, clt, msg))
     log(f"  -> ADDRESS socket={r['sock']} {rep_ip}:{addr[1]} ({len(out)} bytes) to {clt.addr}:{clt.port}" + (f" (observed {addr[0]})" if rep_ip != addr[0] else ""))
-    return [(out, (clt.addr, clt.port))]
+    packets = [(out, (clt.addr, clt.port))]
+    if NAT_EXTRA_PORTID and str(r["sock"]) == "1" and not r.get("extra"):
+        for xport in NAT_EXTRA_PORTID:
+            try:
+                xr, xpid = nat_reply(r["msg"], gsm.NAT_MSG.PORT_ID, 0, xport, pick_id=True)
+                clt.reqs[xpid] = {"msg": r["msg"], "sock": r["sock"], "pending": True, "extra": True, "port": xport}
+                xout = bytes(srp.SRPResponse(None, clt, xr))
+                packets.append((xout, (clt.addr, clt.port)))
+                log(f"  -> EXTRA PORT_ID socket=1 ping_id={xpid:#010x} port={xport} ({len(xout)} bytes) [experiment: does the game ping it?]")
+            except Exception as e:
+                log(f"  EXTRA PORT_ID failed: {e!r}")
+    return packets
 
 
 def handle_segment(data: bytes, addr: tuple[str, int], now: float, nat_port: int):
@@ -235,6 +252,16 @@ RELAY_CTRL_PORT = 0
 RELAY_HOST_PORT = int(os.environ.get("SCCT_RELAY_HOST_PORT", "3658"))
 # Source port of the game's SRP/NAT control session (never relayed).
 RELAY_SRP_PORT = int(os.environ.get("SCCT_RELAY_SRP_PORT", "10070"))
+# SCCT_RELAY_ALT_HOST_PORTS=1: a joiner's 2nd/3rd/4th connection (new source port) is delivered to the host's other
+# presolved sockets (10071, 10072, 10073; all punched to 45000) instead of 3658, so the host sees distinct links and its
+# replies (from that socket) can be routed back to the right joiner port. Natively the host tells links apart by the
+# joiner's source port; through the relay they all arrive from <relay>:45000 and the host drops the 2nd connect.
+RELAY_ALT_HOST_PORTS = [int(x) for x in os.environ.get("SCCT_RELAY_ALT_HOST_PORTS_LIST", "10071,10072,10073").split(",")] \
+    if os.environ.get("SCCT_RELAY_ALT_HOST_PORTS", "0").strip() == "1" else []
+# SCCT_NAT_EXTRA_PORTID=45001[,45002]: after socket 1's ADDRESS reply, send the console extra PORT_ID messages for socket 1
+# pointing at these ports. If the game pings them, its 3658 socket has a second NAT hole (<relay>:45001 -> host:3658) that
+# the relay could use as a distinct source for a second link. Experiment: only logs the pings (bare ACK, no ADDRESS).
+NAT_EXTRA_PORTID = [int(x) for x in os.environ.get("SCCT_NAT_EXTRA_PORTID", "").replace(";", ",").split(",") if x.strip()]
 RELAY_IDLE_S = float(os.environ.get("SCCT_RELAY_IDLE_S", "600"))
 RELAY_MAP: dict = {}        # joiner_ip -> {"host": host_ip, "room": ..., "user": ..., "ts": t}
 RELAY_HOSTS: dict = {}      # host_ip -> {"joiner": (ip, port), "sock": relay socket, "rx": n, "tx": n, "last": t, "first": t}
@@ -357,16 +384,29 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
     hv["eps"][addr] = (sock, now)
     hv["rx"] += 1
     hv["last"] = now
+    # host destination port for this joiner endpoint: first endpoint -> 3658, later ones -> alt host sockets (if enabled)
+    hports = hv.setdefault("hports", {})
+    hport = hports.get(addr)
+    if hport is None:
+        used = set(hports.values())
+        if RELAY_HOST_PORT not in used:
+            hport = RELAY_HOST_PORT
+        else:
+            free = [p for p in RELAY_ALT_HOST_PORTS if p not in used]
+            hport = free[0] if free else RELAY_HOST_PORT
+        hports[addr] = hport
+        if hport != RELAY_HOST_PORT:
+            log(f"RELAY host {host}: joiner endpoint {addr[0]}:{addr[1]} -> host socket {hport} (alt port; replies from {hport} go back to it)")
     if RELAY_DUMP and hv["dump_rx"] < RELAY_DUMP:
         hv["dump_rx"] += 1
-        log(f"RELAY DUMP J->H {addr[0]}:{addr[1]} {len(data)}B: {data[:64].hex(' ')}")
+        log(f"RELAY DUMP J->H {addr[0]}:{addr[1]} -> :{hport} {len(data)}B: {data[:64].hex(' ')}")
     try:
-        NAT_MAIN_SOCK.sendto(data, (host, RELAY_HOST_PORT))
+        NAT_MAIN_SOCK.sendto(data, (host, hport))
     except OSError as e:
         log(f"RELAY -> host {host} send failed: {e}")
         return
     if hv["rx"] in (1, 2, 5, 10, 50) or hv["rx"] % 500 == 0:
-        log(f"RELAY J->H {addr[0]}:{addr[1]} -> {host}:{RELAY_HOST_PORT} {len(data)}B (#{hv['rx']})")
+        log(f"RELAY J->H {addr[0]}:{addr[1]} -> {host}:{hport} {len(data)}B (#{hv['rx']})")
 
 
 def relay_from_host(data: bytes, addr: tuple[str, int], now: float) -> bool:
@@ -376,11 +416,21 @@ def relay_from_host(data: bytes, addr: tuple[str, int], now: float) -> bool:
         return False
     hv["tx"] += 1
     hv["last"] = now
+    dest, dsock = hv["joiner"], hv["sock"]
+    # Route by the host's source socket: the joiner endpoints mapped to that host port are the candidates; with one
+    # candidate it is unambiguous, with several (alt ports off: all on 3658) the most recent sender among them wins.
+    cands = [ep for ep, hp in hv.get("hports", {}).items() if hp == addr[1] and ep in hv["eps"]]
+    if cands:
+        if hv["joiner"] in cands:
+            dest, dsock = hv["joiner"], hv["sock"]
+        else:
+            best = max(cands, key=lambda ep: hv["eps"][ep][1])
+            dest, dsock = best, hv["eps"][best][0]
     if RELAY_DUMP and hv["dump_tx"] < RELAY_DUMP:
         hv["dump_tx"] += 1
-        log(f"RELAY DUMP H->J {addr[0]}:{addr[1]} {len(data)}B: {data[:64].hex(' ')}")
+        log(f"RELAY DUMP H->J {addr[0]}:{addr[1]} -> {dest[0]}:{dest[1]} {len(data)}B: {data[:64].hex(' ')}")
     try:
-        hv["sock"].sendto(data, hv["joiner"])
+        dsock.sendto(data, dest)
     except OSError as e:
         log(f"RELAY -> joiner {hv['joiner']} send failed: {e}")
         return True
@@ -396,7 +446,7 @@ def relay_from_host(data: bytes, addr: tuple[str, int], now: float) -> bool:
             except OSError:
                 pass
     if hv["tx"] in (1, 2, 5, 10, 50) or hv["tx"] % 500 == 0:
-        log(f"RELAY H->J {addr[0]}:{addr[1]} -> {hv['joiner'][0]}:{hv['joiner'][1]} {len(data)}B (#{hv['tx']}) from :{hv['sock'].getsockname()[1]}")
+        log(f"RELAY H->J {addr[0]}:{addr[1]} -> {dest[0]}:{dest[1]} {len(data)}B (#{hv['tx']}) from :{dsock.getsockname()[1]}")
     return True
 
 
@@ -409,7 +459,7 @@ def relay_expire(now: float) -> None:
 
 def handle_packet(data: bytes, addr: tuple[str, int], now: float, nat_port: int):
     if len(data) == 4:
-        return handle_ping(data, addr, now)
+        return handle_ping(data, addr, now, nat_port)
     # Relayed host: anything from it that is not a 4-byte NAT ping and does not come from its SRP control port is game
     # data for its joiner. Classification is by SOURCE PORT only: the game's SRP/NAT session always runs on 10070, the
     # game sockets (3658, 10071-10073) only ever send pings to this service. Inspecting the scrambled game payload for
@@ -473,7 +523,9 @@ def main(argv=None) -> int:
     log(f"  bind: {args.bind}  ports: {', '.join(str(p) for p in ports)}")
     log(f"  ubi-gs modules: {NEW_UBIGS}")
     if RELAY_PORTS:
-        log(f"  RELAY: joiner ports {', '.join(str(p) for p in RELAY_PORTS)} -> host:{RELAY_HOST_PORT} from :{socks[NAT_MAIN_SOCK]}; control 127.0.0.1:{RELAY_CTRL_PORT}; idle {RELAY_IDLE_S:.0f}s; dump {RELAY_DUMP} pkts/dir; fanout {RELAY_FANOUT_S:.0f}s")
+        log(f"  RELAY: joiner ports {', '.join(str(p) for p in RELAY_PORTS)} -> host:{RELAY_HOST_PORT} from :{socks[NAT_MAIN_SOCK]}; control 127.0.0.1:{RELAY_CTRL_PORT}; idle {RELAY_IDLE_S:.0f}s; dump {RELAY_DUMP} pkts/dir; fanout {RELAY_FANOUT_S:.0f}s; alt host ports {RELAY_ALT_HOST_PORTS or 'off'}")
+    if NAT_EXTRA_PORTID:
+        log(f"  EXTRA PORT_ID experiment: socket 1 also told to ping {NAT_EXTRA_PORTID} (these ports must be in --ports)")
     else:
         log("  RELAY: off")
     all_socks = list(socks) + list(relay_socks) + ([ctrl_sock] if ctrl_sock is not None else [])

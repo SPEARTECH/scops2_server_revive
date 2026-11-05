@@ -373,7 +373,9 @@ Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -
 # UDP reply service for ubi.com connectivity/NAT
 if($env:SCCT_NAT_V2 -eq '1') {
   Write-Host 'SCCT_NAT_V2=1: using the GSNAT v2 responder (PORT_ID -> ping -> ADDRESS) on UDP 45000.' -ForegroundColor Yellow
-  $nat2Args = @('tools/nat2/udp_reply_server.py', '--bind', $BindIP, '--ports', '45000', '--log-file', 'logs/udp_45000_reply.log')
+  $nat2Ports = '45000'
+  if($env:SCCT_NAT_EXTRA_PORTID) { $nat2Ports = '45000,' + $env:SCCT_NAT_EXTRA_PORTID; Write-Host "SCCT_NAT_EXTRA_PORTID=$($env:SCCT_NAT_EXTRA_PORTID): NAT responder also listens on those ports" -ForegroundColor Yellow }
+  $nat2Args = @('tools/nat2/udp_reply_server.py', '--bind', $BindIP, '--ports', $nat2Ports, '--log-file', 'logs/udp_45000_reply.log')
   if($relayUdpPorts.Count -gt 0) { $nat2Args += @('--relay-ports', ($relayUdpPorts -join ',')) }
   Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -ArgumentList $nat2Args | Out-Null
 } else {
