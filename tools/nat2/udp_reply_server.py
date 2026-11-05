@@ -375,6 +375,9 @@ def relay_control(data: bytes, addr: tuple[str, int]) -> None:
         if not j or not h:
             log(f"RELAY ctrl: map without joiner/host: {m}")
             return
+        prev = RELAY_MAP.get(j)
+        if prev is not None and (prev.get("host") != h or (prev.get("user") and m.get("user") and prev.get("user") != m.get("user"))):
+            reset_joiner(j, f"re-mapped by {m.get('user')} (was {prev.get('user')} -> {prev.get('host')})")
         RELAY_MAP[j] = {"host": h, "room": m.get("room"), "user": m.get("user"), "ts": now_ts()}
         RELAY_UNMAPPED_LOGGED.discard(j)
         log(f"RELAY ctrl: map joiner {j} ({m.get('user')}) -> host {h} room {m.get('room')}")
@@ -405,6 +408,8 @@ def relay_control(data: bytes, addr: tuple[str, int]) -> None:
                 RELAY_HOSTS.pop(h, None)
         if gone:
             log(f"RELAY ctrl: unmap_any {ip} (entries dropped: {gone})")
+    elif op == "reset_joiner":
+        reset_joiner(str(m.get("joiner", "")), f"{m.get('why')} ({m.get('user')})")
     elif op == "clear":
         RELAY_MAP.clear()
         RELAY_HOSTS.clear()
@@ -412,6 +417,27 @@ def relay_control(data: bytes, addr: tuple[str, int]) -> None:
     else:
         log(f"RELAY ctrl: unknown op {op!r}: {m}")
     relay_snapshot()
+
+
+def reset_joiner(j: str, why: str) -> None:
+    """Forget a joiner IP's endpoints and slots in every host flow (the mapping itself stays), so a new console or a new
+    session from that IP starts with free slots. Two consoles behind one NAT share an IP: the old one's established links
+    otherwise keep all slots and the new one's links are crammed into one (2026-11-04 19:13)."""
+    n = 0
+    for h, hv in RELAY_HOSTS.items():
+        eps = [e for e in hv["eps"] if e[0] == j]
+        for e in eps:
+            hv["eps"].pop(e, None)
+            hv.get("src", {}).pop(e, None)
+            hv.get("slot", {}).pop(e, None)
+            hv.get("ep_rx", {}).pop(e, None)
+            hv.get("hports", {}).pop(e, None)
+            hv.get("src_logged", {}).pop(e, None)
+            n += 1
+        if hv["joiner"][0] == j and eps:
+            hv["joiner"] = eps[0]   # stale, replaced by the next packet
+    if n:
+        log(f"RELAY ctrl: reset joiner {j}: {n} endpoint(s)/slot(s) forgotten - {why}")
 
 
 def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], now: float) -> None:
@@ -471,6 +497,9 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
         src_sock.sendto(data, (host, hport))
         if RELAY_HOLES:
             RELAY_TRAFFIC.setdefault(host, {})[src_port] = now
+            js = hv.setdefault("joiner_since", {})
+            if src_port not in js or HOST_TRAFFIC.get(host, {}).get(src_port, 0.0) > js[src_port]:
+                js[src_port] = now
     except OSError as e:
         log(f"RELAY -> host {host} send failed: {e}")
         return
@@ -567,12 +596,14 @@ def hole_steering(now: float) -> None:
             target, why = RELAY_HOLES[0], "login"
         elif hv is not None:
             dead = []
+            since = hv.get("joiner_since", {})
             for ep, port in hv.get("src", {}).items():
                 if ep not in hv["eps"] or now - hv["eps"][ep][1] > LINK_IDLE_S:
                     continue      # link not sending right now
                 if port == clt.hole_target:
                     continue      # already the ping target
-                if now - traffic.get(port, 0.0) > HOLE_DEAD_S:
+                # the joiner has been sending through this hole for HOLE_DEAD_S without any answer from the host
+                if now - traffic.get(port, 0.0) > HOLE_DEAD_S and now - since.get(port, now) > HOLE_DEAD_S:
                     dead.append((now - traffic.get(port, 0.0), port, ep))
             if dead:
                 age, target, ep = max(dead)

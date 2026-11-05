@@ -2896,6 +2896,16 @@ def handle_message(
             # is a lobby construct; the relay flow lives on traffic (idle expiry) and is dropped on the host's disconnect.
             if _relay_enabled() and os.environ.get("SCCT_RELAY_UNMAP_ON_LEAVE", "0").strip() == "1" and not is_private_addr(str(clt.addr[0])):
                 _relay_notify({"op": "unmap_any", "ip": str(clt.addr[0]), "why": "GROUP_LEAVE", "user": str(clt.username or "")}, log_fp=log_fp)
+            # A JOINER leaving a room (not the host): forget its game endpoints so a later join - possibly by another console
+            # behind the same NAT - gets fresh link slots. The host's own leave (revenge rematch) must not touch the flow.
+            if _relay_enabled() and not is_private_addr(str(clt.addr[0])) and os.environ.get("SCCT_RELAY_RESET_ON_JOINER_LEAVE", "1").strip() == "1":
+                try:
+                    _lv8 = str(msg.dl.lst[1].lst[0]) if hasattr(msg.dl.lst[1], "lst") else str(msg.dl.lst[1][0])
+                except Exception:
+                    _lv8 = ""
+                _is_host8 = any(str(r.group_id) == _lv8 and (str(r.master).lower() == str(clt.username or "").lower() or _room_host_ip(r) == str(clt.addr[0]) and is_private_addr(str(clt.addr[0]))) for r in _lobby_state.get_rooms()) if _lv8 else False
+                if _lv8 and _lv8 != "1" and not _is_host8:
+                    _relay_notify({"op": "reset_joiner", "joiner": str(clt.addr[0]), "why": f"GROUP_LEAVE room {_lv8}", "user": str(clt.username or "")}, log_fp=log_fp)
             _lobby_state.clear_ctx(sk)
             removed = _lobby_state.remove_room_by_owner(sk)
             for room_entry in removed:
