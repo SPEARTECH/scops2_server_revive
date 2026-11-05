@@ -1722,3 +1722,68 @@ DNS 141.76.94.44:50182  TXT id.server
   -> REFUSED (outside client, not an override)
 DNS 141.76.94.44:50266  TXT hostname.bind
   -> REFUSED (outside client, not an override)
+DNS override+forwarder listening
+  listen:   0.0.0.0:53
+  upstream: 1.1.1.1:53
+  overrides:
+    A noname -> 192.168.1.100  ttl=60
+  suffix overrides:
+    A *.dnas.playstation.org -> 192.168.1.100  ttl=60
+    A *.ubisoft.com -> 192.168.1.100  ttl=60
+    A *.gamespy.com -> 192.168.1.100  ttl=60
+    A *.gamespy.net -> 192.168.1.100  ttl=60
+    A *.ubi.com -> 192.168.1.100  ttl=60
+  log:      logs/dns_53.log
+  ctrl+c to stop
+DNS 45.135.193.115:57591  ANY dhitc.com
+  -> REFUSED (outside client, not an override)
+DNS 43.106.105.64:37915  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 141.98.11.129:57172  ANY ni
+  -> REFUSED (outside client, not an override)
+DNS 91.231.89.92:26885  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 91.230.168.220:27031  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 45.135.193.194:60721  ANY uu.nl
+  -> REFUSED (outside client, not an override)
+DNS 86.38.187.95:33457  A cloudflare.com
+  -> REFUSED (outside client, not an override)
+DNS 45.133.173.229:5311  A cloudflare.com
+  -> REFUSED (outside client, not an override)
+DNS 45.133.173.229:5311  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 45.133.173.229:5311  TXT hostname.bind
+  -> REFUSED (outside client, not an override)
+DNS 45.133.173.229:5311  TXT id.server
+  -> REFUSED (outside client, not an override)
+DNS 45.140.222.202:30472  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 45.198.224.251:58513  ANY wisc.edu
+  -> REFUSED (outside client, not an override)
+DNS 24.69.254.96:61615  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 24.69.254.96:61614  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS 24.69.254.96:52151  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 24.69.254.96:52151  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 24.69.254.96:52150  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS 24.69.254.96:52150  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS 45.198.224.251:34239  TXT united.com
+  -> REFUSED (outside client, not an override)
+DNS 159.26.103.62:11252  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 159.26.103.62:28799  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS 38.27.30.232:62924  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 38.27.30.232:62923  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS 24.69.254.96:62670  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 24.69.254.96:62672  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
