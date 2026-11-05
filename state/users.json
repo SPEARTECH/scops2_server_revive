@@ -25,6 +25,11 @@
       "dp": "SC3PS2US1.0",
       "password": "AAA"
     },
+    "BLACKNIGHT": {
+      "created_ts": 1793864487,
+      "dp": "SC3PS2US1.0",
+      "password": "BLACK99"
+    },
     "BNMA": {
       "created_ts": 1773593029,
       "dp": "SC3PS2US1.0",
@@ -120,6 +125,11 @@
       "dp": "SC3PS2US1.0",
       "password": "AAAAAA"
     },
+    "KNOCKEDRIVER": {
+      "created_ts": 1793865800,
+      "dp": "SC3PS2US1.0",
+      "password": "123456"
+    },
     "MANOB": {
       "created_ts": 1793806287,
       "dp": "SC3PS2US1.0",
@@ -142,6 +152,11 @@
     },
     "MYZN": {
       "created_ts": 1773761783,
+      "dp": "SC3PS2US1.0",
+      "password": "AAAAAA"
+    },
+    "NEWDOR": {
+      "created_ts": 1793850785,
       "dp": "SC3PS2US1.0",
       "password": "AAAAAA"
     },
@@ -289,6 +304,11 @@
       "created_ts": 1773710470,
       "dp": "SC3PS2US1.0",
       "password": "AAAAAA"
+    },
+    "TALLY_WHACKER": {
+      "created_ts": 1793864851,
+      "dp": "SC3PS2US1.0",
+      "password": "THUNDER7"
     },
     "TTT": {
       "created_ts": 1773615879,
