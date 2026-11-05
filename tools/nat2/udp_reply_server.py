@@ -143,7 +143,10 @@ def handle_ping(data: bytes, addr: tuple[str, int], now: float, nat_port: int = 
         if r.get("port"):
             HOST_TRAFFIC.setdefault(addr[0], {})[r["port"]] = now
             ext = HOST_EXT.setdefault(addr[0], {})
-            if ext.get(r["port"]) != addr[1]:
+            locked = HOST_EXT_LOCK.setdefault(addr[0], set())
+            # A ping only teaches the external port until the host's own game data has been seen on this hole: two
+            # consoles behind one NAT both ping, and only the host sends game data (2026-11-05 00:16, port flip-flop).
+            if r["port"] not in locked and ext.get(r["port"]) != addr[1]:
                 log(f"  hole {r['port']}: {addr[0]} socket 1 shows external port {addr[1]}" + (f" (was {ext[r['port']]})" if r["port"] in ext else ""))
                 ext[r["port"]] = addr[1]
         if hit <= 2 or hit % 50 == 0:
@@ -303,6 +306,7 @@ HOST_TRAFFIC: dict = {}     # host ip -> {hole port: monotonic time of the last 
 # host ip -> {hole port: external port the host's 3658 socket shows on that hole}. A router may give a re-created
 # mapping a different external port (2026-11-04 18:26: 3658 became 1096 on two holes while the third kept 3658).
 HOST_EXT: dict = {}
+HOST_EXT_LOCK: dict = {}   # host ip -> {hole ports whose external port was confirmed by the host's game data}
 # host ip -> {socket no ("1".."4"): external port seen on that socket's own NAT pings to 45000}. Used by the alt-socket
 # mode: every console socket keeps its 45000 hole open by itself (ping every 25 s), so a link delivered to socket k
 # from 45000 needs no steering at all.
@@ -310,7 +314,7 @@ SOCKET_EXT: dict = {}
 # Hole keepalive: a conntrack entry that has carried traffic both ways is refreshed by ANY packet through it, so the relay
 # keeps such a hole open itself by sending a datagram inbound through it when it has been quiet for this long.
 HOLE_KEEPALIVE_S = float(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE_S", "45"))
-HOLE_KEEPALIVE_PAYLOAD = bytes.fromhex(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE_HEX", ""))   # default: empty datagram
+HOLE_KEEPALIVE_PAYLOAD = bytes.fromhex(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE_HEX", "0000"))  # 2 B (some routers drop empty UDP)
 # Dead-hole rule: a joiner link is sending through a hole but the host has been silent on it for this long -> steer.
 HOLE_DEAD_S = float(os.environ.get("SCCT_RELAY_HOLE_DEAD_S", "15"))
 RELAY_TRAFFIC: dict = {}    # host ip -> {hole port: time of the last datagram the relay sent through it (joiner data or keepalive)}
@@ -524,6 +528,7 @@ def relay_from_host(data: bytes, addr: tuple[str, int], now: float, nat_port: in
         if ext.get(nat_port) != addr[1]:
             log(f"RELAY host {addr[0]}: game data on hole {nat_port} from external port {addr[1]}" + (f" (was {ext[nat_port]})" if nat_port in ext else ""))
             ext[nat_port] = addr[1]
+        HOST_EXT_LOCK.setdefault(addr[0], set()).add(nat_port)
         # multi-hole: the hole port the reply arrived on identifies the joiner link
         owners = [e for e, p in hv.get("src", {}).items() if p == nat_port and e in hv["eps"]]
         if owners:
@@ -568,6 +573,7 @@ def relay_expire(now: float) -> None:
         if now - hv["last"] > RELAY_IDLE_S:
             RELAY_HOSTS.pop(h, None)
             HOST_EXT.pop(h, None)
+            HOST_EXT_LOCK.pop(h, None)
             RELAY_TRAFFIC.pop(h, None)
             log(f"RELAY host {h}: idle {RELAY_IDLE_S:.0f}s, flow dropped (rx={hv['rx']} tx={hv['tx']})")
 
@@ -620,8 +626,11 @@ def hole_steering(now: float) -> None:
             if not hasattr(clt, "hole_steer_time"):
                 clt.hole_steer_time = {}
             clt.hole_steer_time[target] = now
+            ka_n = (hv or {}).get("ka", {}).get(target, 0) if hv else 0
+            ka_t = RELAY_TRAFFIC.get(clt.addr, {}).get(target)
             log(f"HOLE steer #{clt.hole_count}: {clt.addr} socket 1 -> ping port {target} ({why}; " +
-                ", ".join(f"{p}: {now - traffic[p]:.0f}s ago" if p in traffic else f"{p}: never" for p in RELAY_HOLES) + ")")
+                ", ".join(f"{p}: {now - traffic[p]:.0f}s ago" if p in traffic else f"{p}: never" for p in RELAY_HOLES if p in traffic or p == target) +
+                f"; keepalives on {target}: {ka_n}" + (f", last relay send {now - ka_t:.0f}s ago" if ka_t else "") + ")")
             if clt.hole_count >= HOLE_BUDGET - 2:
                 log(f"HOLE WARNING: {clt.addr} has received {clt.hole_count} steering messages (cap {HOLE_BUDGET}; the console stops reacting around 11)")
         except Exception as e:
@@ -667,7 +676,10 @@ def pick_slot(hv: dict, ep, now: float, prev_t, nslots: int) -> int:
         old = slots.pop(ep)
         counts[ep] = 0
         log(f"RELAY host: endpoint {ep[0]}:{ep[1]} reappears after {now - prev_t:.0f}s idle without having been established; re-allocating (was slot {old})")
-    held = {slots[e] for e in slots if counts.get(e, 0) >= LINK_ESTABLISHED and e in hv["eps"]}
+    # slots in use: established links, plus any link of ANOTHER joiner that is sending right now (only a joiner's own
+    # short probe may share a slot with its room link)
+    held = {slots[e] for e in slots if e in hv["eps"] and (counts.get(e, 0) >= LINK_ESTABLISHED
+            or (e[0] != ep[0] and now - hv["eps"][e][1] <= LINK_IDLE_S))}
     free = [i for i in range(nslots) if i not in held]
     if free:
         slot = free[0]
