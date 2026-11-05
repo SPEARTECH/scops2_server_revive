@@ -1,1 +1,25 @@
-{}
+{
+  "100": {
+    "group_type": 5,
+    "group_id": 100,
+    "group_name": "SNK",
+    "master": "SNK",
+    "allowed_games": "SPLINTERCELL3PS2US",
+    "max_players": 4,
+    "event_id": 1228530451,
+    "game_version": "1228530451",
+    "gs_version": "1.0",
+    "config": 472,
+    "parent_id": 1,
+    "ip_addr": "38.49.212.120",
+    "alt_ip_addr": "38.49.212.120",
+    "real_ip_addr": "38.27.30.232",
+    "info_b64": "D2gsQP9JTkkwMQAAAENpbmVtYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA/MzguNDkuMjEyLjEyMAAAACYx1HgOSnlDMzguNDkuMjEyLjEyMAAAACYx1HgOSgAA",
+    "nb_players": 1,
+    "max_visitors": 0,
+    "nb_visitors": 0,
+    "games": "SPLINTERCELL3PS2US",
+    "owner_key": "38.27.30.232:52576",
+    "raw_frame": "0000ae00d124fab9fdc1c4d8f4acb5f6abd6e3bbd6e2e5c8909eb4f0a4d5e2c18c9095d5eed9d1f4add4e1d6fabedfd3eda9b243a9d3e0db5133ddd5e5fb81fbafd2dfdd38310dc8dcf2c39686d1dec5f72c0c5fcc94afd1c4d0ddd8f639391a2ef69ab7c3cfdcd0f53339fb2a16ded7c2cedbd9cdbc3b0c691116b6f0cddad8c787260a19135549f0ccd966c0b737366b2a252a2ecbd8e5dff2350f172615192d6dd7e4c0022b0e162f16062c2f"
+  }
+}
