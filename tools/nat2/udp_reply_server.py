@@ -135,6 +135,8 @@ def handle_ping(data: bytes, addr: tuple[str, int], now: float, nat_port: int = 
     if r.get("extra"):
         hit = r.get("hit", 0) + 1
         r["hit"] = hit
+        if r.get("port"):
+            HOST_TRAFFIC.setdefault(addr[0], {})[r["port"]] = now
         if hit <= 2 or hit % 50 == 0:
             log(f"  HOLE PING #{hit}: {addr[0]}:{addr[1]} reached port {r.get('port')}")
         return [(srp.ack_segment(clt), (clt.addr, clt.port))]
@@ -170,9 +172,10 @@ def handle_ping(data: bytes, addr: tuple[str, int], now: float, nat_port: int = 
     packets = [(out, (clt.addr, clt.port))]
     if str(r["sock"]) == "1" and not r.get("extra") and RELAY_HOLES:
         clt.hole_msg = r["msg"]
-        clt.hole_idx = 0
-        clt.hole_next = now          # first steering PORT_ID goes out on the next loop pass
-        log(f"  multi-hole: socket 1 of {clt.addr} will be cycled over ports {RELAY_HOLES} every {HOLE_REFRESH_S:.0f}s")
+        clt.hole_target = None       # port socket 1 currently pings (None = still 45000)
+        clt.hole_last = 0.0
+        clt.hole_count = 0
+        log(f"  multi-hole: socket 1 of {clt.addr} will be steered to {RELAY_HOLES[0]} now, other holes on demand")
     if NAT_EXTRA_PORTID and not RELAY_HOLES and str(r["sock"]) == "1" and not r.get("extra"):
         for xport in NAT_EXTRA_PORTID:
             try:
@@ -273,9 +276,16 @@ NAT_EXTRA_PORTID = [int(x) for x in os.environ.get("SCCT_NAT_EXTRA_PORTID", "").
 # pings each in turn and keeps every hole open. The relay then uses one hole port per joiner link as its source, so the
 # host sees distinct source ports per link (as it would natively) and its replies arrive on distinct relay sockets.
 RELAY_HOLES = [int(x) for x in os.environ.get("SCCT_RELAY_HOLES", "").replace(";", ",").split(",") if x.strip()]
-HOLE_REFRESH_S = float(os.environ.get("SCCT_RELAY_HOLE_REFRESH_S", "10"))
+# Steering budget: the console's SRP receive window is 536 B and unsolicited PORT_IDs (~46 B) are apparently never freed
+# from it; after ~11 of them the console stopped reacting (2026-11-04 17:19). So a steer is sent only when a hole that is
+# NEEDED (the first hole, or one a live joiner link uses) has seen no host traffic for SCCT_RELAY_HOLE_STALE_S seconds,
+# at most one every SCCT_RELAY_HOLE_MIN_S seconds per console. Typical session: login, game link, match start, match end.
+HOLE_STALE_S = float(os.environ.get("SCCT_RELAY_HOLE_STALE_S", "12"))
+HOLE_MIN_S = float(os.environ.get("SCCT_RELAY_HOLE_MIN_S", "8"))
 HOLE_SOCKS: dict = {}       # port -> socket (bound hole ports)
-LINK_IDLE_S = 5.0           # a joiner endpoint silent for longer frees its hole port
+HOST_TRAFFIC: dict = {}     # host ip -> {hole port: monotonic time of the last datagram from that host's 3658 on it}
+LINK_IDLE_S = 5.0           # a joiner endpoint silent for longer is not "live"
+LINK_ESTABLISHED = 20       # packets from an endpoint before a later endpoint gets its own hole (probe + room link share)
 RELAY_IDLE_S = float(os.environ.get("SCCT_RELAY_IDLE_S", "600"))
 RELAY_MAP: dict = {}        # joiner_ip -> {"host": host_ip, "room": ..., "user": ..., "ts": t}
 RELAY_HOSTS: dict = {}      # host_ip -> {"joiner": (ip, port), "sock": relay socket, "rx": n, "tx": n, "last": t, "first": t}
@@ -396,6 +406,7 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
         hv["joiner"] = addr
         hv["sock"] = sock
     hv["eps"][addr] = (sock, now)
+    hv.setdefault("ep_rx", {})[addr] = hv.setdefault("ep_rx", {}).get(addr, 0) + 1
     hv["rx"] += 1
     hv["last"] = now
     # host destination port for this joiner endpoint: first endpoint -> 3658, later ones -> alt host sockets (if enabled)
@@ -441,6 +452,7 @@ def relay_from_host(data: bytes, addr: tuple[str, int], now: float, nat_port: in
     dest, dsock = hv["joiner"], hv["sock"]
     cands = []
     if RELAY_HOLES and nat_port in RELAY_HOLES:
+        HOST_TRAFFIC.setdefault(addr[0], {})[nat_port] = now
         # multi-hole: the hole port the reply arrived on identifies the joiner link
         owners = [e for e, p in hv.get("src", {}).items() if p == nat_port and e in hv["eps"]]
         if owners:
@@ -488,40 +500,57 @@ def relay_expire(now: float) -> None:
 
 
 def hole_steering(now: float) -> None:
-    """Multi-hole mode: periodically re-send a PORT_ID for socket 1 of every client, cycling over RELAY_HOLES."""
+    """Multi-hole mode: send a PORT_ID for socket 1 only when a needed hole is stale (see HOLE_STALE_S)."""
     main = NAT_MAIN_SOCK
     for clt in list(CLIENTS):
         msg = getattr(clt, "hole_msg", None)
-        if msg is None or now < getattr(clt, "hole_next", 0):
+        if msg is None or now - clt.hole_last < HOLE_MIN_S:
             continue
-        port = RELAY_HOLES[clt.hole_idx % len(RELAY_HOLES)]
-        clt.hole_idx += 1
-        clt.hole_next = now + HOLE_REFRESH_S
+        traffic = HOST_TRAFFIC.get(clt.addr, {})
+        hv = RELAY_HOSTS.get(clt.addr)
+        needed = {RELAY_HOLES[0]}
+        if hv is not None:
+            needed |= {p for e, p in hv.get("src", {}).items() if e in hv["eps"]}
+        if clt.hole_target is None:
+            target = RELAY_HOLES[0]
+        else:
+            stale = [(now - traffic.get(p, 0.0), p) for p in needed if p != clt.hole_target]
+            stale = [(age, p) for age, p in stale if age > HOLE_STALE_S]
+            if not stale:
+                continue
+            target = max(stale)[1]
         try:
-            xr, xpid = nat_reply(msg, gsm.NAT_MSG.PORT_ID, 0, port, pick_id=True)
-            clt.reqs[xpid] = {"msg": msg, "sock": "1", "pending": True, "extra": True, "port": port, "ts": now}
+            xr, xpid = nat_reply(msg, gsm.NAT_MSG.PORT_ID, 0, target, pick_id=True)
+            clt.reqs[xpid] = {"msg": msg, "sock": "1", "pending": True, "extra": True, "port": target, "ts": now}
             main.sendto(bytes(srp.SRPResponse(None, clt, xr)), (clt.addr, clt.port))
-            if clt.hole_idx <= len(RELAY_HOLES) or clt.hole_idx % 30 == 0:
-                log(f"HOLE steer: {clt.addr} socket 1 -> ping port {port} (round {clt.hole_idx})")
+            clt.hole_target = target
+            clt.hole_last = now
+            clt.hole_count += 1
+            log(f"HOLE steer #{clt.hole_count}: {clt.addr} socket 1 -> ping port {target} (needed {sorted(needed)}; " +
+                ", ".join(f"{p}: {now - traffic[p]:.0f}s ago" if p in traffic else f"{p}: never" for p in RELAY_HOLES) + ")")
+            if clt.hole_count >= 9:
+                log(f"HOLE WARNING: {clt.addr} has received {clt.hole_count} steering messages; the console may stop reacting around 11")
         except Exception as e:
             log(f"HOLE steer failed for {clt.addr}: {e!r}")
-        # prune old steering entries (keep the last few so late pings still match)
-        old = [k for k, v in clt.reqs.items() if v.get("extra") and now - v.get("ts", now) > 4 * HOLE_REFRESH_S * len(RELAY_HOLES)]
+        old = [k for k, v in clt.reqs.items() if v.get("extra") and now - v.get("ts", now) > 600]
         for k in old:
             clt.reqs.pop(k, None)
 
 
 def pick_hole_port(hv: dict, ep, now: float) -> int:
-    """Source port (hole) for a joiner endpoint: keep its port; otherwise the first hole not used by a live endpoint."""
+    """Source hole port for a joiner endpoint. The first hole is shared until one endpoint on it is established
+    (the join probe and the room link arrive 1 s apart and the host copes with both from one source); a later endpoint
+    (the game link) gets a hole no live endpoint uses, so the host sees it as a distinct peer."""
     src = hv.setdefault("src", {})
     if ep in src:
         return src[ep]
-    busy = {src[e] for e, (sk, t) in hv["eps"].items() if e in src and now - t <= LINK_IDLE_S and e != ep}
+    counts = hv.setdefault("ep_rx", {})
+    live = {e for e, (sk, t) in hv["eps"].items() if e != ep and now - t <= LINK_IDLE_S and e in src}
+    busy = {src[e] for e in live if counts.get(e, 0) >= LINK_ESTABLISHED}
     free = [p for p in RELAY_HOLES if p not in busy]
     if free:
         port = free[0]
     else:
-        # all holes busy: take the one whose endpoint was least recently heard
         lru = min((e for e in src if e in hv["eps"]), key=lambda e: hv["eps"][e][1], default=None)
         port = src[lru] if lru is not None else RELAY_HOLES[0]
         log(f"RELAY host: all hole ports busy, reusing {port} for {ep[0]}:{ep[1]}")
@@ -607,7 +636,7 @@ def main(argv=None) -> int:
     if NAT_EXTRA_PORTID and not RELAY_HOLES:
         log(f"  EXTRA PORT_ID experiment: socket 1 also told to ping {NAT_EXTRA_PORTID} (these ports must be in --ports)")
     if RELAY_HOLES:
-        log(f"  MULTI-HOLE: socket 1 of every console steered over {RELAY_HOLES} every {HOLE_REFRESH_S:.0f}s; one hole port per joiner link")
+        log(f"  MULTI-HOLE: holes {RELAY_HOLES}; socket 1 steered to a needed hole only when it is stale (>{HOLE_STALE_S:.0f}s), min {HOLE_MIN_S:.0f}s apart")
     else:
         log("  RELAY: off")
     all_socks = list(socks) + list(relay_socks) + ([ctrl_sock] if ctrl_sock is not None else [])
