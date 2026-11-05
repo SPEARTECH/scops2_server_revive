@@ -4441,3 +4441,2289 @@ Ubisoft GS Router WM listening
 <STILLALIVE	GS	P->S	6B>
 [2026-11-04 15:48:56.296] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
 0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:53:41.856] ROUTER_WM fixed-rsa loaded from state\shared_router_rsa.json
+[2026-11-04 15:53:41.870] ROUTER_WM pre-built boot_ke1 len=284
+Ubisoft GS Router WM listening
+  bind:  0.0.0.0:40005
+  proxy: 192.168.1.100:44002
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  login-boot-delay: 0.0s
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=192.168.1.100:44002
+
+[2026-11-04 15:54:48.375] ROUTER_WM 38.27.30.232:49608 -> 38.49.212.120:40005 CONNECT pre_ke1=yes
+[2026-11-04 15:54:48.375] ROUTER_WM RX len=284 sha256=ff459116f11e72b4
+0000  00 01 1c 00 db 82 fa 8b bf a4 97 9d a4 ac b5 bf   ................
+0010  ca d6 61 53 88 59 21 bb fe a3 96 9c a3 ab b4 be   ..aS.Y!.........
+0020  c9 d5 40 57 4f f0 20 31 d7 e3 f7 99 a2 aa b3 bd   ..@WO. 1........
+0030  c8 d4 2b d6 e7 6c 1f 30 40 8f 94 9a a1 a9 b2 bc   ..+..l.0@.......
+0040  c7 d3 88 24 ff 9e 1e 2f 3f 4e a3 9d a0 a8 b1 bb   ...$.../?N......
+0050  c6 d2 57 a0 e5 bb 68 2e 3e 4d 5b 99 9f a7 b0 ba   ..W...h.>M[.....
+0060  c5 d1 6d ce 44 1a c9 2d 3d 4c 5a 67 9e a6 af b9   ..m.D..-=LZg....
+0070  c4 d0 dd d4 51 29 8a 2c 3c 4b 59 66 72 a5 ae b8   ....Q).,<KYfr...
+0080  c3 cf dc fd eb c8 94 2b 3b 4a 58 65 71 7c ad b7   .......+;JXeq|..
+0090  c2 ce db ec d1 72 aa 2a 3a 49 57 64 70 7b 85 b6   .....r.*:IWdp{..
+00a0  c1 cd da 55 15 9b 16 29 39 48 56 63 6f 7a 84 8d   ...U...)9HVcoz..
+00b0  c0 cc d9 59 d8 79 6e 28 38 47 55 62 6e 79 83 8c   ...Y.yn(8GUbny..
+00c0  94 cb d8 e1 88 9b 4e 27 37 46 54 61 6d 78 82 8b   ......N'7FTamx..
+00d0  93 9a d7 4a 6f 5f c5 26 36 45 53 60 6c 77 81 8a   ...Jo_.&6ES`lw..
+00e0  92 99 6a bf e0 5a 25 35 44 52 5f 6b 76 80 89 91   ..j..Z%5DR_kv...
+00f0  98 c3 11 30 0a 24 34 43 51 5e 6a 75 7f 88 90 97   ...0.$4CQ^ju....
+??? (truncated to 256 bytes)
+<KEY_EXCHANGE	GS	UNK->S	284B>
+['1', ['1', '260', b'\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xb3\x88h\xca\xa2\x82\x8e\xaf\x07\xbe\xbd\x05\x17?"M\xca9\xa7\xa2\xe3L\x9b}.\xe2)\x12\xab\xbf\x19\x02\x19\xb0\x88\x012\xe3[\x9e\x7f\x9cz\xc1#\x11\xb7\x93b\xffI(\xf2\x19N\xd0Xy\x0e\xb3\x8e\x91\xd5u\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03']]
+[2026-11-04 15:54:48.379] ROUTER_WM KEY_EXCHANGE(1) client pubkey bits=512 n_bits=512 e=3
+[2026-11-04 15:54:48.379] ROUTER_WM KEY_EXCHANGE(1) pre-KE1 already sent, re-sending KE1 response
+[2026-11-04 15:54:48.380] ROUTER_WM TX[tx] len=284 sha256=e88d33b11b52ed82
+0000  00 01 1c 00 db 28 fa 8b bf a4 97 9d a4 ac b5 bf   .....(..........
+0010  ca d6 6c de ab da 21 bb fe a3 96 9c a3 ab b4 be   ..l...!.........
+0020  c9 d5 23 ba f9 de 20 31 d7 e3 f7 99 a2 aa b3 bd   ..#... 1........
+0030  c8 d4 bc e5 90 6d 1f 30 40 8f 94 9a a1 a9 b2 bc   .....m.0@.......
+0040  c7 d3 cb e4 f4 5f 1e 2f 3f 4e a3 9d a0 a8 b1 bb   ....._./?N......
+0050  c6 d2 fb cf 8f 77 4a 2e 3e 4d 5b 99 9f a7 b0 ba   .....wJ.>M[.....
+0060  c5 d1 5a 65 4e 9f f8 2d 3d 4c 5a 67 9e a6 af b9   ..ZeN..-=LZg....
+0070  c4 d0 dd 3f 76 f2 6a 2c 3c 4b 59 66 72 a5 ae b8   ...?v.j,<KYfr...
+0080  c3 cf dc e8 cd 08 0b 2b 3b 4a 58 65 71 7c ad b7   .......+;JXeq|..
+0090  c2 ce db bf 82 c1 d2 2a 3a 49 57 64 70 7b 85 b6   .......*:IWdp{..
+00a0  c1 cd da 2c 7e ab fa 29 39 48 56 63 6f 7a 84 8d   ...,~..)9HVcoz..
+00b0  c0 cc d9 fe 28 71 48 28 38 47 55 62 6e 79 83 8c   ....(qH(8GUbny..
+00c0  94 cb d8 20 c8 8b 71 27 37 46 54 61 6d 78 82 8b   ... ..q'7FTamx..
+00d0  93 9a d7 d4 ad cf ec 26 36 45 53 60 6c 77 81 8a   .......&6ES`lw..
+00e0  92 99 0a 22 af 3d 25 35 44 52 5f 6b 76 80 89 91   ...".=%5DR_kv...
+00f0  98 c3 38 fd f3 24 34 43 51 5e 6a 75 7f 88 90 97   ..8..$4CQ^ju....
+??? (truncated to 256 bytes)
+[2026-11-04 15:54:48.424] ROUTER_WM RX len=98 sha256=a6d62eae4cef5304
+0000  00 00 57 00 db 82 fa 8b bf a6 97 16 4c 4f 08 b8   ..W.........LO..
+0010  fe a7 96 aa 88 30 d8 ee d7 e3 95 a6 51 e4 21 76   .....0......Q.!v
+0020  67 8f f6 ce 10 27 78 d1 90 b8 93 a4 f1 d1 16 10   g....'x.........
+0030  56 d0 4b d8 0f a2 12 61 58 5a ea 93 de 06 d4 d3   V.K....aXZ......
+0040  54 c6 3d 4d 87 ad 0f e0 35 ae db 22 52 38 e6 4a   T.=M....5.."R8.J
+0050  46 1e e1 a5 40 0e 84 00 00 0b 00 4d 41 fa c5 d9   F...@......MA...
+0060  8d c7                                             ..
+<KEY_EXCHANGE	GS	UNK->S	87B>
+['2', ['1', '64', b'=T=6\x8b@\x90Q\xb1\xf3+\xe8\x08\xa0\x05y\x8eN\x9b\xe3K\xa1{\xa2\xa7\xca\x92l\xbd\xfcWk\xd8\xaaj\xcaS\xf8\x8a\x94\x99\x94S\xa3\xdbh\x01\x92\x19r*\x17\xf0$\x84u\xf3\x9f@\x94\x87Q\xd9\xe0']]
+[2026-11-04 15:54:48.426] ROUTER_WM KEY_EXCHANGE(2) decrypted client BF key len=16
+[2026-11-04 15:54:48.427] ROUTER_WM KEY_EXCHANGE(2) mode=echo-client
+[2026-11-04 15:54:48.427] ROUTER_WM KEY_EXCHANGE(2) RX hdr b3=00 b4=db b5=82
+[2026-11-04 15:54:48.428] ROUTER_WM TX[tx] len=87 sha256=bcba79bb7b2dd737
+0000  00 00 57 00 db 28 fa 8b bf a6 97 71 ba bd ce b8   ..W..(.....q....
+0010  fe a7 96 9e 1f 59 69 bd d7 e3 95 1b 7a 09 c6 09   .....Yi.....z...
+0020  f7 8f f6 8b af 4a 09 44 bf 04 93 04 c1 72 c2 e8   .....J.D.....r..
+0030  b6 81 91 d8 26 e7 fd 98 2b b8 5b ab 05 36 d5 52   ....&...+.[..6.R
+0040  19 42 8d 70 e8 e2 69 ac 0e ca 90 9a 64 39 2e 3b   .B.p..i.....d9.;
+0050  13 c9 b4 04 56 95 84                              ....V..
+<LOGINWAITMODULE	GS	P->R	11B>
+['SNK']
+[2026-11-04 15:54:48.431] ROUTER_WM TX[tx] len=12 sha256=8e9106f332123cd8
+0000  00 00 0c 00 26 14 eb 8b c3 8a 8c 8c               ....&.......
+[2026-11-04 15:54:48.440] ROUTER_WM RX len=87 sha256=0aaaa06c60d684dd
+0000  00 00 57 00 db 82 fa 8b bf a6 97 41 52 61 8d b8   ..W........ARa..
+0010  fe a7 96 04 cf 67 69 db d7 e3 95 f7 bf e1 12 c2   .....gi.........
+0020  62 8f f6 8b ea 4e 08 9d 29 55 93 bb 72 c0 19 c3   b....N..)U..r...
+0030  9e 57 b8 d8 42 f4 96 09 ab 64 3f 92 69 19 c8 62   .W..B....d?.i..b
+0040  4b 68 c8 ed 43 83 14 bc c7 31 df 14 1f f8 10 2a   Kh..C....1.....*
+0050  9e cc b0 8b dc a1 84                              .......
+<KEY_EXCHANGE	GS	UNK->S	87B>
+['2', ['1', '64', b'"\x11l\x98\xdc\xf7\xdd\xd2K\x1dl\xf6&\xbfSh\xe7K\xcc\xcd\xbd\xbag&\xa8\xba\xa1\xdd8\x9c\x0b\xda\xb0y&~f x\x8bj\\\xea\xa6\t\xf7\xaf\xac\x9e\x9f{\x13\x05\xf1w[\xc5?A\x08\xca\x95v ']]
+[2026-11-04 15:54:48.442] ROUTER_WM KEY_EXCHANGE(2) decrypted client BF key len=16
+[2026-11-04 15:54:48.442] ROUTER_WM KEY_EXCHANGE(2) mode=echo-client
+[2026-11-04 15:54:48.442] ROUTER_WM KEY_EXCHANGE(2) RX hdr b3=00 b4=db b5=82
+[2026-11-04 15:54:48.443] ROUTER_WM TX[tx] len=87 sha256=79291fb82392615f
+0000  00 00 57 00 db 28 fa 8b bf a6 97 4e 12 91 61 b8   ..W..(.....N..a.
+0010  fe a7 96 83 08 43 c0 54 d7 e3 95 17 c3 22 1f 63   .....C.T.....".c
+0020  ae 8f f6 ab cd 88 48 1d a1 32 93 ee b3 6d 98 ea   ......H..2...m..
+0030  6b 76 28 d8 27 b0 41 de 4c e9 c2 23 9b 98 f6 09   kv(.'.A.L..#....
+0040  41 15 ee 5f e6 e0 43 b7 b6 de 5c e1 80 2c b4 ec   A.._..C...\..,..
+0050  a7 22 35 be 3c 9f 84                              ."5.<..
+[2026-11-04 15:54:48.541] ROUTER_WM RX len=32 sha256=4d151a0a788d790f
+0000  00 00 20 00 d1 41 fa ba fd db d4 ce b8 d6 dd c4   .. ..A..........
+0010  cc ff 8c c0 d0 a8 a1 dc c0 d6 f3 dd d5 ca dd ac   ................
+<LOBBY_MSG	GS	P->R	32B>
+['21', ['SPLINTERCELL3PS2US']]
+[2026-11-04 15:54:48.546] ROUTER_WM LOBBY_MSG subtype=21 from=SNK@38.27.30.232:49608
+[2026-11-04 15:54:48.546] ROUTER_WM LOGIN lobby entry: ['0', 'www.splintercellonline.net', '1', '1', '0', '448', '1', '', '', '', b'', '0', '16', '1']
+[2026-11-04 15:54:48.551] ROUTER_WM LOBBY_MSG LOGIN -> GROUP_INFO with 1 lobby (no rooms)
+[2026-11-04 15:54:48.551] ROUTER_WM LOGIN extra[0] len=98 b5=0x14
+[2026-11-04 15:54:48.551] ROUTER_WM TX[tx] len=16 sha256=649c34e105240c00
+0000  00 00 10 00 d1 14 fa b3 fd cf b9 d6 91 8c a1 bd   ................
+[2026-11-04 15:54:48.553] ROUTER_WM TX[push0] len=98 sha256=fad928ef431048b3
+0000  00 00 62 00 d1 14 fa b8 fd a0 e4 ee 8a de db cc   ..b.............
+0010  bf d6 e2 cd c7 d4 ce dd be f0 8c 90 95 c0 d5 de   ................
+0020  df 8c f3 d0 be a2 c7 d6 c7 dc cf f2 bc d7 a6 99   ................
+0030  d3 c1 de bb b6 ce d6 eb a8 9f cb dc ce c4 be d5   ................
+0040  ed bf ae d6 c3 dc f3 cc d4 a8 e1 d6 cb d6 b1 fa   ................
+0050  b1 da d1 ce 99 c1 b9 d2 e9 ac b9 d3 f1 c9 a2 ab   ................
+0060  de be                                             ..
+[2026-11-04 15:54:48.591] ROUTER_WM RX len=64 sha256=d96163026019730d
+0000  00 00 18 00 4e 41 eb 8b 8e f0 97 8a 89 91 92 8c   ....NA..........
+0010  90 95 9a 8f 94 99 93 98 00 00 0a 00 de 41 fa e5   .............A..
+0020  ef 8c 00 00 1e 00 cc 41 fa 8b e2 f7 e5 bb fe f5   .......A........
+0030  f3 ab d7 f4 e0 e9 ae ee e5 99 ee fd e1 e1 9c 9f   ................
+<LOGINFRIENDS	GS	P->R	24B>
+[b'\x00\x00\x00\x00', b'\x00\x00\x00\x00']
+[2026-11-04 15:54:48.593] FRIENDS LOGINFRIENDS SNK: 0 friend(s) []
+[2026-11-04 15:54:48.594] ROUTER_WM TX[tx] len=12 sha256=6e11286b75ff1666
+0000  00 00 0c 00 26 14 eb 8b c0 8a 8c 8c               ....&.......
+<0xDE	GS	P->R	10B>
+['en']
+[2026-11-04 15:54:48.596] ROUTER_WM MOTD request lang='en' -> game='Welcome to the Splinter Cell: Chaos Theory community server!'... ubi=''...
+[2026-11-04 15:54:48.597] ROUTER_WM TX[tx] len=122 sha256=92de1cee99d8fc0d
+0000  00 00 7a 00 26 14 eb 8b 50 e1 f8 bd c8 c9 c6 d0   ..z.&...P.......
+0010  b8 8a 8c 91 f5 f3 d3 e8 db dd ac f4 8c e3 f9 ef   ................
+0020  f1 8a d2 9d bb a7 a9 d4 f1 ba 81 db da c5 e7 bb   ................
+0030  b3 8a c4 fc c5 cd f2 c9 bf b5 b6 90 89 f5 f7 d3   ................
+0040  90 d5 b1 95 f5 c3 8c d2 ea c8 95 dc ad c5 bc 96   ................
+0050  84 82 96 cc c2 d0 ad ef ac 99 88 99 85 fb c1 e3   ................
+0060  b7 bf b6 94 80 87 86 d4 96 ac a9 a2 f1 84 9a 91   ................
+0070  9c ad bd a6 ba c6 cd 9e 9f a1                     ..........
+<PROXY_HANDLER	GS	P->R	30B>
+['1', ['ladderquery', '0', '0']]
+[2026-11-04 15:54:48.598] ROUTER_WM PROXY_HANDLER subtype=1 module=ladderquery
+[2026-11-04 15:54:48.598] ROUTER_WM PROXY_HANDLER ct34 base=ladderquery id=2 host=38.49.212.120:44002
+[2026-11-04 15:54:48.600] ROUTER_WM TX[tx] len=65 sha256=359e0677f2d2df3f
+0000  00 00 41 00 cc 14 fa b3 fd e1 f2 e4 a4 94 b9 d6   ..A.............
+0010  ca f2 ee 93 98 81 8c 90 f1 fe d1 d9 83 ca be f5   ................
+0020  ef a1 a9 83 b8 8c ff e8 90 9a 9e 87 8d 9f ea ec   ................
+0030  d4 96 84 8c 9c 9e fd 9a 84 8f 9d fe 83 9a 8e bf   ................
+0040  9e                                                .
+[2026-11-04 15:54:48.657] ROUTER_WM RX len=14 sha256=62c6f616cfa72f4b
+0000  00 00 0e 00 cc 41 fa 8b bc b8 fe cd d7 8f         .....A........
+<PROXY_HANDLER	GS	P->R	14B>
+['2', ['2']]
+[2026-11-04 15:54:48.658] ROUTER_WM PROXY_HANDLER subtype=2 module=2
+[2026-11-04 15:54:48.660] ROUTER_WM TX[tx] len=20 sha256=89c092a9b61ad872
+0000  00 00 14 00 cc 14 fa b3 fd e1 b9 d6 ca c8 8c 90   ................
+0010  94 bd a1 cb                                       ....
+[2026-11-04 15:54:48.957] ROUTER_WM RX len=14 sha256=1c06d926ecbb6d0c
+0000  00 00 0e 00 cc 41 d2 b8 bc f9 fe cd 8c 8f         .....A........
+<PROXY_HANDLER	GS	P->R	14B>
+[['3', '2']]
+[2026-11-04 15:54:48.969] ROUTER_WM PROXY_HANDLER subtype=['3', '2'] module=?
+[2026-11-04 15:54:48.969] ROUTER_WM PROXY_HANDLER module notice ['3', '2']: no reply sent
+[2026-11-04 15:54:57.868] ROUTER_WM RX len=14 sha256=dc6dba38e02e478a
+0000  00 00 0e 00 d1 41 fa 8b bf b9 fe cd d7 8f         .....A........
+<LOBBY_MSG	GS	P->R	14B>
+['3', ['1']]
+[2026-11-04 15:54:57.894] ROUTER_WM LOBBY_MSG subtype=3 from=SNK@38.27.30.232:49608
+[2026-11-04 15:54:57.894] ROUTER_WM LOBBY_MSG JOIN_SERVER id=1 -> 38.49.212.120:40005
+[2026-11-04 15:54:57.896] ROUTER_WM TX[tx] len=42 sha256=cadbb3638d430acd
+0000  00 00 2a 00 d1 14 fa b3 fd e1 af ac b9 d6 ca a5   ..*.............
+0010  ae 92 8c 90 e6 b5 93 96 bc 94 a3 91 91 9c a2 ad   ................
+0020  b1 d7 98 f6 b6 ac a3 97 aa f1                     ..........
+
+[2026-11-04 15:54:57.952] ROUTER_WM 38.27.30.232:49605 -> 38.49.212.120:40005 CONNECT pre_ke1=yes
+[2026-11-04 15:54:57.955] ROUTER_WM RX len=47 sha256=6301ce4742271bf3
+0000  00 00 2f 00 d2 42 fa c5 fd a3 a1 a9 8a d9 8d e2   ../..B..........
+0010  a7 ae 96 9f c7 90 bb b5 97 9b dc be a6 aa 93 86   ................
+0020  ae aa b7 d3 92 9d a0 9f 93 82 b1 a7 97 9e 80      ...............
+<LOBBYSERVERLOGIN	GS	P->S	47B>
+['SNK', '1', '192.168.0.249', '255.255.255.0', '0']
+[2026-11-04 15:54:57.960] ROUTER_WM LOBBYSERVERLOGIN user=SNK svid=1
+[2026-11-04 15:54:57.960] ROUTER_WM LOBBY session registered (lobby-server conn): 38.27.30.232:49605 user=SNK
+[2026-11-04 15:54:57.964] ROUTER_WM TX[tx] len=16 sha256=16182c08896123b7
+0000  00 00 10 00 26 24 fa ba d5 cf b8 8d 91 bc a1 fc   ....&$..........
+[2026-11-04 15:54:57.969] ROUTER_WM RX len=87 sha256=7bcd890978e265ab
+0000  00 00 57 00 db 82 fa 8b bf a6 97 1e 2d 6d 6b b8   ..W.........-mk.
+0010  fe a7 96 4f f5 bb b3 b2 d7 e3 95 98 d1 8e 64 86   ...O..........d.
+0020  a1 8f f6 91 c8 c7 ae 49 8e e9 93 c8 89 19 85 d4   .......I........
+0030  3b 43 4e d8 27 25 71 7d ef 45 8f f8 6a 8f c3 de   ;CN.'%q}.E..j...
+0040  cd ca 9b bd 42 76 5f 50 7d 89 e0 72 44 ef 71 c1   ....Bv_P}..rD.q.
+0050  6c 73 c6 58 63 c6 84                              ls.Xc..
+<KEY_EXCHANGE	GS	UNK->S	87B>
+['2', ['1', '64', b'Q\x0b\x03\xd3\x83\xf4\xb8)isV\x89\xd3)\x82\xb1n$\x10\xc1\xdc\xf1l\xc14\x1c\xd7\x07\xdew\xe7f\xc4n\xf2:\x0f\xd2\xc2\r.\xf9Me\xb6O\r\x8d\x8a#\r,VA\x81\x88\xa3o+\xb7\x91\x94\x117']]
+[2026-11-04 15:54:57.995] ROUTER_WM KEY_EXCHANGE(2) decrypted client BF key len=16
+[2026-11-04 15:54:57.997] ROUTER_WM KEY_EXCHANGE(2) mode=echo-client-nopub (lobby fallback)
+[2026-11-04 15:54:57.997] ROUTER_WM KEY_EXCHANGE(2) RX hdr b3=00 b4=db b5=82
+[2026-11-04 15:54:57.999] ROUTER_WM TX[tx] len=87 sha256=e4676cbbb57021c6
+0000  00 00 57 00 db 28 fa 8b bf a6 97 1e 2d 6d 6b b8   ..W..(......-mk.
+0010  fe a7 96 4f f5 bb b3 b2 d7 e3 95 98 d1 8e 64 86   ...O..........d.
+0020  a1 8f f6 91 c8 c7 ae 49 8e e9 93 c8 89 19 85 d4   .......I........
+0030  3b 43 4e d8 27 25 71 7d ef 45 8f f8 6a 8f c3 de   ;CN.'%q}.E..j...
+0040  cd ca 9b bd 42 76 5f 50 7d 89 e0 72 44 ef 71 c1   ....Bv_P}..rD.q.
+0050  6c 73 c6 58 63 c6 84                              ls.Xc..
+[2026-11-04 15:54:58.000] ROUTER_WM RX len=22 sha256=8f9e31a122a5331c
+0000  00 00 16 00 d1 42 fa b8 fd 92 b8 d6 e2 a0 8c 90   .....B..........
+0010  a6 97 be e0 a0 c5                                 ......
+<LOBBY_MSG	GS	P->S	22B>
+['23', ['1', '', '256']]
+[2026-11-04 15:54:58.002] ROUTER_WM LOBBY_MSG subtype=23 from=SNK@38.27.30.232:49605
+[2026-11-04 15:54:58.002] ROUTER_WM LOBBY_MSG JOIN_LOBBY id=1 players_now=1
+[2026-11-04 15:54:58.002] ROUTER_WM LOBBY session registered (JOIN_LOBBY): 38.27.30.232:49605 user=SNK
+[2026-11-04 15:54:58.004] LOBBY_BROADCAST: no other registered sessions (len=20)
+[2026-11-04 15:54:58.004] ROUTER_WM MEMBER_JOIN broadcast: SNK joined lobby 1
+[2026-11-04 15:54:58.005] ROUTER_WM TX[tx] len=21 sha256=630c92b3172c72db
+0000  00 00 15 00 d1 24 fa b3 fd c9 b9 d6 91 95 8c a3   .....$..........
+0010  a5 ca bd e0 cb                                    .....
+[2026-11-04 15:54:58.086] ROUTER_WM RX len=41 sha256=2661a6b334588655
+0000  00 00 29 00 d1 42 fa b9 ec 8a b0 83 be d6 91 7e   ..)..B.........~
+0010  87 a3 8c 90 8b bd 5e 4e 8f 8f 9a f8 bb 56 b5 99   ......^N.....V..
+0020  b8 bf f1 f6 cf 76 85 80 ab                        .....v...
+<LOBBY_MSG	GS	P->S	41B>
+['42', [b"&\x1b\x1e\xe8'W\x00\x00&\x1b\x1e\xe8'X\xff\x01&\x1b\x1e\xe8'Y\xff\x01"]]
+[2026-11-04 15:54:58.087] ROUTER_WM LOBBY_MSG subtype=42 from=SNK@38.27.30.232:49605
+[2026-11-04 15:54:58.087] ROUTER_WM SET_PLAYER_INFO from SNK raw DL: ['42', [b"&\x1b\x1e\xe8'W\x00\x00&\x1b\x1e\xe8'X\xff\x01&\x1b\x1e\xe8'Y\xff\x01"]]
+[2026-11-04 15:54:58.087] LOBBY_BROADCAST: no other registered sessions (len=41)
+[2026-11-04 15:54:58.087] ROUTER_WM PLAYER_INFO_UPDATE broadcast for SNK
+[2026-11-04 15:54:58.087] ROUTER_WM SET_PLAYER_INFO ack=proper S->P
+[2026-11-04 15:54:58.089] ROUTER_WM TX[tx] len=16 sha256=60937de26ebad739
+0000  00 00 10 00 d1 24 fa b3 fd cf b9 d6 91 8c a2 bb   .....$..........
+[2026-11-04 15:55:08.061] ROUTER_WM RX len=174 sha256=b6db09d551444dd2
+0000  00 00 ae 00 d1 42 fa b9 fd c1 c4 d8 f4 ac b5 f6   .....B..........
+0010  ab d6 e3 bb d6 e2 e5 c8 90 9e b4 f0 a4 d5 e2 c1   ................
+0020  8c 90 95 d5 ee d9 d1 f4 ad d4 e1 d6 fa be df d3   ................
+0030  ed a9 b2 43 a9 d3 e0 db 51 33 dd d5 e5 fb 81 e3   ...C....Q3......
+0040  af d2 df dd 38 31 0d c8 dc f2 c3 96 86 d1 de c5   ....81..........
+0050  b2 2c 0c 5f cc 94 af d1 c4 d0 dd d8 b3 39 39 1a   .,._.........99.
+0060  2e f6 9a b7 c3 cf dc d0 f5 33 39 fb 2a 16 de d7   .........39.*...
+0070  c2 ce db d9 cd bc 3b 0c 69 11 16 b6 f0 cd da b2   ......;.i.......
+0080  c7 b7 26 0a 19 13 55 49 f0 cc d9 a5 c0 b7 37 36   ..&...UI......76
+0090  6b 2a 25 2a 2e cb d8 a0 df f2 35 0f 17 26 15 19   k*%*......5..&..
+00a0  2d 6d d7 e4 c0 02 2b 0e 16 2f 16 06 2c 2f         -m....+../..,/
+<LOBBY_MSG	GS	P->S	174B>
+['12', ['1', 'SNK', 'SPLINTERCELL3PS2US', '5', '4', '0', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU192.168.0.249\x00EE\xc0\xa8\x00\xf9\x0eJIC38.27.30.232\x00\x00\x00\x00&\x1b\x1e\xe8\x0eJ\x00\x00', '', '1228530451', '1.0', b'']]
+[2026-11-04 15:55:08.063] ROUTER_WM LOBBY_MSG subtype=12 from=SNK@38.27.30.232:49605
+[2026-11-04 15:55:08.063] ROUTER_WM CREATE_ROOM raw DL: ['12', ['1', 'SNK', 'SPLINTERCELL3PS2US', '5', '4', '0', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU192.168.0.249\x00EE\xc0\xa8\x00\xf9\x0eJIC38.27.30.232\x00\x00\x00\x00&\x1b\x1e\xe8\x0eJ\x00\x00', '', '1228530451', '1.0', b'']]
+[2026-11-04 15:55:08.063] ROUTER_WM CREATE_ROOM relay: room by SNK at 38.27.30.232 advertised as 38.49.212.120 (blob slots rewritten)
+[2026-11-04 15:55:08.065] ROUTER_WM LOBBY_MSG CREATE_ROOM host='SNK' map='Cinema' group_name='SNK' room_id=100 parent=1 type=5 max=4 visitors=0 event_id=1228530451 config=0x1d8 info_len=96
+[2026-11-04 15:55:08.065] ROUTER_WM CREATE_ROOM room.to_list()=['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']
+[2026-11-04 15:55:08.065] ROUTER_WM CREATE_ROOM -> GROUP_INFO broadcast with 1 room(s) (20-field format, is_rooms=1) len=273
+[2026-11-04 15:55:08.065] ROUTER_WM CREATE_ROOM GROUP_INFO payload: [['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']]
+[2026-11-04 15:55:08.065] ROUTER_WM CREATE_ROOM -> NEW_GROUP(54) broadcast mode=room len=256 payload=['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']
+[2026-11-04 15:55:08.065] ROUTER_WM CREATE_ROOM ack=roomid room_id=100
+[2026-11-04 15:55:08.067] ROUTER_WM TX[tx] len=31 sha256=c2c054fafdeb4e7d
+0000  00 00 1f 00 d1 24 fa b3 fd c9 97 b9 d6 91 a6 d0   .....$..........
+0010  8c a2 a5 d4 af be a5 ca ee fd e0 eb 9c 9f fc      ...............
+[2026-11-04 15:55:08.094] ROUTER_WM RX len=40 sha256=aeda7ef01a62c95d
+0000  00 00 28 00 d1 42 fa bf fd 92 e4 ee b8 d6 a1 e5   ..(..B..........
+0010  9c d1 8c a0 f4 ff a1 96 be c4 e8 98 d6 a9 e0 f6   ................
+0020  ad a4 99 ef af 93 89 f7                           ........
+<LOBBY_MSG	GS	P->S	40B>
+['24', ['100', 'Password', '128', '0', '0.1']]
+[2026-11-04 15:55:08.094] ROUTER_WM LOBBY_MSG subtype=24 from=SNK@38.27.30.232:49605
+[2026-11-04 15:55:08.094] ROUTER_WM JOIN_ROOM request=['100', 'Password', '128', '0', '0.1'] room_found=True mode=ip
+[2026-11-04 15:55:08.096] ROUTER_WM JOIN_ROOM host: NEW_GROUP(54) sent to creator before join ack (room 100)
+[2026-11-04 15:55:08.096] ROUTER_WM JOIN_ROOM requester is host -> reply mode=ip
+[2026-11-04 15:55:08.096] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.27.30.232'
+[2026-11-04 15:55:08.097] ROUTER_WM TX[tx] len=37 sha256=612393b6380e3ad0
+0000  00 00 25 00 d1 24 fa b3 fd c9 97 aa b9 d6 91 a6   ..%..$..........
+0010  ae 90 8c a4 a5 b5 8f fb bd a5 a2 90 a5 e0 aa ac   ................
+0020  96 eb b0 90 fa                                    .....
+[2026-11-04 15:55:08.127] ROUTER_WM RX len=17 sha256=3b6b4fbb5bf8a225
+0000  00 00 11 00 d1 42 fa be fd 92 bb d6 a1 8c a0 be   .....B..........
+0010  ce                                                .
+<LOBBY_MSG	GS	P->S	17B>
+['15', ['100']]
+[2026-11-04 15:55:08.129] ROUTER_WM LOBBY_MSG subtype=15 from=SNK@38.27.30.232:49605
+[2026-11-04 15:55:08.129] ROUTER_WM LOBBY_MSG 15: typed reply [['100']]
+[2026-11-04 15:55:08.130] ROUTER_WM TX[tx] len=23 sha256=f27e9f02bfe3ba80
+0000  00 00 17 00 d1 24 fa b3 fd c9 97 b9 d6 91 a6 8c   .....$..........
+0010  a5 a5 be a5 c4 e0 c5                              .......
+[2026-11-04 15:55:08.162] ROUTER_WM RX len=40 sha256=7e052723299fda53
+0000  00 00 28 00 d1 42 fa b8 fd 92 97 a4 b9 d6 a1 96   ..(..B..........
+0010  ad 9a 8c a0 95 e8 97 94 be 94 9a 91 8b a9 f1 a9   ................
+0020  b1 94 91 eb ac 8d 93 f7                           ........
+<LOBBY_MSG	GS	P->S	40B>
+['33', ['100', b'', '0', '192.168.0.249']]
+[2026-11-04 15:55:08.164] ROUTER_WM LOBBY_MSG subtype=33 from=SNK@38.27.30.232:49605
+[2026-11-04 15:55:08.164] ROUTER_WM LOBBY_MSG 33: typed reply [['100']]
+[2026-11-04 15:55:08.165] ROUTER_WM TX[tx] len=23 sha256=dbd8a0b6c8638aa8
+0000  00 00 17 00 d1 24 fa b3 fd c9 97 b9 d6 91 a6 8c   .....$..........
+0010  a3 a5 bc a5 c4 e0 c5                              .......
+
+[2026-11-04 15:55:12.462] ROUTER_WM 24.69.254.96:56190 -> 38.49.212.120:40005 CONNECT pre_ke1=yes
+[2026-11-04 15:55:12.485] ROUTER_WM RX len=284 sha256=0ecb46fab59baa10
+0000  00 01 1c 00 db 82 fa 8b bf a4 97 9d a4 ac b5 bf   ................
+0010  ca d6 1d 71 c9 3b 21 bb fe a3 96 9c a3 ab b4 be   ...q.;!.........
+0020  c9 d5 33 db 57 4d 20 31 d7 e3 f7 99 a2 aa b3 bd   ..3.WM 1........
+0030  c8 d4 5d 39 2d a9 1f 30 40 8f 94 9a a1 a9 b2 bc   ..]9-..0@.......
+0040  c7 d3 6d 6b 6e e5 1e 2f 3f 4e a3 9d a0 a8 b1 bb   ..mkn../?N......
+0050  c6 d2 b0 f9 4f ee 8c 2e 3e 4d 5b 99 9f a7 b0 ba   ....O...>M[.....
+0060  c5 d1 27 6f 22 41 bf 2d 3d 4c 5a 67 9e a6 af b9   ..'o"A.-=LZg....
+0070  c4 d0 dd 35 52 bb 48 2c 3c 4b 59 66 72 a5 ae b8   ...5R.H,<KYfr...
+0080  c3 cf dc 8e a1 b3 77 2b 3b 4a 58 65 71 7c ad b7   ......w+;JXeq|..
+0090  c2 ce db 53 79 1b 05 2a 3a 49 57 64 70 7b 85 b6   ...Sy..*:IWdp{..
+00a0  c1 cd da 72 eb 19 35 29 39 48 56 63 6f 7a 84 8d   ...r..5)9HVcoz..
+00b0  c0 cc d9 5c a3 3d aa 28 38 47 55 62 6e 79 83 8c   ...\.=.(8GUbny..
+00c0  94 cb d8 65 7f cd 7f 27 37 46 54 61 6d 78 82 8b   ...e...'7FTamx..
+00d0  93 9a d7 9a 4a 8e a8 26 36 45 53 60 6c 77 81 8a   ....J..&6ES`lw..
+00e0  92 99 22 78 eb 86 25 35 44 52 5f 6b 76 80 89 91   .."x..%5DR_kv...
+00f0  98 c3 ed 72 48 24 34 43 51 5e 6a 75 7f 88 90 97   ...rH$4CQ^ju....
+??? (truncated to 256 bytes)
+<KEY_EXCHANGE	GS	UNK->S	284B>
+['1', ['1', '260', b'\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf9o\x8d\xbc\xd1\xfe\xc6\x7f\x83\xbb\x9a\xbad\xde\x83\x14\x85\xd6+\x80\x1f\x8b\xbe\x8aU\x1c\x81X\xa8\xd9\xb3\x93\xd3\xa8\xc9,p\xe8\x8a\xc8;\x1e\x13\xba\xb1J\xe2\xe8\xa7B+i#[\x92\xbdi\xbd-\x1cmS\xa3\x91\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03']]
+[2026-11-04 15:55:12.501] ROUTER_WM KEY_EXCHANGE(1) client pubkey bits=512 n_bits=512 e=3
+[2026-11-04 15:55:12.501] ROUTER_WM KEY_EXCHANGE(1) pre-KE1 already sent, re-sending KE1 response
+[2026-11-04 15:55:12.502] ROUTER_WM TX[tx] len=284 sha256=e88d33b11b52ed82
+0000  00 01 1c 00 db 28 fa 8b bf a4 97 9d a4 ac b5 bf   .....(..........
+0010  ca d6 6c de ab da 21 bb fe a3 96 9c a3 ab b4 be   ..l...!.........
+0020  c9 d5 23 ba f9 de 20 31 d7 e3 f7 99 a2 aa b3 bd   ..#... 1........
+0030  c8 d4 bc e5 90 6d 1f 30 40 8f 94 9a a1 a9 b2 bc   .....m.0@.......
+0040  c7 d3 cb e4 f4 5f 1e 2f 3f 4e a3 9d a0 a8 b1 bb   ....._./?N......
+0050  c6 d2 fb cf 8f 77 4a 2e 3e 4d 5b 99 9f a7 b0 ba   .....wJ.>M[.....
+0060  c5 d1 5a 65 4e 9f f8 2d 3d 4c 5a 67 9e a6 af b9   ..ZeN..-=LZg....
+0070  c4 d0 dd 3f 76 f2 6a 2c 3c 4b 59 66 72 a5 ae b8   ...?v.j,<KYfr...
+0080  c3 cf dc e8 cd 08 0b 2b 3b 4a 58 65 71 7c ad b7   .......+;JXeq|..
+0090  c2 ce db bf 82 c1 d2 2a 3a 49 57 64 70 7b 85 b6   .......*:IWdp{..
+00a0  c1 cd da 2c 7e ab fa 29 39 48 56 63 6f 7a 84 8d   ...,~..)9HVcoz..
+00b0  c0 cc d9 fe 28 71 48 28 38 47 55 62 6e 79 83 8c   ....(qH(8GUbny..
+00c0  94 cb d8 20 c8 8b 71 27 37 46 54 61 6d 78 82 8b   ... ..q'7FTamx..
+00d0  93 9a d7 d4 ad cf ec 26 36 45 53 60 6c 77 81 8a   .......&6ES`lw..
+00e0  92 99 0a 22 af 3d 25 35 44 52 5f 6b 76 80 89 91   ...".=%5DR_kv...
+00f0  98 c3 38 fd f3 24 34 43 51 5e 6a 75 7f 88 90 97   ..8..$4CQ^ju....
+??? (truncated to 256 bytes)
+[2026-11-04 15:55:12.591] ROUTER_WM RX len=102 sha256=f7976e026fbcaf7a
+0000  00 00 57 00 db 82 fa 8b bf a6 97 f5 8b 9a 64 b8   ..W...........d.
+0010  fe a7 96 90 72 6f 82 76 d7 e3 95 63 43 73 56 52   ....ro.v...cCsVR
+0020  22 8f f6 07 14 14 5c 37 ae 0d 93 a1 82 3b 08 4a   ".....\7.....;.J
+0030  fe 5a 91 d8 5a 65 f6 da 13 9f 5b 67 e7 02 a9 9d   .Z..Ze....[g....
+0040  6c 9f 79 d6 3f 47 cb d9 9a 93 5a c5 80 af 2e b9   l.y.?G....Z.....
+0050  e9 3f ca d0 7e 81 84 00 00 0f 00 4d 41 fa c4 ca   .?..~......MA...
+0060  ce a0 c2 de c0 91                                 ......
+<KEY_EXCHANGE	GS	UNK->S	87B>
+['2', ['1', '64', b'8\x9d\xf8\x0chy\xc5"\xb5\xe1\xd1/\xe2\xa4\xc2\x93\xbd\xd9\xc46\x83e\x06F\xb9\xee\xe56\xd1\x0fn%c\xf0\x8c\xee\xcbW%\xac\xd2<m\xe6\xfaUXW\x93\xc7\x01\x96\xb4\x95^\x00\x14\x04\xb4\xaaU\xe9Vw']]
+[2026-11-04 15:55:12.593] ROUTER_WM KEY_EXCHANGE(2) decrypted client BF key len=16
+[2026-11-04 15:55:12.593] ROUTER_WM KEY_EXCHANGE(2) mode=echo-client
+[2026-11-04 15:55:12.593] ROUTER_WM KEY_EXCHANGE(2) RX hdr b3=00 b4=db b5=82
+[2026-11-04 15:55:12.594] ROUTER_WM TX[tx] len=87 sha256=8f4ecd9c59338cc9
+0000  00 00 57 00 db 28 fa 8b bf a6 97 ce db 5d 20 b8   ..W..(.......] .
+0010  fe a7 96 ee 0c 33 69 82 d7 e3 95 8c 46 7b df df   .....3i.....F{..
+0020  e4 8f f6 96 70 a9 c3 da 34 02 93 08 a0 09 41 1c   ....p...4.....A.
+0030  a0 ad aa d8 0d e5 3b d3 32 47 00 45 06 c3 4f 52   ......;.2G.E..OR
+0040  ba eb 4f ec 49 93 f2 2e 18 32 ec fb bd 23 42 25   ..O.I....2...#B%
+0050  d2 48 52 8a 1d 74 84                              .HR..t.
+<LOGINWAITMODULE	GS	P->R	15B>
+['DOR-DOR']
+[2026-11-04 15:55:12.596] ROUTER_WM TX[tx] len=12 sha256=8e9106f332123cd8
+0000  00 00 0c 00 26 14 eb 8b c3 8a 8c 8c               ....&.......
+[2026-11-04 15:55:12.681] ROUTER_WM RX len=87 sha256=03b287b302b6383f
+0000  00 00 57 00 db 82 fa 8b bf a6 97 18 3e eb e1 b8   ..W.........>...
+0010  fe a7 96 c9 93 c5 da 92 d7 e3 95 77 a9 93 8a b8   ...........w....
+0020  d7 8f f6 3e 41 17 04 26 79 5f 93 8b bb 87 ba 4f   ...>A..&y_.....O
+0030  df 85 5d d8 af 7c 85 63 32 c6 b0 79 39 30 93 42   ..]..|.c2..y90.B
+0040  ea 17 e6 9c 30 d5 f7 44 74 cc 5b fb a6 56 7c ed   ....0..Dt.[..V|.
+0050  f9 50 f1 65 41 36 84                              .P.eA6.
+<KEY_EXCHANGE	GS	UNK->S	87B>
+['2', ['1', '64', b'\x12\xa4\xecU\x85\xa70\x1b\xe0\x0b0\x9ap\x96\xdb/\xbe9nG\xd1Y<5\x0b\xb69nT[\xf3\xfa\xda\xf5\x9d\x04/G\xcb*\xf3\x1d\xba\x13\x95\n\xd0\x0eL\x95:\x97+~\x92\xb5*N\xaa\x95s\xe6\xe1\x8e']]
+[2026-11-04 15:55:12.688] ROUTER_WM KEY_EXCHANGE(2) decrypted client BF key len=16
+[2026-11-04 15:55:12.689] ROUTER_WM KEY_EXCHANGE(2) mode=echo-client
+[2026-11-04 15:55:12.689] ROUTER_WM KEY_EXCHANGE(2) RX hdr b3=00 b4=db b5=82
+[2026-11-04 15:55:12.691] ROUTER_WM TX[tx] len=87 sha256=92faa7f9c5456aae
+0000  00 00 57 00 db 28 fa 8b bf a6 97 91 be 7d 69 b8   ..W..(.......}i.
+0010  fe a7 96 cb 7f 32 83 d3 d7 e3 95 ab e2 2b c7 c5   .....2.......+..
+0020  5c 8f f6 5e e6 76 5c 0a e3 67 93 37 25 ae 71 cb   \..^.v\..g.7%.q.
+0030  cc 51 82 d8 76 48 3f 3b e4 ed 58 83 30 78 1e 7a   .Q..vH?;..X.0x.z
+0040  4a 55 26 48 60 b5 cb 52 67 42 5f ab 53 55 b9 1f   JU&H`..RgB_.SU..
+0050  cf eb af 0a f2 9f 84                              .......
+[2026-11-04 15:55:12.813] ROUTER_WM RX len=32 sha256=4d151a0a788d790f
+0000  00 00 20 00 d1 41 fa ba fd db d4 ce b8 d6 dd c4   .. ..A..........
+0010  cc ff 8c c0 d0 a8 a1 dc c0 d6 f3 dd d5 ca dd ac   ................
+<LOBBY_MSG	GS	P->R	32B>
+['21', ['SPLINTERCELL3PS2US']]
+[2026-11-04 15:55:12.818] ROUTER_WM LOBBY_MSG subtype=21 from=DOR-DOR@24.69.254.96:56190
+[2026-11-04 15:55:12.818] ROUTER_WM LOGIN lobby entry: ['0', 'www.splintercellonline.net', '1', '1', '0', '448', '1', '', '', '', b'', '0', '16', '2']
+[2026-11-04 15:55:12.818] ROUTER_WM LOGIN GROUP_INFO rooms payload: [['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']]
+[2026-11-04 15:55:12.818] ROUTER_WM LOBBY_MSG LOGIN -> GROUP_INFO with 1 lobby + 1 room(s) (20-field format, is_rooms=1)
+[2026-11-04 15:55:12.820] ROUTER_WM LOGIN extra[0] len=98 b5=0x14
+[2026-11-04 15:55:12.820] ROUTER_WM LOGIN extra[1] len=273 b5=0x14
+[2026-11-04 15:55:12.822] ROUTER_WM TX[tx] len=16 sha256=649c34e105240c00
+0000  00 00 10 00 d1 14 fa b3 fd cf b9 d6 91 8c a1 bd   ................
+[2026-11-04 15:55:12.825] ROUTER_WM TX[push0] len=98 sha256=f136065c997a064d
+0000  00 00 62 00 d1 14 fa b8 fd a0 e4 ee 8a de db cc   ..b.............
+0010  bf d6 e2 cd c7 d4 ce dd be f0 8c 90 95 c0 d5 de   ................
+0020  df 8c f3 d0 be a2 c7 d6 c7 dc cf f2 bc d7 a6 99   ................
+0030  d3 c1 de bb b6 ce d6 eb a8 9f cb dc ce c4 be d5   ................
+0040  ed bf ae d6 c3 dc f3 cc d4 a8 e1 d6 cb d6 b1 fa   ................
+0050  b1 da d2 ce 99 c1 b9 d2 e9 ac b9 d3 f1 c9 a2 ab   ................
+0060  de be                                             ..
+[2026-11-04 15:55:12.830] ROUTER_WM TX[push1] len=273 sha256=483d1d7606b40962
+0000  00 01 11 00 d1 14 fa b8 fd a0 e4 ee a4 ac c6 ef   ................
+0010  f9 98 b0 b8 00 10 10 bf d6 e2 cd c7 e8 9a b4 ed   ................
+0020  85 9c b7 be ff 0f 12 72 8c 90 95 c0 ec d9 81 ce   .......r........
+0030  84 98 d3 a6 fe 0e 31 79 40 be a2 c7 f2 a9 85 bc   ......1y@.......
+0040  82 83 b3 11 fd 0d 27 65 3f 76 a6 99 d3 98 85 f0   ......'e?v......
+0050  85 81 8f b5 9d 0c 29 20 0e 7f 5b a9 9f 97 c3 f4   ......) ..[.....
+0060  97 a2 ed c0 96 0b 32 55 0f 7e 6b 52 ab 97 af ea   ......2U.~kR....
+0070  81 d0 91 83 9f 0a 23 f8 0d 7a 2a 5e 72 d6 9f cb   ......#..z*^r...
+0080  97 9c 90 e5 97 09 29 1a 15 39 58 57 41 4e de b7   ......)..9XWAN..
+0090  8c 9b 9e 89 91 08 4c 0c 08 49 63 56 5e 4a ab 87   ......L..IcV^J..
+00a0  88 ff 99 e8 b4 07 5b 29 08 48 25 52 5e 48 bc bc   ......[).H%R^H..
+00b0  8c 9f 8b e7 f6 06 52 28 0a 0d 55 11 1d 57 b0 a2   ......R(..U..W..
+00c0  9b 9d e6 f5 05 16 27 19 48 65 61 6d 41 f1 b9 ce   ......'.HeamA...
+00d0  83 87 f4 04 15 16 0f 3d 66 50 5d 43 81 bb cf e4   .......=fP]C....
+00e0  c2 03 14 17 01 90 66 2c 5e 58 b0 bb cc c2 02 13   ......f,^X......
+00f0  15 1a 72 61 5e 5e 4d 4d a6 90 01 12 0d 0b 64 63   ..ra^^MM......dc
+??? (truncated to 256 bytes)
+[2026-11-04 15:55:13.086] ROUTER_WM RX len=64 sha256=d96163026019730d
+0000  00 00 18 00 4e 41 eb 8b 8e f0 97 8a 89 91 92 8c   ....NA..........
+0010  90 95 9a 8f 94 99 93 98 00 00 0a 00 de 41 fa e5   .............A..
+0020  ef 8c 00 00 1e 00 cc 41 fa 8b e2 f7 e5 bb fe f5   .......A........
+0030  f3 ab d7 f4 e0 e9 ae ee e5 99 ee fd e1 e1 9c 9f   ................
+<LOGINFRIENDS	GS	P->R	24B>
+[b'\x00\x00\x00\x00', b'\x00\x00\x00\x00']
+[2026-11-04 15:55:13.087] FRIENDS LOGINFRIENDS DOR-DOR: 0 friend(s) []
+[2026-11-04 15:55:13.089] ROUTER_WM TX[tx] len=12 sha256=6e11286b75ff1666
+0000  00 00 0c 00 26 14 eb 8b c0 8a 8c 8c               ....&.......
+<0xDE	GS	P->R	10B>
+['en']
+[2026-11-04 15:55:13.091] ROUTER_WM MOTD request lang='en' -> game='Welcome to the Splinter Cell: Chaos Theory community server!'... ubi=''...
+[2026-11-04 15:55:13.091] ROUTER_WM TX[tx] len=122 sha256=92de1cee99d8fc0d
+0000  00 00 7a 00 26 14 eb 8b 50 e1 f8 bd c8 c9 c6 d0   ..z.&...P.......
+0010  b8 8a 8c 91 f5 f3 d3 e8 db dd ac f4 8c e3 f9 ef   ................
+0020  f1 8a d2 9d bb a7 a9 d4 f1 ba 81 db da c5 e7 bb   ................
+0030  b3 8a c4 fc c5 cd f2 c9 bf b5 b6 90 89 f5 f7 d3   ................
+0040  90 d5 b1 95 f5 c3 8c d2 ea c8 95 dc ad c5 bc 96   ................
+0050  84 82 96 cc c2 d0 ad ef ac 99 88 99 85 fb c1 e3   ................
+0060  b7 bf b6 94 80 87 86 d4 96 ac a9 a2 f1 84 9a 91   ................
+0070  9c ad bd a6 ba c6 cd 9e 9f a1                     ..........
+<PROXY_HANDLER	GS	P->R	30B>
+['1', ['ladderquery', '0', '0']]
+[2026-11-04 15:55:13.093] ROUTER_WM PROXY_HANDLER subtype=1 module=ladderquery
+[2026-11-04 15:55:13.093] ROUTER_WM PROXY_HANDLER ct34 base=ladderquery id=2 host=38.49.212.120:44002
+[2026-11-04 15:55:13.094] ROUTER_WM TX[tx] len=65 sha256=359e0677f2d2df3f
+0000  00 00 41 00 cc 14 fa b3 fd e1 f2 e4 a4 94 b9 d6   ..A.............
+0010  ca f2 ee 93 98 81 8c 90 f1 fe d1 d9 83 ca be f5   ................
+0020  ef a1 a9 83 b8 8c ff e8 90 9a 9e 87 8d 9f ea ec   ................
+0030  d4 96 84 8c 9c 9e fd 9a 84 8f 9d fe 83 9a 8e bf   ................
+0040  9e                                                .
+[2026-11-04 15:55:13.283] ROUTER_WM RX len=14 sha256=62c6f616cfa72f4b
+0000  00 00 0e 00 cc 41 fa 8b bc b8 fe cd d7 8f         .....A........
+<PROXY_HANDLER	GS	P->R	14B>
+['2', ['2']]
+[2026-11-04 15:55:13.283] ROUTER_WM PROXY_HANDLER subtype=2 module=2
+[2026-11-04 15:55:13.285] ROUTER_WM TX[tx] len=20 sha256=89c092a9b61ad872
+0000  00 00 14 00 cc 14 fa b3 fd e1 b9 d6 ca c8 8c 90   ................
+0010  94 bd a1 cb                                       ....
+[2026-11-04 15:55:13.947] ROUTER_WM RX len=14 sha256=1c06d926ecbb6d0c
+0000  00 00 0e 00 cc 41 d2 b8 bc f9 fe cd 8c 8f         .....A........
+<PROXY_HANDLER	GS	P->R	14B>
+[['3', '2']]
+[2026-11-04 15:55:13.995] ROUTER_WM PROXY_HANDLER subtype=['3', '2'] module=?
+[2026-11-04 15:55:13.995] ROUTER_WM PROXY_HANDLER module notice ['3', '2']: no reply sent
+
+[2026-11-04 15:55:21.541] ROUTER_WM 24.69.254.96:51540 -> 38.49.212.120:40005 CONNECT pre_ke1=yes
+[2026-11-04 15:55:21.589] ROUTER_WM RX len=284 sha256=d5fd421849b1685d
+0000  00 01 1c 00 db 82 fa 8b bf a4 97 9d a4 ac b5 bf   ................
+0010  ca d6 de 4b 0e 79 21 bb fe a3 96 9c a3 ab b4 be   ...K.y!.........
+0020  c9 d5 41 e1 8d 62 20 31 d7 e3 f7 99 a2 aa b3 bd   ..A..b 1........
+0030  c8 d4 84 4d bf 06 1f 30 40 8f 94 9a a1 a9 b2 bc   ...M...0@.......
+0040  c7 d3 8c 43 80 74 1e 2f 3f 4e a3 9d a0 a8 b1 bb   ...C.t./?N......
+0050  c6 d2 42 ab 91 c5 90 2e 3e 4d 5b 99 9f a7 b0 ba   ..B.....>M[.....
+0060  c5 d1 6a 48 9d 1d 2f 2d 3d 4c 5a 67 9e a6 af b9   ..jH../-=LZg....
+0070  c4 d0 dd 31 06 19 90 2c 3c 4b 59 66 72 a5 ae b8   ...1...,<KYfr...
+0080  c3 cf dc bf 78 aa 76 2b 3b 4a 58 65 71 7c ad b7   ....x.v+;JXeq|..
+0090  c2 ce db 44 77 36 d7 2a 3a 49 57 64 70 7b 85 b6   ...Dw6.*:IWdp{..
+00a0  c1 cd da b4 62 a0 13 29 39 48 56 63 6f 7a 84 8d   ....b..)9HVcoz..
+00b0  c0 cc d9 59 70 42 c7 28 38 47 55 62 6e 79 83 8c   ...YpB.(8GUbny..
+00c0  94 cb d8 6c 04 22 5e 27 37 46 54 61 6d 78 82 8b   ...l."^'7FTamx..
+00d0  93 9a d7 59 cf 38 e7 26 36 45 53 60 6c 77 81 8a   ...Y.8.&6ES`lw..
+00e0  92 99 4d a3 c3 bd 25 35 44 52 5f 6b 76 80 89 91   ..M...%5DR_kv...
+00f0  98 c3 95 a2 be 24 34 43 51 5e 6a 75 7f 88 90 97   .....$4CQ^ju....
+??? (truncated to 256 bytes)
+<KEY_EXCHANGE	GS	UNK->S	284B>
+['1', ['1', '260', b"\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xb4\x9dle\xa3=\xa9\xbc\x8a\xbe\\\xadU\xda\xa4F\xad\xa2\x11\xbagP;\xf1\x86\x95\x8f\x81\xfcfm}Ar\x0e\xf3\xa0\xc0<'D\xa7>\xa3\x13\x16\xc9y\x08mi\x9e\xdc\xad\xa9\xf2H\xd0\x0b\xcel\x8b3\x8d\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03"]]
+[2026-11-04 15:55:21.607] ROUTER_WM KEY_EXCHANGE(1) client pubkey bits=512 n_bits=512 e=3
+[2026-11-04 15:55:21.610] ROUTER_WM KEY_EXCHANGE(1) pre-KE1 already sent, re-sending KE1 response
+[2026-11-04 15:55:21.612] ROUTER_WM TX[tx] len=284 sha256=e88d33b11b52ed82
+0000  00 01 1c 00 db 28 fa 8b bf a4 97 9d a4 ac b5 bf   .....(..........
+0010  ca d6 6c de ab da 21 bb fe a3 96 9c a3 ab b4 be   ..l...!.........
+0020  c9 d5 23 ba f9 de 20 31 d7 e3 f7 99 a2 aa b3 bd   ..#... 1........
+0030  c8 d4 bc e5 90 6d 1f 30 40 8f 94 9a a1 a9 b2 bc   .....m.0@.......
+0040  c7 d3 cb e4 f4 5f 1e 2f 3f 4e a3 9d a0 a8 b1 bb   ....._./?N......
+0050  c6 d2 fb cf 8f 77 4a 2e 3e 4d 5b 99 9f a7 b0 ba   .....wJ.>M[.....
+0060  c5 d1 5a 65 4e 9f f8 2d 3d 4c 5a 67 9e a6 af b9   ..ZeN..-=LZg....
+0070  c4 d0 dd 3f 76 f2 6a 2c 3c 4b 59 66 72 a5 ae b8   ...?v.j,<KYfr...
+0080  c3 cf dc e8 cd 08 0b 2b 3b 4a 58 65 71 7c ad b7   .......+;JXeq|..
+0090  c2 ce db bf 82 c1 d2 2a 3a 49 57 64 70 7b 85 b6   .......*:IWdp{..
+00a0  c1 cd da 2c 7e ab fa 29 39 48 56 63 6f 7a 84 8d   ...,~..)9HVcoz..
+00b0  c0 cc d9 fe 28 71 48 28 38 47 55 62 6e 79 83 8c   ....(qH(8GUbny..
+00c0  94 cb d8 20 c8 8b 71 27 37 46 54 61 6d 78 82 8b   ... ..q'7FTamx..
+00d0  93 9a d7 d4 ad cf ec 26 36 45 53 60 6c 77 81 8a   .......&6ES`lw..
+00e0  92 99 0a 22 af 3d 25 35 44 52 5f 6b 76 80 89 91   ...".=%5DR_kv...
+00f0  98 c3 38 fd f3 24 34 43 51 5e 6a 75 7f 88 90 97   ..8..$4CQ^ju....
+??? (truncated to 256 bytes)
+[2026-11-04 15:55:22.129] ROUTER_WM RX len=14 sha256=dc6dba38e02e478a
+0000  00 00 0e 00 d1 41 fa 8b bf b9 fe cd d7 8f         .....A........
+<LOBBY_MSG	GS	P->R	14B>
+['3', ['1']]
+[2026-11-04 15:55:22.145] ROUTER_WM LOBBY_MSG subtype=3 from=DOR-DOR@24.69.254.96:56190
+[2026-11-04 15:55:22.145] ROUTER_WM LOBBY_MSG JOIN_SERVER id=1 -> 38.49.212.120:40005
+[2026-11-04 15:55:22.146] ROUTER_WM TX[tx] len=42 sha256=cadbb3638d430acd
+0000  00 00 2a 00 d1 14 fa b3 fd e1 af ac b9 d6 ca a5   ..*.............
+0010  ae 92 8c 90 e6 b5 93 96 bc 94 a3 91 91 9c a2 ad   ................
+0020  b1 d7 98 f6 b6 ac a3 97 aa f1                     ..........
+
+[2026-11-04 15:55:22.303] ROUTER_WM 24.69.254.96:56187 -> 38.49.212.120:40005 CONNECT pre_ke1=yes
+[2026-11-04 15:55:22.304] ROUTER_WM RX len=51 sha256=ed0b98b1e6ec2aa2
+0000  00 00 33 00 d2 42 fa c4 ca e1 ae b3 d7 ce a0 91   ..3..B..........
+0010  a7 a4 a3 9f de c2 e6 ad 9a 9b 9a c0 94 ab 90 86   ................
+0020  9b c0 a2 b7 92 92 9f b2 aa b1 93 82 81 b5 af 97   ................
+0030  9e 9e 84                                          ...
+<LOBBYSERVERLOGIN	GS	P->S	51B>
+['DOR-DOR', '1', '192.168.1.218', '255.255.255.0', '0']
+[2026-11-04 15:55:22.308] ROUTER_WM LOBBYSERVERLOGIN user=DOR-DOR svid=1
+[2026-11-04 15:55:22.308] ROUTER_WM LOBBY session registered (lobby-server conn): 24.69.254.96:56187 user=DOR-DOR
+[2026-11-04 15:55:22.310] ROUTER_WM TX[tx] len=16 sha256=16182c08896123b7
+0000  00 00 10 00 26 24 fa ba d5 cf b8 8d 91 bc a1 fc   ....&$..........
+[2026-11-04 15:55:22.416] ROUTER_WM RX len=87 sha256=d75d81a822ffee45
+0000  00 00 57 00 db 82 fa 8b bf a6 97 3b 4a 5e d5 b8   ..W........;J^..
+0010  fe a7 96 9d bb 1a 57 83 d7 e3 95 86 8a 2a 6d bc   ......W......*m.
+0020  77 8f f6 c8 e9 24 fc b1 1f 13 93 d4 88 b9 24 e1   w....$........$.
+0030  12 93 b2 d8 18 18 f8 90 12 49 80 9e b7 48 79 5d   .........I...Hy]
+0040  ee 07 af e2 ad 6e 02 33 17 24 ea f5 be 5e a2 69   .....n.3.$...^.i
+0050  3c db 3d 68 d5 8b 84                              <.=h...
+<KEY_EXCHANGE	GS	UNK->S	87B>
+['2', ['1', '64', b'MR\x1d\x01\xa6)\x87(H(\x18\xee\xcb\xee\xbf\x11\x8d\x80\xb1\xf2\x0f\xac\xd6H\x95N\xde\xe3`\xdf\x84\xe5)[\n\x00>\x82\xa8.\xd3\xd0\xdc\xb3\x1e\xe2\xc0\x81Z\xd9\xf6&bN}\xb8$0M\x01k{\\\x86']]
+[2026-11-04 15:55:22.422] ROUTER_WM KEY_EXCHANGE(2) decrypted client BF key len=16
+[2026-11-04 15:55:22.422] ROUTER_WM KEY_EXCHANGE(2) mode=echo-client-nopub (lobby fallback)
+[2026-11-04 15:55:22.422] ROUTER_WM KEY_EXCHANGE(2) RX hdr b3=00 b4=db b5=82
+[2026-11-04 15:55:22.424] ROUTER_WM TX[tx] len=87 sha256=1e707b19dfa70ba3
+0000  00 00 57 00 db 28 fa 8b bf a6 97 3b 4a 5e d5 b8   ..W..(.....;J^..
+0010  fe a7 96 9d bb 1a 57 83 d7 e3 95 86 8a 2a 6d bc   ......W......*m.
+0020  77 8f f6 c8 e9 24 fc b1 1f 13 93 d4 88 b9 24 e1   w....$........$.
+0030  12 93 b2 d8 18 18 f8 90 12 49 80 9e b7 48 79 5d   .........I...Hy]
+0040  ee 07 af e2 ad 6e 02 33 17 24 ea f5 be 5e a2 69   .....n.3.$...^.i
+0050  3c db 3d 68 d5 8b 84                              <.=h...
+[2026-11-04 15:55:22.471] ROUTER_WM RX len=102 sha256=d45a98108578d903
+0000  00 00 57 00 db 82 fa 8b bf a6 97 38 b1 ff 0c b8   ..W........8....
+0010  fe a7 96 b6 46 fc b0 79 d7 e3 95 70 01 a1 33 85   ....F..y...p..3.
+0020  26 8f f6 6b 04 03 36 2d 11 5d 93 80 a1 ab 32 df   &..k..6-.]....2.
+0030  86 65 2f d8 8b 2a d1 ea f4 2b 7a 43 e9 30 16 0d   .e/..*...+zC.0..
+0040  9c 46 05 61 84 d4 1e 10 cf 70 f2 92 db 01 ca 65   .F.a.....p.....e
+0050  e4 c0 ea da fe 2a 84 00 00 0f 00 4d 41 fa c4 ca   .....*.....MA...
+0060  c9 c1 c2 c3 c0 91                                 ......
+<KEY_EXCHANGE	GS	UNK->S	87B>
+['2', ['1', '64', b'\x19\xf1\xeb*\xa5w\x14\x01\xa5\xa3\xe5\x15q\x96\x8d\x03\xaa\x0bWSg\xb0\xb9a\x83\x84\x80\x04\xb9\xd3\xa7\xb5Se\x969\xc4Zp\\5D\xd2\xe2\x05\xb6\x81\xe3\xac\x97!>\xc8\xb4\xe0\nC\xb3\x90*\x0eR\xfd\xd9']]
+[2026-11-04 15:55:22.473] ROUTER_WM KEY_EXCHANGE(2) decrypted client BF key len=16
+[2026-11-04 15:55:22.473] ROUTER_WM KEY_EXCHANGE(2) mode=echo-client
+[2026-11-04 15:55:22.473] ROUTER_WM KEY_EXCHANGE(2) RX hdr b3=00 b4=db b5=82
+[2026-11-04 15:55:22.475] ROUTER_WM TX[tx] len=87 sha256=c8b4de4a8a18b054
+0000  00 00 57 00 db 28 fa 8b bf a6 97 df 3b d2 c9 b8   ..W..(......;...
+0010  fe a7 96 16 b9 64 b0 6f d7 e3 95 00 d4 8d 04 1e   .....d.o........
+0020  dd 8f f6 88 ff db 4c 67 f3 ab 93 a4 f0 60 35 de   ......Lg.....`5.
+0030  66 a9 af d8 f8 ce 9b fa a4 7f de e7 7b 4f b1 68   f...........{O.h
+0040  aa d3 ad ec 1a 73 40 ae 88 f2 27 82 36 73 b4 f0   .....s@...'.6s..
+0050  53 b3 bb 50 64 a2 84                              S..Pd..
+<LOGINWAITMODULE	GS	P->R	15B>
+['COOLDOR']
+[2026-11-04 15:55:22.476] ROUTER_WM TX[tx] len=12 sha256=8e9106f332123cd8
+0000  00 00 0c 00 26 14 eb 8b c3 8a 8c 8c               ....&.......
+[2026-11-04 15:55:22.541] ROUTER_WM RX len=22 sha256=8f9e31a122a5331c
+0000  00 00 16 00 d1 42 fa b8 fd 92 b8 d6 e2 a0 8c 90   .....B..........
+0010  a6 97 be e0 a0 c5                                 ......
+<LOBBY_MSG	GS	P->S	22B>
+['23', ['1', '', '256']]
+[2026-11-04 15:55:22.543] ROUTER_WM LOBBY_MSG subtype=23 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:55:22.543] ROUTER_WM LOBBY_MSG JOIN_LOBBY id=1 players_now=2
+[2026-11-04 15:55:22.543] ROUTER_WM LOBBY session registered (JOIN_LOBBY): 24.69.254.96:56187 user=DOR-DOR
+[2026-11-04 15:55:22.543] LOBBY_BROADCAST -> 38.27.30.232:49605 len=24
+[2026-11-04 15:55:22.544] ROUTER_WM MEMBER_JOIN broadcast: DOR-DOR joined lobby 1
+[2026-11-04 15:55:22.544] ROUTER_WM pushing 1 existing member(s) to DOR-DOR
+[2026-11-04 15:55:22.544] ROUTER_WM JOIN_LOBBY GROUP_INFO rooms payload: [['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']]
+[2026-11-04 15:55:22.544] ROUTER_WM pushing GROUP_INFO with 1 room(s) (20-field format, is_rooms=1) to DOR-DOR
+[2026-11-04 15:55:22.544] ROUTER_WM LOBBY pushing 2 extras (members+rooms) to DOR-DOR
+[2026-11-04 15:55:22.546] ROUTER_WM TX[tx] len=21 sha256=630c92b3172c72db
+0000  00 00 15 00 d1 24 fa b3 fd c9 b9 d6 91 95 8c a3   .....$..........
+0010  a5 ca bd e0 cb                                    .....
+[2026-11-04 15:55:22.548] ROUTER_WM TX[push0] len=20 sha256=afe26a020fcec185
+0000  00 00 14 00 d1 24 fa bb fd c1 bf d6 e2 95 8c 90   .....$..........
+0010  df be dd cb                                       ....
+[2026-11-04 15:55:22.549] ROUTER_WM TX[push1] len=273 sha256=44ac5ade5f5229a2
+0000  00 01 11 00 d1 24 fa b8 fd a0 e4 ee a4 ac c6 ef   .....$..........
+0010  f9 98 b0 b8 00 10 10 bf d6 e2 cd c7 e8 9a b4 ed   ................
+0020  85 9c b7 be ff 0f 12 72 8c 90 95 c0 ec d9 81 ce   .......r........
+0030  84 98 d3 a6 fe 0e 31 79 40 be a2 c7 f2 a9 85 bc   ......1y@.......
+0040  82 83 b3 11 fd 0d 27 65 3f 76 a6 99 d3 98 85 f0   ......'e?v......
+0050  85 81 8f b5 9d 0c 29 20 0e 7f 5b a9 9f 97 c3 f4   ......) ..[.....
+0060  97 a2 ed c0 96 0b 32 55 0f 7e 6b 52 ab 97 af ea   ......2U.~kR....
+0070  81 d0 91 83 9f 0a 23 f8 0d 7a 2a 5e 72 d6 9f cb   ......#..z*^r...
+0080  97 9c 90 e5 97 09 29 1a 15 39 58 57 41 4e de b7   ......)..9XWAN..
+0090  8c 9b 9e 89 91 08 4c 0c 08 49 63 56 5e 4a ab 87   ......L..IcV^J..
+00a0  88 ff 99 e8 b4 07 5b 29 08 48 25 52 5e 48 bc bc   ......[).H%R^H..
+00b0  8c 9f 8b e7 f6 06 52 28 0a 0d 55 11 1d 57 b0 a2   ......R(..U..W..
+00c0  9b 9d e6 f5 05 16 27 19 48 65 61 6d 41 f1 b9 ce   ......'.HeamA...
+00d0  83 87 f4 04 15 16 0f 3d 66 50 5d 43 81 bb cf e4   .......=fP]C....
+00e0  c2 03 14 17 01 90 66 2c 5e 58 b0 bb cc c2 02 13   ......f,^X......
+00f0  15 1a 72 61 5e 5e 4d 4d a6 90 01 12 0d 0b 64 63   ..ra^^MM......dc
+??? (truncated to 256 bytes)
+[2026-11-04 15:55:22.553] ROUTER_WM RX len=87 sha256=96136588d4a0194c
+0000  00 00 57 00 db 82 fa 8b bf a6 97 64 9f 40 39 b8   ..W........d.@9.
+0010  fe a7 96 10 5a a0 bd 49 d7 e3 95 55 8a 46 aa f2   ....Z..I...U.F..
+0020  17 8f f6 ed 48 d8 e3 80 54 2e 93 c6 7d c5 b0 4d   ....H...T...}..M
+0030  92 1b 6e d8 cd 73 d8 2f 4d 74 d7 e9 34 d6 fa 29   ..n..s./Mt..4..)
+0040  6c 68 aa 25 9f 0c 89 0a d4 c2 ee 14 dc d5 76 ab   lh.%..........v.
+0050  38 6b 58 0f 0c e3 84                              8kX....
+<KEY_EXCHANGE	GS	UNK->S	87B>
+['2', ['1', '64', b'_w\xce\x8c\xf9\xaaR\xdd\xe9(\xf9;\xa9p\xd4mq\xec\x0b\xec\xdb\'Uh\x01Q\x19\t\x8c\x1d\xbd\x91\x96\xf7;N\xf4\x86k\xac\x8cP\x97\xd3\xae\x04\xaf\xbc\xd2\xe4\x93"g\x19\xa1\xdf\xc5\xf7:\xd8\tI4\r']]
+[2026-11-04 15:55:22.555] ROUTER_WM KEY_EXCHANGE(2) decrypted client BF key len=16
+[2026-11-04 15:55:22.556] ROUTER_WM KEY_EXCHANGE(2) mode=echo-client
+[2026-11-04 15:55:22.556] ROUTER_WM KEY_EXCHANGE(2) RX hdr b3=00 b4=db b5=82
+[2026-11-04 15:55:22.556] ROUTER_WM TX[tx] len=87 sha256=4132ad67fc9c6ccf
+0000  00 00 57 00 db 28 fa 8b bf a6 97 ff 06 97 cc b8   ..W..(..........
+0010  fe a7 96 48 b4 30 54 5a d7 e3 95 61 f7 bd 47 ce   ...H.0TZ...a..G.
+0020  76 8f f6 03 14 68 c4 1e 47 a2 93 8b c1 2f fb 49   v....h..G..../.I
+0030  20 e4 2c d8 55 13 d8 fb 68 90 15 f6 d7 60 7b 6e    .,.U...h....`{n
+0040  49 ca 91 53 ca d0 c0 d1 2a 6c fb 88 ef cb 01 82   I..S....*l......
+0050  12 13 61 ed 1a 8a 84                              ..a....
+[2026-11-04 15:55:22.602] LOBBY_COUNT live update -> SNK: 2
+[2026-11-04 15:55:22.653] ROUTER_WM RX len=32 sha256=4d151a0a788d790f
+0000  00 00 20 00 d1 41 fa ba fd db d4 ce b8 d6 dd c4   .. ..A..........
+0010  cc ff 8c c0 d0 a8 a1 dc c0 d6 f3 dd d5 ca dd ac   ................
+<LOBBY_MSG	GS	P->R	32B>
+['21', ['SPLINTERCELL3PS2US']]
+[2026-11-04 15:55:22.657] ROUTER_WM LOBBY_MSG subtype=21 from=COOLDOR@24.69.254.96:51540
+[2026-11-04 15:55:22.657] ROUTER_WM LOGIN lobby entry: ['0', 'www.splintercellonline.net', '1', '1', '0', '448', '1', '', '', '', b'', '0', '16', '3']
+[2026-11-04 15:55:22.657] ROUTER_WM LOGIN GROUP_INFO rooms payload: [['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']]
+[2026-11-04 15:55:22.658] ROUTER_WM LOBBY_MSG LOGIN -> GROUP_INFO with 1 lobby + 1 room(s) (20-field format, is_rooms=1)
+[2026-11-04 15:55:22.659] ROUTER_WM LOGIN extra[0] len=98 b5=0x14
+[2026-11-04 15:55:22.659] ROUTER_WM LOGIN extra[1] len=273 b5=0x14
+[2026-11-04 15:55:22.660] ROUTER_WM TX[tx] len=16 sha256=649c34e105240c00
+0000  00 00 10 00 d1 14 fa b3 fd cf b9 d6 91 8c a1 bd   ................
+[2026-11-04 15:55:22.662] ROUTER_WM TX[push0] len=98 sha256=eeaf80f70e8c1f31
+0000  00 00 62 00 d1 14 fa b8 fd a0 e4 ee 8a de db cc   ..b.............
+0010  bf d6 e2 cd c7 d4 ce dd be f0 8c 90 95 c0 d5 de   ................
+0020  df 8c f3 d0 be a2 c7 d6 c7 dc cf f2 bc d7 a6 99   ................
+0030  d3 c1 de bb b6 ce d6 eb a8 9f cb dc ce c4 be d5   ................
+0040  ed bf ae d6 c3 dc f3 cc d4 a8 e1 d6 cb d6 b1 fa   ................
+0050  b1 da d3 ce 99 c1 b9 d2 e9 ac b9 d3 f1 c9 a2 ab   ................
+0060  de be                                             ..
+[2026-11-04 15:55:22.665] ROUTER_WM TX[push1] len=273 sha256=483d1d7606b40962
+0000  00 01 11 00 d1 14 fa b8 fd a0 e4 ee a4 ac c6 ef   ................
+0010  f9 98 b0 b8 00 10 10 bf d6 e2 cd c7 e8 9a b4 ed   ................
+0020  85 9c b7 be ff 0f 12 72 8c 90 95 c0 ec d9 81 ce   .......r........
+0030  84 98 d3 a6 fe 0e 31 79 40 be a2 c7 f2 a9 85 bc   ......1y@.......
+0040  82 83 b3 11 fd 0d 27 65 3f 76 a6 99 d3 98 85 f0   ......'e?v......
+0050  85 81 8f b5 9d 0c 29 20 0e 7f 5b a9 9f 97 c3 f4   ......) ..[.....
+0060  97 a2 ed c0 96 0b 32 55 0f 7e 6b 52 ab 97 af ea   ......2U.~kR....
+0070  81 d0 91 83 9f 0a 23 f8 0d 7a 2a 5e 72 d6 9f cb   ......#..z*^r...
+0080  97 9c 90 e5 97 09 29 1a 15 39 58 57 41 4e de b7   ......)..9XWAN..
+0090  8c 9b 9e 89 91 08 4c 0c 08 49 63 56 5e 4a ab 87   ......L..IcV^J..
+00a0  88 ff 99 e8 b4 07 5b 29 08 48 25 52 5e 48 bc bc   ......[).H%R^H..
+00b0  8c 9f 8b e7 f6 06 52 28 0a 0d 55 11 1d 57 b0 a2   ......R(..U..W..
+00c0  9b 9d e6 f5 05 16 27 19 48 65 61 6d 41 f1 b9 ce   ......'.HeamA...
+00d0  83 87 f4 04 15 16 0f 3d 66 50 5d 43 81 bb cf e4   .......=fP]C....
+00e0  c2 03 14 17 01 90 66 2c 5e 58 b0 bb cc c2 02 13   ......f,^X......
+00f0  15 1a 72 61 5e 5e 4d 4d a6 90 01 12 0d 0b 64 63   ..ra^^MM......dc
+??? (truncated to 256 bytes)
+[2026-11-04 15:55:22.877] ROUTER_WM RX len=41 sha256=67dd914b2ec779ca
+0000  00 00 29 00 d1 42 fa b9 ec 8a 93 63 be d6 91 f6   ..)..B.....c....
+0010  d9 a3 8c 90 6b 83 5e c6 8f d1 9a f8 5b 56 8b 99   ....k.^.....[V..
+0020  9b e1 f1 f6 cf fe bb a3 ab                        .........
+<LOBBY_MSG	GS	P->S	41B>
+['42', [b'\x18E\xfe`\x04W\x00\x00\x18E\xfe`\x04X\xff\x01\x18E\xfe`\x04Y\xff\x01']]
+[2026-11-04 15:55:22.879] ROUTER_WM LOBBY_MSG subtype=42 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:55:22.879] ROUTER_WM SET_PLAYER_INFO from DOR-DOR raw DL: ['42', [b'\x18E\xfe`\x04W\x00\x00\x18E\xfe`\x04X\xff\x01\x18E\xfe`\x04Y\xff\x01']]
+[2026-11-04 15:55:22.880] LOBBY_BROADCAST -> 38.27.30.232:49605 len=41
+[2026-11-04 15:55:22.880] ROUTER_WM PLAYER_INFO_UPDATE broadcast for DOR-DOR
+[2026-11-04 15:55:22.881] ROUTER_WM SET_PLAYER_INFO ack=proper S->P
+[2026-11-04 15:55:22.881] ROUTER_WM pushing 1 room(s) to DOR-DOR after SET_PLAYER_INFO
+[2026-11-04 15:55:22.882] ROUTER_WM TX[tx] len=16 sha256=60937de26ebad739
+0000  00 00 10 00 d1 24 fa b3 fd cf b9 d6 91 8c a2 bb   .....$..........
+[2026-11-04 15:55:22.883] ROUTER_WM TX[push0] len=273 sha256=44ac5ade5f5229a2
+0000  00 01 11 00 d1 24 fa b8 fd a0 e4 ee a4 ac c6 ef   .....$..........
+0010  f9 98 b0 b8 00 10 10 bf d6 e2 cd c7 e8 9a b4 ed   ................
+0020  85 9c b7 be ff 0f 12 72 8c 90 95 c0 ec d9 81 ce   .......r........
+0030  84 98 d3 a6 fe 0e 31 79 40 be a2 c7 f2 a9 85 bc   ......1y@.......
+0040  82 83 b3 11 fd 0d 27 65 3f 76 a6 99 d3 98 85 f0   ......'e?v......
+0050  85 81 8f b5 9d 0c 29 20 0e 7f 5b a9 9f 97 c3 f4   ......) ..[.....
+0060  97 a2 ed c0 96 0b 32 55 0f 7e 6b 52 ab 97 af ea   ......2U.~kR....
+0070  81 d0 91 83 9f 0a 23 f8 0d 7a 2a 5e 72 d6 9f cb   ......#..z*^r...
+0080  97 9c 90 e5 97 09 29 1a 15 39 58 57 41 4e de b7   ......)..9XWAN..
+0090  8c 9b 9e 89 91 08 4c 0c 08 49 63 56 5e 4a ab 87   ......L..IcV^J..
+00a0  88 ff 99 e8 b4 07 5b 29 08 48 25 52 5e 48 bc bc   ......[).H%R^H..
+00b0  8c 9f 8b e7 f6 06 52 28 0a 0d 55 11 1d 57 b0 a2   ......R(..U..W..
+00c0  9b 9d e6 f5 05 16 27 19 48 65 61 6d 41 f1 b9 ce   ......'.HeamA...
+00d0  83 87 f4 04 15 16 0f 3d 66 50 5d 43 81 bb cf e4   .......=fP]C....
+00e0  c2 03 14 17 01 90 66 2c 5e 58 b0 bb cc c2 02 13   ......f,^X......
+00f0  15 1a 72 61 5e 5e 4d 4d a6 90 01 12 0d 0b 64 63   ..ra^^MM......dc
+??? (truncated to 256 bytes)
+[2026-11-04 15:55:22.976] ROUTER_WM RX len=64 sha256=d96163026019730d
+0000  00 00 18 00 4e 41 eb 8b 8e f0 97 8a 89 91 92 8c   ....NA..........
+0010  90 95 9a 8f 94 99 93 98 00 00 0a 00 de 41 fa e5   .............A..
+0020  ef 8c 00 00 1e 00 cc 41 fa 8b e2 f7 e5 bb fe f5   .......A........
+0030  f3 ab d7 f4 e0 e9 ae ee e5 99 ee fd e1 e1 9c 9f   ................
+<LOGINFRIENDS	GS	P->R	24B>
+[b'\x00\x00\x00\x00', b'\x00\x00\x00\x00']
+[2026-11-04 15:55:22.982] FRIENDS LOGINFRIENDS COOLDOR: 0 friend(s) []
+[2026-11-04 15:55:22.982] ROUTER_WM TX[tx] len=12 sha256=6e11286b75ff1666
+0000  00 00 0c 00 26 14 eb 8b c0 8a 8c 8c               ....&.......
+<0xDE	GS	P->R	10B>
+['en']
+[2026-11-04 15:55:22.987] ROUTER_WM MOTD request lang='en' -> game='Welcome to the Splinter Cell: Chaos Theory community server!'... ubi=''...
+[2026-11-04 15:55:22.987] ROUTER_WM TX[tx] len=122 sha256=92de1cee99d8fc0d
+0000  00 00 7a 00 26 14 eb 8b 50 e1 f8 bd c8 c9 c6 d0   ..z.&...P.......
+0010  b8 8a 8c 91 f5 f3 d3 e8 db dd ac f4 8c e3 f9 ef   ................
+0020  f1 8a d2 9d bb a7 a9 d4 f1 ba 81 db da c5 e7 bb   ................
+0030  b3 8a c4 fc c5 cd f2 c9 bf b5 b6 90 89 f5 f7 d3   ................
+0040  90 d5 b1 95 f5 c3 8c d2 ea c8 95 dc ad c5 bc 96   ................
+0050  84 82 96 cc c2 d0 ad ef ac 99 88 99 85 fb c1 e3   ................
+0060  b7 bf b6 94 80 87 86 d4 96 ac a9 a2 f1 84 9a 91   ................
+0070  9c ad bd a6 ba c6 cd 9e 9f a1                     ..........
+<PROXY_HANDLER	GS	P->R	30B>
+['1', ['ladderquery', '0', '0']]
+[2026-11-04 15:55:22.990] ROUTER_WM PROXY_HANDLER subtype=1 module=ladderquery
+[2026-11-04 15:55:22.990] ROUTER_WM PROXY_HANDLER ct34 base=ladderquery id=2 host=38.49.212.120:44002
+[2026-11-04 15:55:22.992] ROUTER_WM TX[tx] len=65 sha256=359e0677f2d2df3f
+0000  00 00 41 00 cc 14 fa b3 fd e1 f2 e4 a4 94 b9 d6   ..A.............
+0010  ca f2 ee 93 98 81 8c 90 f1 fe d1 d9 83 ca be f5   ................
+0020  ef a1 a9 83 b8 8c ff e8 90 9a 9e 87 8d 9f ea ec   ................
+0030  d4 96 84 8c 9c 9e fd 9a 84 8f 9d fe 83 9a 8e bf   ................
+0040  9e                                                .
+[2026-11-04 15:55:23.176] ROUTER_WM RX len=14 sha256=62c6f616cfa72f4b
+0000  00 00 0e 00 cc 41 fa 8b bc b8 fe cd d7 8f         .....A........
+<PROXY_HANDLER	GS	P->R	14B>
+['2', ['2']]
+[2026-11-04 15:55:23.195] ROUTER_WM PROXY_HANDLER subtype=2 module=2
+[2026-11-04 15:55:23.197] ROUTER_WM TX[tx] len=20 sha256=89c092a9b61ad872
+0000  00 00 14 00 cc 14 fa b3 fd e1 b9 d6 ca c8 8c 90   ................
+0010  94 bd a1 cb                                       ....
+[2026-11-04 15:55:23.872] ROUTER_WM RX len=14 sha256=1c06d926ecbb6d0c
+0000  00 00 0e 00 cc 41 d2 b8 bc f9 fe cd 8c 8f         .....A........
+<PROXY_HANDLER	GS	P->R	14B>
+[['3', '2']]
+[2026-11-04 15:55:23.872] ROUTER_WM PROXY_HANDLER subtype=['3', '2'] module=?
+[2026-11-04 15:55:23.873] ROUTER_WM PROXY_HANDLER module notice ['3', '2']: no reply sent
+[2026-11-04 15:55:28.681] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:55:28.697] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:55:30.914] ROUTER_WM RX len=14 sha256=dc6dba38e02e478a
+0000  00 00 0e 00 d1 41 fa 8b bf b9 fe cd d7 8f         .....A........
+<LOBBY_MSG	GS	P->R	14B>
+['3', ['1']]
+[2026-11-04 15:55:30.945] ROUTER_WM LOBBY_MSG subtype=3 from=COOLDOR@24.69.254.96:51540
+[2026-11-04 15:55:30.945] ROUTER_WM LOBBY_MSG JOIN_SERVER id=1 -> 38.49.212.120:40005
+[2026-11-04 15:55:30.947] ROUTER_WM TX[tx] len=42 sha256=cadbb3638d430acd
+0000  00 00 2a 00 d1 14 fa b3 fd e1 af ac b9 d6 ca a5   ..*.............
+0010  ae 92 8c 90 e6 b5 93 96 bc 94 a3 91 91 9c a2 ad   ................
+0020  b1 d7 98 f6 b6 ac a3 97 aa f1                     ..........
+
+[2026-11-04 15:55:31.145] ROUTER_WM 24.69.254.96:51537 -> 38.49.212.120:40005 CONNECT pre_ke1=yes
+[2026-11-04 15:55:31.147] ROUTER_WM RX len=50 sha256=78610599dbfb829a
+0000  00 00 32 00 d2 42 fa c4 ca e1 ae b3 96 c9 c1 91   ..2..B..........
+0010  a7 a4 d0 9f c3 c2 e6 ad a2 9c 81 c0 94 ab 91 9a   ................
+0020  9b 83 a2 b7 97 89 98 c1 aa b1 93 9e b1 af 90 85   ................
+0030  80 b4                                             ..
+<LOBBYSERVERLOGIN	GS	P->S	50B>
+['COOLDOR', '1', '192.168.1.70', '255.255.255.0', '0']
+[2026-11-04 15:55:31.147] ROUTER_WM LOBBYSERVERLOGIN user=COOLDOR svid=1
+[2026-11-04 15:55:31.147] ROUTER_WM LOBBY session registered (lobby-server conn): 24.69.254.96:51537 user=COOLDOR
+[2026-11-04 15:55:31.148] ROUTER_WM TX[tx] len=16 sha256=16182c08896123b7
+0000  00 00 10 00 26 24 fa ba d5 cf b8 8d 91 bc a1 fc   ....&$..........
+[2026-11-04 15:55:31.263] ROUTER_WM RX len=87 sha256=86615f71acb7a389
+0000  00 00 57 00 db 82 fa 8b bf a6 97 3d bd d3 72 b8   ..W........=..r.
+0010  fe a7 96 5b c5 dc f1 22 d7 e3 95 24 ef f4 22 5b   ...[..."...$.."[
+0020  72 8f f6 73 22 da 28 cb 90 50 93 de 1d 19 41 78   r..s".(..P....Ax
+0030  ec cb 41 d8 7a d7 d9 88 f1 cb 04 76 00 9c dc 17   ..A.z......v....
+0040  b8 7f 37 6b df bb f7 cc ae 97 45 d5 d7 27 3f b5   ..7k......E..'?.
+0050  57 10 4b a2 5f 87 84                              W.K._..
+<KEY_EXCHANGE	GS	UNK->S	87B>
+['2', ['1', '64', b'G\xe9\xbf\xc7\xa0\x9e\xe5\xbd\x83Mf\x19\x1e:p\xb1s^w\x7f\x92Ysi\xf0\x9a\x91E\xc7\x03{\xaf1\xc2p\xe7\x9f\xe9\x11x0.S\xb6\xd5Q\xb8\x03\x02\x9a\x80\x89\xfa\xca\x8er\x04\xb9\xa5\x8b\x02\tP\xff']]
+[2026-11-04 15:55:31.263] ROUTER_WM KEY_EXCHANGE(2) decrypted client BF key len=16
+[2026-11-04 15:55:31.264] ROUTER_WM KEY_EXCHANGE(2) mode=echo-client-nopub (lobby fallback)
+[2026-11-04 15:55:31.264] ROUTER_WM KEY_EXCHANGE(2) RX hdr b3=00 b4=db b5=82
+[2026-11-04 15:55:31.265] ROUTER_WM TX[tx] len=87 sha256=fee4e74b3c6baa30
+0000  00 00 57 00 db 28 fa 8b bf a6 97 3d bd d3 72 b8   ..W..(.....=..r.
+0010  fe a7 96 5b c5 dc f1 22 d7 e3 95 24 ef f4 22 5b   ...[..."...$.."[
+0020  72 8f f6 73 22 da 28 cb 90 50 93 de 1d 19 41 78   r..s".(..P....Ax
+0030  ec cb 41 d8 7a d7 d9 88 f1 cb 04 76 00 9c dc 17   ..A.z......v....
+0040  b8 7f 37 6b df bb f7 cc ae 97 45 d5 d7 27 3f b5   ..7k......E..'?.
+0050  57 10 4b a2 5f 87 84                              W.K._..
+[2026-11-04 15:55:31.347] ROUTER_WM RX len=22 sha256=8f9e31a122a5331c
+0000  00 00 16 00 d1 42 fa b8 fd 92 b8 d6 e2 a0 8c 90   .....B..........
+0010  a6 97 be e0 a0 c5                                 ......
+<LOBBY_MSG	GS	P->S	22B>
+['23', ['1', '', '256']]
+[2026-11-04 15:55:31.351] ROUTER_WM LOBBY_MSG subtype=23 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:55:31.351] ROUTER_WM LOBBY_MSG JOIN_LOBBY id=1 players_now=3
+[2026-11-04 15:55:31.351] ROUTER_WM LOBBY session registered (JOIN_LOBBY): 24.69.254.96:51537 user=COOLDOR
+[2026-11-04 15:55:31.351] LOBBY_BROADCAST -> 38.27.30.232:49605 len=24
+[2026-11-04 15:55:31.351] LOBBY_BROADCAST -> 24.69.254.96:56187 len=24
+[2026-11-04 15:55:31.351] ROUTER_WM MEMBER_JOIN broadcast: COOLDOR joined lobby 1
+[2026-11-04 15:55:31.353] ROUTER_WM pushing 2 existing member(s) to COOLDOR
+[2026-11-04 15:55:31.353] ROUTER_WM JOIN_LOBBY GROUP_INFO rooms payload: [['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']]
+[2026-11-04 15:55:31.353] ROUTER_WM pushing GROUP_INFO with 1 room(s) (20-field format, is_rooms=1) to COOLDOR
+[2026-11-04 15:55:31.353] ROUTER_WM LOBBY pushing 3 extras (members+rooms) to COOLDOR
+[2026-11-04 15:55:31.354] ROUTER_WM TX[tx] len=21 sha256=630c92b3172c72db
+0000  00 00 15 00 d1 24 fa b3 fd c9 b9 d6 91 95 8c a3   .....$..........
+0010  a5 ca bd e0 cb                                    .....
+[2026-11-04 15:55:31.355] ROUTER_WM TX[push0] len=20 sha256=afe26a020fcec185
+0000  00 00 14 00 d1 24 fa bb fd c1 bf d6 e2 95 8c 90   .....$..........
+0010  df be dd cb                                       ....
+[2026-11-04 15:55:31.357] ROUTER_WM TX[push1] len=24 sha256=cba3e37fb6f30589
+0000  00 00 18 00 d1 24 fa bb fd d6 d8 bf d6 e2 d2 8c   .....$..........
+0010  90 b8 c7 be c6 99 dc ca                           ........
+[2026-11-04 15:55:31.358] ROUTER_WM TX[push2] len=273 sha256=44ac5ade5f5229a2
+0000  00 01 11 00 d1 24 fa b8 fd a0 e4 ee a4 ac c6 ef   .....$..........
+0010  f9 98 b0 b8 00 10 10 bf d6 e2 cd c7 e8 9a b4 ed   ................
+0020  85 9c b7 be ff 0f 12 72 8c 90 95 c0 ec d9 81 ce   .......r........
+0030  84 98 d3 a6 fe 0e 31 79 40 be a2 c7 f2 a9 85 bc   ......1y@.......
+0040  82 83 b3 11 fd 0d 27 65 3f 76 a6 99 d3 98 85 f0   ......'e?v......
+0050  85 81 8f b5 9d 0c 29 20 0e 7f 5b a9 9f 97 c3 f4   ......) ..[.....
+0060  97 a2 ed c0 96 0b 32 55 0f 7e 6b 52 ab 97 af ea   ......2U.~kR....
+0070  81 d0 91 83 9f 0a 23 f8 0d 7a 2a 5e 72 d6 9f cb   ......#..z*^r...
+0080  97 9c 90 e5 97 09 29 1a 15 39 58 57 41 4e de b7   ......)..9XWAN..
+0090  8c 9b 9e 89 91 08 4c 0c 08 49 63 56 5e 4a ab 87   ......L..IcV^J..
+00a0  88 ff 99 e8 b4 07 5b 29 08 48 25 52 5e 48 bc bc   ......[).H%R^H..
+00b0  8c 9f 8b e7 f6 06 52 28 0a 0d 55 11 1d 57 b0 a2   ......R(..U..W..
+00c0  9b 9d e6 f5 05 16 27 19 48 65 61 6d 41 f1 b9 ce   ......'.HeamA...
+00d0  83 87 f4 04 15 16 0f 3d 66 50 5d 43 81 bb cf e4   .......=fP]C....
+00e0  c2 03 14 17 01 90 66 2c 5e 58 b0 bb cc c2 02 13   ......f,^X......
+00f0  15 1a 72 61 5e 5e 4d 4d a6 90 01 12 0d 0b 64 63   ..ra^^MM......dc
+??? (truncated to 256 bytes)
+[2026-11-04 15:55:31.565] ROUTER_WM RX len=41 sha256=255bf4d82607416c
+0000  00 00 29 00 d1 42 fa b9 ec 8a b0 63 be d6 91 f6   ..)..B.....c....
+0010  d9 a3 8c 90 6b 83 5e c6 8f d1 9a f8 5b 56 8b 99   ....k.^.....[V..
+0020  b8 e1 f1 f6 cf fe bb 80 ab                        .........
+<LOBBY_MSG	GS	P->S	41B>
+['42', [b"\x18E\xfe`'W\x00\x00\x18E\xfe`'X\xff\x01\x18E\xfe`'Y\xff\x01"]]
+[2026-11-04 15:55:31.570] ROUTER_WM LOBBY_MSG subtype=42 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:55:31.570] ROUTER_WM SET_PLAYER_INFO from COOLDOR raw DL: ['42', [b"\x18E\xfe`'W\x00\x00\x18E\xfe`'X\xff\x01\x18E\xfe`'Y\xff\x01"]]
+[2026-11-04 15:55:31.570] LOBBY_BROADCAST -> 38.27.30.232:49605 len=41
+[2026-11-04 15:55:31.570] LOBBY_BROADCAST -> 24.69.254.96:56187 len=41
+[2026-11-04 15:55:31.571] ROUTER_WM PLAYER_INFO_UPDATE broadcast for COOLDOR
+[2026-11-04 15:55:31.572] ROUTER_WM SET_PLAYER_INFO ack=proper S->P
+[2026-11-04 15:55:31.572] ROUTER_WM pushing 1 room(s) to COOLDOR after SET_PLAYER_INFO
+[2026-11-04 15:55:31.574] ROUTER_WM TX[tx] len=16 sha256=60937de26ebad739
+0000  00 00 10 00 d1 24 fa b3 fd cf b9 d6 91 8c a2 bb   .....$..........
+[2026-11-04 15:55:31.575] ROUTER_WM TX[push0] len=273 sha256=44ac5ade5f5229a2
+0000  00 01 11 00 d1 24 fa b8 fd a0 e4 ee a4 ac c6 ef   .....$..........
+0010  f9 98 b0 b8 00 10 10 bf d6 e2 cd c7 e8 9a b4 ed   ................
+0020  85 9c b7 be ff 0f 12 72 8c 90 95 c0 ec d9 81 ce   .......r........
+0030  84 98 d3 a6 fe 0e 31 79 40 be a2 c7 f2 a9 85 bc   ......1y@.......
+0040  82 83 b3 11 fd 0d 27 65 3f 76 a6 99 d3 98 85 f0   ......'e?v......
+0050  85 81 8f b5 9d 0c 29 20 0e 7f 5b a9 9f 97 c3 f4   ......) ..[.....
+0060  97 a2 ed c0 96 0b 32 55 0f 7e 6b 52 ab 97 af ea   ......2U.~kR....
+0070  81 d0 91 83 9f 0a 23 f8 0d 7a 2a 5e 72 d6 9f cb   ......#..z*^r...
+0080  97 9c 90 e5 97 09 29 1a 15 39 58 57 41 4e de b7   ......)..9XWAN..
+0090  8c 9b 9e 89 91 08 4c 0c 08 49 63 56 5e 4a ab 87   ......L..IcV^J..
+00a0  88 ff 99 e8 b4 07 5b 29 08 48 25 52 5e 48 bc bc   ......[).H%R^H..
+00b0  8c 9f 8b e7 f6 06 52 28 0a 0d 55 11 1d 57 b0 a2   ......R(..U..W..
+00c0  9b 9d e6 f5 05 16 27 19 48 65 61 6d 41 f1 b9 ce   ......'.HeamA...
+00d0  83 87 f4 04 15 16 0f 3d 66 50 5d 43 81 bb cf e4   .......=fP]C....
+00e0  c2 03 14 17 01 90 66 2c 5e 58 b0 bb cc c2 02 13   ......f,^X......
+00f0  15 1a 72 61 5e 5e 4d 4d a6 90 01 12 0d 0b 64 63   ..ra^^MM......dc
+??? (truncated to 256 bytes)
+[2026-11-04 15:55:32.610] LOBBY_COUNT live update -> SNK: 3
+[2026-11-04 15:55:32.610] LOBBY_COUNT live update -> DOR-DOR: 3
+[2026-11-04 15:55:33.633] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 15:55:33.645] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:55:33.645] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 15:55:33.646] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'COOLDOR'}
+[2026-11-04 15:55:33.646] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 15:55:33.648] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 15:55:33.648] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 15:55:33.650] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 15:55:38.659] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:55:38.697] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:55:39.004] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 15:55:39.008] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:55:39.008] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 15:55:39.009] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 15:55:39.012] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 15:55:39.012] LOBBY_BROADCAST -> 24.69.254.96:56187 len=26
+[2026-11-04 15:55:39.013] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: COOLDOR left room 100
+[2026-11-04 15:55:39.013] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 15:55:39.015] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 15:55:39.018] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:55:39.018] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 15:55:39.018] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 15:55:39.020] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 15:55:42.527] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 15:55:42.546] ROUTER_WM LOBBY_MSG subtype=24 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:55:42.546] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 15:55:42.547] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'DOR-DOR'}
+[2026-11-04 15:55:42.547] ROUTER_WM JOIN_ROOM relay: joiner DOR-DOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 15:55:42.548] ROUTER_WM JOIN_ROOM joiner DOR-DOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 15:55:42.548] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 15:55:42.550] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 15:55:45.013] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 15:55:45.018] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:55:45.018] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 15:55:45.018] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'COOLDOR'}
+[2026-11-04 15:55:45.019] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 15:55:45.022] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 15:55:45.022] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 15:55:45.023] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 15:55:47.933] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 15:55:47.945] ROUTER_WM LOBBY_MSG subtype=8 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:55:47.945] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'DOR-DOR'}
+[2026-11-04 15:55:47.945] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='DOR-DOR'/'DOR-DOR'@24.69.254.96 sk=24.69.254.96:56187 host_match=False
+[2026-11-04 15:55:47.946] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 15:55:47.946] LOBBY_BROADCAST -> 24.69.254.96:51537 len=26
+[2026-11-04 15:55:47.946] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: DOR-DOR left room 100
+[2026-11-04 15:55:47.946] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 15:55:47.949] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 15:55:47.950] ROUTER_WM LOBBY_MSG subtype=9 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:55:47.950] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 15:55:47.950] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 15:55:47.951] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 15:55:50.385] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 15:55:50.395] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:55:50.395] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 15:55:50.396] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 15:55:50.397] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 15:55:50.397] LOBBY_BROADCAST -> 24.69.254.96:56187 len=26
+[2026-11-04 15:55:50.397] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: COOLDOR left room 100
+[2026-11-04 15:55:50.397] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 15:55:50.398] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 15:55:50.398] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:55:50.398] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 15:55:50.398] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 15:55:50.400] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 15:55:52.805] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:55:52.847] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:55:55.942] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 15:55:55.944] ROUTER_WM LOBBY_MSG subtype=24 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:55:55.944] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 15:55:55.944] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'DOR-DOR'}
+[2026-11-04 15:55:55.944] ROUTER_WM JOIN_ROOM relay: joiner DOR-DOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 15:55:55.945] ROUTER_WM JOIN_ROOM joiner DOR-DOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 15:55:55.945] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 15:55:55.947] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 15:55:57.157] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 15:55:57.195] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:55:57.195] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 15:55:57.195] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'COOLDOR'}
+[2026-11-04 15:55:57.195] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 15:55:57.197] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 15:55:57.197] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 15:55:57.199] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 15:55:59.680] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:55:59.697] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:56:01.093] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:56:01.147] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:56:01.313] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 15:56:01.317] ROUTER_WM LOBBY_MSG subtype=8 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:56:01.318] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'DOR-DOR'}
+[2026-11-04 15:56:01.319] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='DOR-DOR'/'DOR-DOR'@24.69.254.96 sk=24.69.254.96:56187 host_match=False
+[2026-11-04 15:56:01.321] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 15:56:01.321] LOBBY_BROADCAST -> 24.69.254.96:51537 len=26
+[2026-11-04 15:56:01.322] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: DOR-DOR left room 100
+[2026-11-04 15:56:01.322] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 15:56:01.324] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 15:56:01.327] ROUTER_WM LOBBY_MSG subtype=9 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:56:01.327] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 15:56:01.327] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 15:56:01.329] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 15:56:02.595] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 15:56:02.645] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:56:02.645] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 15:56:02.647] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 15:56:02.647] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 15:56:02.647] LOBBY_BROADCAST -> 24.69.254.96:56187 len=26
+[2026-11-04 15:56:02.647] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: COOLDOR left room 100
+[2026-11-04 15:56:02.647] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 15:56:02.649] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 15:56:02.650] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:56:02.650] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 15:56:02.650] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 15:56:02.650] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 15:56:09.657] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:56:09.697] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:56:16.476] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 15:56:16.496] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:56:16.496] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 15:56:16.496] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'COOLDOR'}
+[2026-11-04 15:56:16.496] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 15:56:16.497] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 15:56:16.497] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 15:56:16.499] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 15:56:21.814] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 15:56:21.815] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:56:21.815] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 15:56:21.815] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 15:56:21.816] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 15:56:21.816] LOBBY_BROADCAST -> 24.69.254.96:56187 len=26
+[2026-11-04 15:56:21.816] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: COOLDOR left room 100
+[2026-11-04 15:56:21.816] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 15:56:21.817] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 15:56:21.819] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:56:21.819] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 15:56:21.819] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 15:56:21.820] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 15:56:23.801] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:56:23.848] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:56:30.678] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:56:30.697] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:56:31.810] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:56:31.848] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:56:32.091] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:56:32.093] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:56:40.655] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:56:40.697] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:56:52.076] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:56:52.098] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:56:54.801] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:56:54.848] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:57:01.678] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:57:01.697] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:57:02.808] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:57:02.846] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:57:03.090] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:57:03.095] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:57:11.654] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:57:11.696] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:57:23.076] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:57:23.096] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:57:25.803] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:57:25.848] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:57:32.676] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:57:32.697] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:57:33.805] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:57:33.847] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:57:34.086] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:57:34.088] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:57:42.687] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:57:42.690] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:57:54.072] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:57:54.098] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:57:56.795] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:57:56.848] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:58:03.674] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:58:03.697] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:58:04.803] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:58:04.848] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:58:05.083] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:58:05.085] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:58:13.684] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:58:13.696] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:58:25.069] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:58:25.095] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:58:27.826] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:58:27.828] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:58:34.673] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:58:34.698] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:58:35.800] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:58:35.847] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:58:36.079] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:58:36.085] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:58:44.682] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:58:44.697] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:58:56.067] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:58:56.097] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:58:58.824] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:58:58.848] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:59:05.671] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:59:05.697] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:59:06.805] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:59:06.850] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:59:07.078] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:59:07.083] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:59:15.682] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:59:15.697] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:59:27.099] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:59:27.147] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:59:27.684] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 15:59:27.689] ROUTER_WM LOBBY_MSG subtype=24 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:59:27.689] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 15:59:27.691] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'DOR-DOR'}
+[2026-11-04 15:59:27.691] ROUTER_WM JOIN_ROOM relay: joiner DOR-DOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 15:59:27.692] ROUTER_WM JOIN_ROOM joiner DOR-DOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 15:59:27.694] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 15:59:27.694] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 15:59:29.822] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:59:29.847] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:59:31.402] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 15:59:31.446] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:59:31.447] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 15:59:31.448] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'COOLDOR'}
+[2026-11-04 15:59:31.448] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 15:59:31.449] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 15:59:31.450] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 15:59:31.451] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 15:59:32.924] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 15:59:32.947] ROUTER_WM LOBBY_MSG subtype=8 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:59:32.947] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'DOR-DOR'}
+[2026-11-04 15:59:32.948] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='DOR-DOR'/'DOR-DOR'@24.69.254.96 sk=24.69.254.96:56187 host_match=False
+[2026-11-04 15:59:32.949] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 15:59:32.949] LOBBY_BROADCAST -> 24.69.254.96:51537 len=26
+[2026-11-04 15:59:32.949] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: DOR-DOR left room 100
+[2026-11-04 15:59:32.950] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 15:59:32.952] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 15:59:32.954] ROUTER_WM LOBBY_MSG subtype=9 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:59:32.954] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 15:59:32.954] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 15:59:32.956] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 15:59:36.669] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:59:36.698] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:59:36.807] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 15:59:36.809] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:59:36.809] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 15:59:36.809] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 15:59:36.810] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 15:59:36.810] LOBBY_BROADCAST -> 24.69.254.96:56187 len=26
+[2026-11-04 15:59:36.810] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: COOLDOR left room 100
+[2026-11-04 15:59:36.810] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 15:59:36.812] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 15:59:36.812] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 15:59:36.812] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 15:59:36.812] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 15:59:36.814] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 15:59:38.075] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 15:59:38.077] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 15:59:46.681] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 15:59:46.698] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 15:59:56.133] ROUTER_WM RX len=178 sha256=d141d59a05cc290c
+0000  00 00 b2 00 d1 42 fa b9 fd d6 d8 d1 e1 ff 85 d7   .....B..........
+0010  a3 d6 e3 c7 bb d6 e2 d2 cc e0 fe c7 92 8a d5 e2   ................
+0020  c1 ff 8c 90 b8 c8 f0 98 b3 d5 c8 d4 e1 c1 55 38   ..............U8
+0030  be c6 e9 e4 fa 86 b3 c7 d3 e0 dc 3c 27 50 dc 99   ...........<'P..
+0040  f4 f8 c2 db c6 d2 df d4 d5 31 0c 2e ca d1 94 b0   .........1......
+0050  ba f4 d1 de dd 94 31 13 6d 19 d7 ea 9a b9 f4 d0   ......1.m.......
+0060  dd 84 f9 28 12 1d 12 30 e9 dd b8 8a cf dc 9e c0   ...(...0........
+0070  31 11 6f 12 4d ad d5 8c af db c9 c6 36 10 1b 15   1.o.M.......6...
+0080  2e b6 88 a0 da e8 c4 46 39 1a 17 1d 3f a9 d9 e7   .......F9...?...
+0090  db 4c 37 4f 16 02 69 a5 d8 e6 c5 4b 23 1c 1a 1a   .L7O..i....K#...
+00a0  33 d7 e5 dd 0e 38 77 13 59 32 e4 ca 25 3e e8 12   3....8w.Y2..%>..
+00b0  29 31                                             )1
+<LOBBY_MSG	GS	P->S	178B>
+['12', ['1', 'DOR-DOR', 'SPLINTERCELL3PS2US', '5', '4', '0', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to192.168.1.218\x00n.\xc0\xa8\x01\xda\x0eJNE24.69.254.96\x00\x00\x00\x00\x18E\xfe`\x04V\x00\x00', '', '1228530451', '1.0', b'']]
+[2026-11-04 15:59:56.146] ROUTER_WM LOBBY_MSG subtype=12 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:59:56.146] ROUTER_WM CREATE_ROOM raw DL: ['12', ['1', 'DOR-DOR', 'SPLINTERCELL3PS2US', '5', '4', '0', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to192.168.1.218\x00n.\xc0\xa8\x01\xda\x0eJNE24.69.254.96\x00\x00\x00\x00\x18E\xfe`\x04V\x00\x00', '', '1228530451', '1.0', b'']]
+[2026-11-04 15:59:56.147] ROUTER_WM CREATE_ROOM relay: room by DOR-DOR at 24.69.254.96 advertised as 38.49.212.120 (blob slots rewritten)
+[2026-11-04 15:59:56.147] ROUTER_WM LOBBY_MSG CREATE_ROOM host='DOR-DOR' map='Cinema' group_name='DOR-DOR' room_id=101 parent=1 type=5 max=4 visitors=0 event_id=1228530451 config=0x1d8 info_len=96
+[2026-11-04 15:59:56.147] ROUTER_WM CREATE_ROOM room.to_list()=['5', 'DOR-DOR', '101', '1', '1', '472', '1', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to38.49.212.120\x00\x00\x00&1\xd4x\x0eJNE38.49.212.120\x00\x00\x00&1\xd4x\x04V\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']
+[2026-11-04 15:59:56.149] ROUTER_WM CREATE_ROOM -> GROUP_INFO broadcast with 2 room(s) (20-field format, is_rooms=1) len=527
+[2026-11-04 15:59:56.149] ROUTER_WM CREATE_ROOM GROUP_INFO payload: [['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120'], ['5', 'DOR-DOR', '101', '1', '1', '472', '1', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to38.49.212.120\x00\x00\x00&1\xd4x\x0eJNE38.49.212.120\x00\x00\x00&1\xd4x\x04V\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']]
+[2026-11-04 15:59:56.150] LOBBY_BROADCAST(rooms) -> 38.27.30.232:49605 ctx=100
+[2026-11-04 15:59:56.151] LOBBY_BROADCAST(rooms) -> 24.69.254.96:51537 ctx=None
+[2026-11-04 15:59:56.151] ROUTER_WM CREATE_ROOM -> NEW_GROUP(54) broadcast mode=room len=264 payload=['5', 'DOR-DOR', '101', '1', '1', '472', '1', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to38.49.212.120\x00\x00\x00&1\xd4x\x0eJNE38.49.212.120\x00\x00\x00&1\xd4x\x04V\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']
+[2026-11-04 15:59:56.152] LOBBY_BROADCAST(rooms) -> 38.27.30.232:49605 ctx=100
+[2026-11-04 15:59:56.152] LOBBY_BROADCAST(rooms) -> 24.69.254.96:51537 ctx=None
+[2026-11-04 15:59:56.152] ROUTER_WM CREATE_ROOM ack=roomid room_id=101
+[2026-11-04 15:59:56.154] ROUTER_WM TX[tx] len=35 sha256=fca6f91f0c833f20
+0000  00 00 23 00 d1 24 fa b3 fd c9 97 d9 b9 d6 91 a7   ..#..$..........
+0010  b1 93 8c a2 a5 c9 d2 be a5 d5 a0 f8 e0 dd cd f9   ................
+0020  eb d1 a3                                          ...
+[2026-11-04 15:59:56.263] ROUTER_WM RX len=40 sha256=3a37897e17cf868f
+0000  00 00 28 00 d1 42 fa bf fd 92 e4 ee b8 d6 a0 e5   ..(..B..........
+0010  9c d1 8c a0 f4 ff a1 96 be c4 e8 98 d6 a9 e0 f6   ................
+0020  ad a4 99 ef af 93 89 f7                           ........
+<LOBBY_MSG	GS	P->S	40B>
+['24', ['101', 'Password', '128', '0', '0.1']]
+[2026-11-04 15:59:56.269] ROUTER_WM LOBBY_MSG subtype=24 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:59:56.269] ROUTER_WM JOIN_ROOM request=['101', 'Password', '128', '0', '0.1'] room_found=True mode=ip
+[2026-11-04 15:59:56.270] ROUTER_WM JOIN_ROOM host: NEW_GROUP(54) sent to creator before join ack (room 101)
+[2026-11-04 15:59:56.271] ROUTER_WM JOIN_ROOM requester is host -> reply mode=ip
+[2026-11-04 15:59:56.271] ROUTER_WM JOIN_ROOM ack room_id=101 extra='24.69.254.96'
+[2026-11-04 15:59:56.273] ROUTER_WM TX[tx] len=37 sha256=c27a39a044b7abac
+0000  00 00 25 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a7   ..%..$..........
+0010  aa 8c 8c a4 a5 b5 95 fb bd a5 ae 95 a5 e0 ab ad   ................
+0020  92 eb b0 9a fa                                    .....
+[2026-11-04 15:59:56.497] ROUTER_WM RX len=17 sha256=6fd8de71750a46b6
+0000  00 00 11 00 d1 42 fa be fd 92 bb d6 a0 8c a0 be   .....B..........
+0010  ce                                                .
+<LOBBY_MSG	GS	P->S	17B>
+['15', ['101']]
+[2026-11-04 15:59:56.502] ROUTER_WM LOBBY_MSG subtype=15 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:59:56.502] ROUTER_WM LOBBY_MSG 15: typed reply [['101']]
+[2026-11-04 15:59:56.504] ROUTER_WM TX[tx] len=23 sha256=5fcdd29c9ead5a35
+0000  00 00 17 00 d1 24 fa b3 fd c9 97 b9 d6 91 a7 8c   .....$..........
+0010  a5 a5 be a5 c4 e0 c5                              .......
+[2026-11-04 15:59:56.597] ROUTER_WM RX len=40 sha256=69aaf9b4db48d042
+0000  00 00 28 00 d1 42 fa b8 fd 92 97 a4 b9 d6 a0 96   ..(..B..........
+0010  ad 9a 8c a0 95 e8 97 94 be 94 9a 91 8b a9 f1 a9   ................
+0020  b1 95 90 eb ac 8d 96 f7                           ........
+<LOBBY_MSG	GS	P->S	40B>
+['33', ['101', b'', '0', '192.168.1.218']]
+[2026-11-04 15:59:56.600] ROUTER_WM LOBBY_MSG subtype=33 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 15:59:56.600] ROUTER_WM LOBBY_MSG 33: typed reply [['101']]
+[2026-11-04 15:59:56.602] ROUTER_WM TX[tx] len=23 sha256=0bfbfa123701f810
+0000  00 00 17 00 d1 24 fa b3 fd c9 97 b9 d6 91 a7 8c   .....$..........
+0010  a3 a5 bc a5 c4 e0 c5                              .......
+[2026-11-04 16:00:00.264] ROUTER_WM RX len=32 sha256=57c8aa7fc50a2adc
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a0 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['101', '', '128', '0', '1.0']]
+[2026-11-04 16:00:00.297] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:00.297] ROUTER_WM JOIN_ROOM request=['101', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 16:00:00.298] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '24.69.254.96', 'room': '101', 'user': 'COOLDOR'}
+[2026-11-04 16:00:00.298] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 101 (host 24.69.254.96)
+[2026-11-04 16:00:00.299] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 101 flags=128)
+[2026-11-04 16:00:00.299] ROUTER_WM JOIN_ROOM ack room_id=101 extra='38.49.212.120'
+[2026-11-04 16:00:00.300] ROUTER_WM TX[tx] len=38 sha256=04dab6851eaa20fb
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a7   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 16:00:00.802] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:00:00.805] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:00:05.602] ROUTER_WM RX len=35 sha256=9a68138543660607
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a1 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['101']]
+[2026-11-04 16:00:05.647] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:05.647] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 16:00:05.649] ROUTER_WM GROUP_LEAVE room=101 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 16:00:05.649] ROUTER_WM GROUP_LEAVE room=101 master=DOR-DOR room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=True
+[2026-11-04 16:00:05.651] LOBBY_BROADCAST -> 38.27.30.232:49605 len=17
+[2026-11-04 16:00:05.651] LOBBY_BROADCAST -> 24.69.254.96:56187 len=17
+[2026-11-04 16:00:05.651] LOBBY_BROADCAST -> 24.69.254.96:51537 len=17
+[2026-11-04 16:00:05.653] ROUTER_WM LOBBY room removed (host left): id=101
+[2026-11-04 16:00:05.654] ROUTER_WM GROUP_LEAVE reply shape=single payload=['101']
+[2026-11-04 16:00:05.654] ROUTER_WM TX[tx] len=22 sha256=2d42c2844e17cd6a
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a4 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 16:00:05.656] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:05.656] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 16:00:05.656] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 16:00:05.658] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 16:00:05.741] ROUTER_WM RX len=19 sha256=0b554c400c5c95dd
+0000  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0010  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 16:00:05.743] ROUTER_WM LOBBY_MSG subtype=9 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 16:00:05.743] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 16:00:05.743] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 16:00:05.744] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 16:00:06.053] ROUTER_WM pushing authoritative room list (1 room(s)) to all sessions
+[2026-11-04 16:00:06.055] LOBBY_BROADCAST -> 38.27.30.232:49605 len=273
+[2026-11-04 16:00:06.055] LOBBY_BROADCAST -> 24.69.254.96:56187 len=273
+[2026-11-04 16:00:06.055] LOBBY_BROADCAST -> 24.69.254.96:51537 len=273
+[2026-11-04 16:00:06.455] LOBBY_BROADCAST -> 38.27.30.232:49605 len=17
+[2026-11-04 16:00:06.455] LOBBY_BROADCAST -> 24.69.254.96:56187 len=17
+[2026-11-04 16:00:06.456] LOBBY_BROADCAST -> 24.69.254.96:51537 len=17
+[2026-11-04 16:00:07.253] ROUTER_WM pushing authoritative room list (1 room(s)) to all sessions
+[2026-11-04 16:00:07.255] LOBBY_BROADCAST -> 38.27.30.232:49605 len=273
+[2026-11-04 16:00:07.255] LOBBY_BROADCAST -> 24.69.254.96:56187 len=273
+[2026-11-04 16:00:07.255] LOBBY_BROADCAST -> 24.69.254.96:51537 len=273
+[2026-11-04 16:00:07.668] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:00:07.698] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:00:08.154] LOBBY_BROADCAST -> 38.27.30.232:49605 len=17
+[2026-11-04 16:00:08.154] LOBBY_BROADCAST -> 24.69.254.96:56187 len=17
+[2026-11-04 16:00:08.156] LOBBY_BROADCAST -> 24.69.254.96:51537 len=17
+[2026-11-04 16:00:09.071] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:00:09.097] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:00:12.241] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 16:00:12.297] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:12.298] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 16:00:12.298] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'COOLDOR'}
+[2026-11-04 16:00:12.298] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 16:00:12.300] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 16:00:12.300] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 16:00:12.302] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 16:00:17.583] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 16:00:17.595] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:17.595] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 16:00:17.595] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 16:00:17.597] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 16:00:17.597] LOBBY_BROADCAST -> 24.69.254.96:56187 len=26
+[2026-11-04 16:00:17.597] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: COOLDOR left room 100
+[2026-11-04 16:00:17.597] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 16:00:17.599] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 16:00:17.599] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:17.601] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 16:00:17.601] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 16:00:17.601] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 16:00:17.677] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:00:17.681] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:00:27.024] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 16:00:27.047] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:27.047] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 16:00:27.047] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'COOLDOR'}
+[2026-11-04 16:00:27.048] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 16:00:27.048] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 16:00:27.048] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 16:00:27.050] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 16:00:32.399] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 16:00:32.446] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:32.448] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 16:00:32.448] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 16:00:32.448] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 16:00:32.448] LOBBY_BROADCAST -> 24.69.254.96:56187 len=26
+[2026-11-04 16:00:32.448] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: COOLDOR left room 100
+[2026-11-04 16:00:32.448] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 16:00:32.449] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 16:00:32.451] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:32.451] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 16:00:32.451] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 16:00:32.451] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 16:00:38.667] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:00:38.703] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:00:40.068] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:00:40.097] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:00:42.063] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:00:42.064] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:00:42.099] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:00:42.101] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:00:48.677] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:00:48.698] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:00:49.048] ROUTER_WM RX len=178 sha256=094c581da4c559e6
+0000  00 00 b2 00 d1 42 fa b9 fd d1 d8 d1 e1 ff 85 d7   .....B..........
+0010  a3 d6 e3 c7 bb d6 e2 d2 cc e0 fe c7 92 8a d5 e2   ................
+0020  c1 ff 8c 90 d9 c8 f0 98 b3 d5 c8 d4 e1 c1 55 38   ..............U8
+0030  be db e9 e4 fa 86 b3 c7 d3 e0 dc 3c 27 50 dc 99   ...........<'P..
+0040  f4 f8 c2 db c6 d2 df d4 8f 31 0c 2e ca d1 94 b0   .........1......
+0050  ba f4 d1 de dd 8a 31 13 6d 19 d7 ea 9a b9 f4 d0   ......1.m.......
+0060  dd cb 96 28 12 1d 12 30 e9 dd b8 8a cf dc 86 f8   ...(...0........
+0070  31 11 6f 12 4d ad d5 8c af db 85 c7 36 10 1b 15   1.o.M.......6...
+0080  2e b6 88 a0 da e8 c1 70 39 1a 17 1d 3f a9 d9 e7   .......p9...?...
+0090  db 22 37 53 16 02 69 a5 d8 e6 c5 4b 23 16 1a 1a   ."7S..i....K#...
+00a0  33 d7 e5 dd 0e 38 77 13 59 32 e4 ca b9 3e e8 12   3....8w.Y2...>..
+00b0  29 31                                             )1
+<LOBBY_MSG	GS	P->S	178B>
+['12', ['1', 'COOLDOR', 'SPLINTERCELL3PS2US', '5', '4', '0', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ll 192.168.1.70\x00opt\xc0\xa8\x01F\x0eJ s24.69.254.96\x00\x00\x00\x00\x18E\xfe`\x0eJ\x00\x00', '', '1228530451', '1.0', b'']]
+[2026-11-04 16:00:49.055] ROUTER_WM LOBBY_MSG subtype=12 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:49.056] ROUTER_WM CREATE_ROOM raw DL: ['12', ['1', 'COOLDOR', 'SPLINTERCELL3PS2US', '5', '4', '0', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ll 192.168.1.70\x00opt\xc0\xa8\x01F\x0eJ s24.69.254.96\x00\x00\x00\x00\x18E\xfe`\x0eJ\x00\x00', '', '1228530451', '1.0', b'']]
+[2026-11-04 16:00:49.056] ROUTER_WM CREATE_ROOM relay: room by COOLDOR at 24.69.254.96 advertised as 38.49.212.120 (blob slots rewritten)
+[2026-11-04 16:00:49.057] ROUTER_WM LOBBY_MSG CREATE_ROOM host='COOLDOR' map='Cinema' group_name='COOLDOR' room_id=102 parent=1 type=5 max=4 visitors=0 event_id=1228530451 config=0x1d8 info_len=96
+[2026-11-04 16:00:49.057] ROUTER_WM CREATE_ROOM room.to_list()=['5', 'COOLDOR', '102', '1', '1', '472', '1', 'COOLDOR', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ll 38.49.212.120\x00\x00\x00&1\xd4x\x0eJ s38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']
+[2026-11-04 16:00:49.059] ROUTER_WM CREATE_ROOM -> GROUP_INFO broadcast with 2 room(s) (20-field format, is_rooms=1) len=527
+[2026-11-04 16:00:49.059] ROUTER_WM CREATE_ROOM GROUP_INFO payload: [['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120'], ['5', 'COOLDOR', '102', '1', '1', '472', '1', 'COOLDOR', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ll 38.49.212.120\x00\x00\x00&1\xd4x\x0eJ s38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']]
+[2026-11-04 16:00:49.061] LOBBY_BROADCAST(rooms) -> 38.27.30.232:49605 ctx=100
+[2026-11-04 16:00:49.062] LOBBY_BROADCAST(rooms) -> 24.69.254.96:56187 ctx=101
+[2026-11-04 16:00:49.063] ROUTER_WM CREATE_ROOM -> NEW_GROUP(54) broadcast mode=room len=264 payload=['5', 'COOLDOR', '102', '1', '1', '472', '1', 'COOLDOR', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,h\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ll 38.49.212.120\x00\x00\x00&1\xd4x\x0eJ s38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']
+[2026-11-04 16:00:49.063] LOBBY_BROADCAST(rooms) -> 38.27.30.232:49605 ctx=100
+[2026-11-04 16:00:49.064] LOBBY_BROADCAST(rooms) -> 24.69.254.96:56187 ctx=101
+[2026-11-04 16:00:49.064] ROUTER_WM CREATE_ROOM ack=roomid room_id=102
+[2026-11-04 16:00:49.066] ROUTER_WM TX[tx] len=35 sha256=6ff07c390bcfe3f2
+0000  00 00 23 00 d1 24 fa b3 fd c9 97 d9 b9 d6 91 a4   ..#..$..........
+0010  d0 93 8c a2 a5 d4 d2 be a5 d5 a0 f8 e0 da cd f9   ................
+0020  eb d1 a3                                          ...
+[2026-11-04 16:00:49.144] ROUTER_WM RX len=40 sha256=d2246f9d23935046
+0000  00 00 28 00 d1 42 fa bf fd 92 e4 ee b8 d6 a3 e5   ..(..B..........
+0010  9c d1 8c a0 f4 ff a1 96 be c4 e8 98 d6 a9 e0 f6   ................
+0020  ad a4 99 ef af 93 89 f7                           ........
+<LOBBY_MSG	GS	P->S	40B>
+['24', ['102', 'Password', '128', '0', '0.1']]
+[2026-11-04 16:00:49.151] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:49.151] ROUTER_WM JOIN_ROOM request=['102', 'Password', '128', '0', '0.1'] room_found=True mode=ip
+[2026-11-04 16:00:49.153] ROUTER_WM JOIN_ROOM host: NEW_GROUP(54) sent to creator before join ack (room 102)
+[2026-11-04 16:00:49.153] ROUTER_WM JOIN_ROOM requester is host -> reply mode=ip
+[2026-11-04 16:00:49.153] ROUTER_WM JOIN_ROOM ack room_id=102 extra='24.69.254.96'
+[2026-11-04 16:00:49.155] ROUTER_WM TX[tx] len=37 sha256=64d1e6508f70c062
+0000  00 00 25 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a4   ..%..$..........
+0010  aa 8c 8c a4 a5 b5 95 fb bd a5 ae 95 a5 e0 ab ad   ................
+0020  92 eb b0 9a fa                                    .....
+[2026-11-04 16:00:49.344] ROUTER_WM RX len=17 sha256=16d785caf34a3bc0
+0000  00 00 11 00 d1 42 fa be fd 92 bb d6 a3 8c a0 be   .....B..........
+0010  ce                                                .
+<LOBBY_MSG	GS	P->S	17B>
+['15', ['102']]
+[2026-11-04 16:00:49.347] ROUTER_WM LOBBY_MSG subtype=15 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:49.349] ROUTER_WM LOBBY_MSG 15: typed reply [['102']]
+[2026-11-04 16:00:49.349] ROUTER_WM TX[tx] len=23 sha256=471237ac8423d074
+0000  00 00 17 00 d1 24 fa b3 fd c9 97 b9 d6 91 a4 8c   .....$..........
+0010  a5 a5 be a5 c4 e0 c5                              .......
+[2026-11-04 16:00:49.444] ROUTER_WM RX len=39 sha256=5e85e572dc7438f8
+0000  00 00 27 00 d1 42 fa b8 fd 92 97 a4 b9 d6 a3 96   ..'..B..........
+0010  ad 9a 8c a0 95 e8 97 91 be 94 9a 91 8b f4 f1 a9   ................
+0020  b1 95 a8 eb ac 8d 97                              .......
+<LOBBY_MSG	GS	P->S	39B>
+['33', ['102', b'', '0', '192.168.1.70']]
+[2026-11-04 16:00:49.448] ROUTER_WM LOBBY_MSG subtype=33 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:00:49.448] ROUTER_WM LOBBY_MSG 33: typed reply [['102']]
+[2026-11-04 16:00:49.449] ROUTER_WM TX[tx] len=23 sha256=8c26116a48fd0e27
+0000  00 00 17 00 d1 24 fa b3 fd c9 97 b9 d6 91 a4 8c   .....$..........
+0010  a3 a5 bc a5 c4 e0 c5                              .......
+[2026-11-04 16:00:55.842] ROUTER_WM RX len=32 sha256=56500314b4b3cadb
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a3 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['102', '', '128', '0', '1.0']]
+[2026-11-04 16:00:55.898] ROUTER_WM LOBBY_MSG subtype=24 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 16:00:55.899] ROUTER_WM JOIN_ROOM request=['102', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 16:00:55.899] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '24.69.254.96', 'room': '102', 'user': 'DOR-DOR'}
+[2026-11-04 16:00:55.900] ROUTER_WM JOIN_ROOM relay: joiner DOR-DOR@24.69.254.96 dials 38.49.212.120 for room 102 (host 24.69.254.96)
+[2026-11-04 16:00:55.900] ROUTER_WM JOIN_ROOM joiner DOR-DOR: room-level GROUP_INFO(53) sent before ack (room 102 flags=128)
+[2026-11-04 16:00:55.901] ROUTER_WM JOIN_ROOM ack room_id=102 extra='38.49.212.120'
+[2026-11-04 16:00:55.903] ROUTER_WM TX[tx] len=38 sha256=e143d4d62c86ca95
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a4   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 16:01:01.146] ROUTER_WM RX len=35 sha256=9246545074a7b992
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a2 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['102']]
+[2026-11-04 16:01:01.196] ROUTER_WM LOBBY_MSG subtype=8 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 16:01:01.196] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'DOR-DOR'}
+[2026-11-04 16:01:01.196] ROUTER_WM GROUP_LEAVE room=102 master=SNK room_ip=38.49.212.120 sender='DOR-DOR'/'DOR-DOR'@24.69.254.96 sk=24.69.254.96:56187 host_match=False
+[2026-11-04 16:01:01.197] ROUTER_WM GROUP_LEAVE room=102 master=COOLDOR room_ip=38.49.212.120 sender='DOR-DOR'/'DOR-DOR'@24.69.254.96 sk=24.69.254.96:56187 host_match=True
+[2026-11-04 16:01:01.198] LOBBY_BROADCAST -> 38.27.30.232:49605 len=17
+[2026-11-04 16:01:01.199] LOBBY_BROADCAST -> 24.69.254.96:56187 len=17
+[2026-11-04 16:01:01.200] LOBBY_BROADCAST -> 24.69.254.96:51537 len=17
+[2026-11-04 16:01:01.203] ROUTER_WM LOBBY room removed (host left): id=102
+[2026-11-04 16:01:01.203] ROUTER_WM GROUP_LEAVE reply shape=single payload=['102']
+[2026-11-04 16:01:01.204] ROUTER_WM TX[tx] len=22 sha256=8c221fb7b6dfa988
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a7 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 16:01:01.205] ROUTER_WM LOBBY_MSG subtype=9 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 16:01:01.205] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 16:01:01.206] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 16:01:01.207] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 16:01:01.292] ROUTER_WM RX len=19 sha256=0b554c400c5c95dd
+0000  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0010  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 16:01:01.293] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:01:01.293] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 16:01:01.293] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 16:01:01.295] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 16:01:01.602] ROUTER_WM pushing authoritative room list (1 room(s)) to all sessions
+[2026-11-04 16:01:01.604] LOBBY_BROADCAST -> 38.27.30.232:49605 len=273
+[2026-11-04 16:01:01.604] LOBBY_BROADCAST -> 24.69.254.96:56187 len=273
+[2026-11-04 16:01:01.604] LOBBY_BROADCAST -> 24.69.254.96:51537 len=273
+[2026-11-04 16:01:02.003] LOBBY_BROADCAST -> 38.27.30.232:49605 len=17
+[2026-11-04 16:01:02.003] LOBBY_BROADCAST -> 24.69.254.96:56187 len=17
+[2026-11-04 16:01:02.005] LOBBY_BROADCAST -> 24.69.254.96:51537 len=17
+[2026-11-04 16:01:02.802] ROUTER_WM pushing authoritative room list (1 room(s)) to all sessions
+[2026-11-04 16:01:02.802] LOBBY_BROADCAST -> 38.27.30.232:49605 len=273
+[2026-11-04 16:01:02.804] LOBBY_BROADCAST -> 24.69.254.96:56187 len=273
+[2026-11-04 16:01:02.804] LOBBY_BROADCAST -> 24.69.254.96:51537 len=273
+[2026-11-04 16:01:03.708] LOBBY_BROADCAST -> 38.27.30.232:49605 len=17
+[2026-11-04 16:01:03.708] LOBBY_BROADCAST -> 24.69.254.96:56187 len=17
+[2026-11-04 16:01:03.710] LOBBY_BROADCAST -> 24.69.254.96:51537 len=17
+[2026-11-04 16:01:09.665] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:01:09.702] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:01:11.068] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:01:11.104] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:01:12.825] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:01:12.827] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:01:19.673] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:01:19.698] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:01:31.846] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:01:31.898] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:01:32.088] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:01:32.095] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:01:36.316] ROUTER_WM RX len=30 sha256=bf02cbc94bc7605a
+0000  00 00 1e 00 cc 41 fa 8b e2 f7 e5 bb fe f5 f3 ab   .....A..........
+0010  d7 f4 e0 e9 ae ee e5 99 ee fd e1 e1 9c 9f         ..............
+<PROXY_HANDLER	GS	P->R	30B>
+['1', ['ladderquery', '0', '0']]
+[2026-11-04 16:01:36.345] ROUTER_WM PROXY_HANDLER subtype=1 module=ladderquery
+[2026-11-04 16:01:36.347] ROUTER_WM PROXY_HANDLER ct34 base=ladderquery id=2 host=38.49.212.120:44002
+[2026-11-04 16:01:36.349] ROUTER_WM TX[tx] len=65 sha256=359e0677f2d2df3f
+0000  00 00 41 00 cc 14 fa b3 fd e1 f2 e4 a4 94 b9 d6   ..A.............
+0010  ca f2 ee 93 98 81 8c 90 f1 fe d1 d9 83 ca be f5   ................
+0020  ef a1 a9 83 b8 8c ff e8 90 9a 9e 87 8d 9f ea ec   ................
+0030  d4 96 84 8c 9c 9e fd 9a 84 8f 9d fe 83 9a 8e bf   ................
+0040  9e                                                .
+[2026-11-04 16:01:36.448] ROUTER_WM RX len=14 sha256=62c6f616cfa72f4b
+0000  00 00 0e 00 cc 41 fa 8b bc b8 fe cd d7 8f         .....A........
+<PROXY_HANDLER	GS	P->R	14B>
+['2', ['2']]
+[2026-11-04 16:01:36.453] ROUTER_WM PROXY_HANDLER subtype=2 module=2
+[2026-11-04 16:01:36.455] ROUTER_WM TX[tx] len=20 sha256=89c092a9b61ad872
+0000  00 00 14 00 cc 14 fa b3 fd e1 b9 d6 ca c8 8c 90   ................
+0010  94 bd a1 cb                                       ....
+[2026-11-04 16:01:37.097] ROUTER_WM RX len=14 sha256=1c06d926ecbb6d0c
+0000  00 00 0e 00 cc 41 d2 b8 bc f9 fe cd 8c 8f         .....A........
+<PROXY_HANDLER	GS	P->R	14B>
+[['3', '2']]
+[2026-11-04 16:01:37.106] ROUTER_WM PROXY_HANDLER subtype=['3', '2'] module=?
+[2026-11-04 16:01:37.146] ROUTER_WM PROXY_HANDLER module notice ['3', '2']: no reply sent
+[2026-11-04 16:01:40.663] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:01:40.698] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:01:42.064] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:01:42.097] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:01:50.674] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:01:50.698] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:02:02.860] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:02:02.901] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:02:07.830] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:02:07.849] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:02:09.797] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:02:09.848] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:02:11.662] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:02:11.698] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:02:13.094] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:02:13.099] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:02:21.672] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:02:21.696] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:02:24.068] ROUTER_WM RX len=178 sha256=04d032cb0ee994f1
+0000  00 00 b2 00 d1 42 fa b9 fd d6 d8 d1 e1 ff 85 d7   .....B..........
+0010  b8 d6 e3 c7 bb d6 e2 d2 cc e0 fe c7 92 86 d5 e2   ................
+0020  c1 ff 8c 90 b8 c8 f0 98 b3 d5 c8 d4 e1 c1 55 38   ..............U8
+0030  be c6 e9 e4 fa 86 b3 c7 d3 e0 dc 3c 27 50 dc 99   ...........<'P..
+0040  f4 f8 c2 db c6 d2 df d4 d5 31 0c 2e ca d1 94 b0   .........1......
+0050  ba f1 b4 de dd 94 31 13 6d 19 d7 ea 9a b9 f5 b7   ......1.m.......
+0060  dd 84 f9 28 12 1d 12 30 e9 dd b8 93 ae dc 9e c0   ...(...0........
+0070  31 11 6f 12 4d ad d5 90 a0 db c9 c6 36 10 1b 15   1.o.M.......6...
+0080  2e b6 8e ac da e8 c4 46 39 1a 17 1d 3f a4 d9 e7   .......F9...?...
+0090  db 4c 37 4f 16 02 69 bb d8 e6 c5 4b 23 1c 1a 1a   .L7O..i....K#...
+00a0  33 d7 e5 dd 0e 38 77 13 59 32 e4 ca 25 3e e8 12   3....8w.Y2..%>..
+00b0  29 31                                             )1
+<LOBBY_MSG	GS	P->S	178B>
+['12', ['1', 'DOR-DOR', 'SPLINTERCELL3PS2US', '5', '4', '0', b'\x0fh,h\xffORP14\x00\x00\x00Orphanage\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to192.168.1.218\x00n.\xc0\xa8\x01\xda\x0eJNE24.69.254.96\x00\x00\x00\x00\x18E\xfe`\x04V\x00\x00', '', '1228530451', '1.0', b'']]
+[2026-11-04 16:02:24.099] ROUTER_WM LOBBY_MSG subtype=12 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 16:02:24.099] ROUTER_WM CREATE_ROOM raw DL: ['12', ['1', 'DOR-DOR', 'SPLINTERCELL3PS2US', '5', '4', '0', b'\x0fh,h\xffORP14\x00\x00\x00Orphanage\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to192.168.1.218\x00n.\xc0\xa8\x01\xda\x0eJNE24.69.254.96\x00\x00\x00\x00\x18E\xfe`\x04V\x00\x00', '', '1228530451', '1.0', b'']]
+[2026-11-04 16:02:24.101] ROUTER_WM CREATE_ROOM relay: room by DOR-DOR at 24.69.254.96 advertised as 38.49.212.120 (blob slots rewritten)
+[2026-11-04 16:02:24.103] ROUTER_WM LOBBY_MSG CREATE_ROOM host='DOR-DOR' map='Orphanage' group_name='DOR-DOR' room_id=103 parent=1 type=5 max=4 visitors=0 event_id=1228530451 config=0x1d8 info_len=96
+[2026-11-04 16:02:24.103] ROUTER_WM CREATE_ROOM room.to_list()=['5', 'DOR-DOR', '103', '1', '1', '472', '1', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,h\xffORP14\x00\x00\x00Orphanage\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to38.49.212.120\x00\x00\x00&1\xd4x\x0eJNE38.49.212.120\x00\x00\x00&1\xd4x\x04V\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']
+[2026-11-04 16:02:24.103] ROUTER_WM CREATE_ROOM -> GROUP_INFO broadcast with 2 room(s) (20-field format, is_rooms=1) len=527
+[2026-11-04 16:02:24.103] ROUTER_WM CREATE_ROOM GROUP_INFO payload: [['5', 'SNK', '100', '1', '1', '472', '1', 'SNK', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,X\xffINI01\x00\x00\x00Cinema\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ECU38.49.212.120\x00\x00\x00&1\xd4x\x0eJIC38.49.212.120\x00\x00\x00&1\xd4x\x0eJ\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120'], ['5', 'DOR-DOR', '103', '1', '1', '472', '1', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,h\xffORP14\x00\x00\x00Orphanage\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to38.49.212.120\x00\x00\x00&1\xd4x\x0eJNE38.49.212.120\x00\x00\x00&1\xd4x\x04V\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']]
+[2026-11-04 16:02:24.104] LOBBY_BROADCAST(rooms) -> 38.27.30.232:49605 ctx=100
+[2026-11-04 16:02:24.106] LOBBY_BROADCAST(rooms) -> 24.69.254.96:51537 ctx=102
+[2026-11-04 16:02:24.106] ROUTER_WM CREATE_ROOM -> NEW_GROUP(54) broadcast mode=room len=264 payload=['5', 'DOR-DOR', '103', '1', '1', '472', '1', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SPLINTERCELL3PS2US', b'\x0fh,h\xffORP14\x00\x00\x00Orphanage\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 to38.49.212.120\x00\x00\x00&1\xd4x\x0eJNE38.49.212.120\x00\x00\x00&1\xd4x\x04V\x00\x00', '1228530451', '4', '1', '0', '0', '1228530451', '1.0', '38.49.212.120', '38.49.212.120']
+[2026-11-04 16:02:24.106] LOBBY_BROADCAST(rooms) -> 38.27.30.232:49605 ctx=100
+[2026-11-04 16:02:24.108] LOBBY_BROADCAST(rooms) -> 24.69.254.96:51537 ctx=102
+[2026-11-04 16:02:24.108] ROUTER_WM CREATE_ROOM ack=roomid room_id=103
+[2026-11-04 16:02:24.109] ROUTER_WM TX[tx] len=35 sha256=a33901c904240e04
+0000  00 00 23 00 d1 24 fa b3 fd c9 97 d9 b9 d6 91 a5   ..#..$..........
+0010  b1 93 8c a2 a5 c9 d2 be a5 d5 a0 f8 e0 dd cd f9   ................
+0020  eb d1 a3                                          ...
+[2026-11-04 16:02:24.195] ROUTER_WM RX len=40 sha256=088bf6bac2cf6ba3
+0000  00 00 28 00 d1 42 fa bf fd 92 e4 ee b8 d6 a2 e5   ..(..B..........
+0010  9c d1 8c a0 f4 ff a1 96 be c4 e8 98 d6 a9 e0 f6   ................
+0020  ad a4 99 ef af 93 89 f7                           ........
+<LOBBY_MSG	GS	P->S	40B>
+['24', ['103', 'Password', '128', '0', '0.1']]
+[2026-11-04 16:02:24.199] ROUTER_WM LOBBY_MSG subtype=24 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 16:02:24.200] ROUTER_WM JOIN_ROOM request=['103', 'Password', '128', '0', '0.1'] room_found=True mode=ip
+[2026-11-04 16:02:24.200] ROUTER_WM JOIN_ROOM host: NEW_GROUP(54) sent to creator before join ack (room 103)
+[2026-11-04 16:02:24.201] ROUTER_WM JOIN_ROOM requester is host -> reply mode=ip
+[2026-11-04 16:02:24.201] ROUTER_WM JOIN_ROOM ack room_id=103 extra='24.69.254.96'
+[2026-11-04 16:02:24.203] ROUTER_WM TX[tx] len=37 sha256=005b68a71b11d47b
+0000  00 00 25 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a5   ..%..$..........
+0010  aa 8c 8c a4 a5 b5 95 fb bd a5 ae 95 a5 e0 ab ad   ................
+0020  92 eb b0 9a fa                                    .....
+[2026-11-04 16:02:24.528] ROUTER_WM RX len=17 sha256=140f9d9565671ded
+0000  00 00 11 00 d1 42 fa be fd 92 bb d6 a2 8c a0 be   .....B..........
+0010  ce                                                .
+<LOBBY_MSG	GS	P->S	17B>
+['15', ['103']]
+[2026-11-04 16:02:24.533] ROUTER_WM LOBBY_MSG subtype=15 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 16:02:24.533] ROUTER_WM LOBBY_MSG 15: typed reply [['103']]
+[2026-11-04 16:02:24.535] ROUTER_WM TX[tx] len=23 sha256=affb3d3b60484bfb
+0000  00 00 17 00 d1 24 fa b3 fd c9 97 b9 d6 91 a5 8c   .....$..........
+0010  a5 a5 be a5 c4 e0 c5                              .......
+[2026-11-04 16:02:24.629] ROUTER_WM RX len=40 sha256=eb866834d1f10efc
+0000  00 00 28 00 d1 42 fa b8 fd 92 97 a4 b9 d6 a2 96   ..(..B..........
+0010  ad 9a 8c a0 95 e8 97 94 be 94 9a 91 8b a9 f1 a9   ................
+0020  b1 95 90 eb ac 8d 96 f7                           ........
+<LOBBY_MSG	GS	P->S	40B>
+['33', ['103', b'', '0', '192.168.1.218']]
+[2026-11-04 16:02:24.653] ROUTER_WM LOBBY_MSG subtype=33 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 16:02:24.653] ROUTER_WM LOBBY_MSG 33: typed reply [['103']]
+[2026-11-04 16:02:24.655] ROUTER_WM TX[tx] len=23 sha256=b6de51917f6cd2ea
+0000  00 00 17 00 d1 24 fa b3 fd c9 97 b9 d6 91 a5 8c   .....$..........
+0010  a3 a5 bc a5 c4 e0 c5                              .......
+[2026-11-04 16:02:26.839] ROUTER_WM RX len=32 sha256=1baea5029cd5d742
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a2 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['103', '', '128', '0', '1.0']]
+[2026-11-04 16:02:26.899] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:02:26.899] ROUTER_WM JOIN_ROOM request=['103', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 16:02:26.901] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '24.69.254.96', 'room': '103', 'user': 'COOLDOR'}
+[2026-11-04 16:02:26.901] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 103 (host 24.69.254.96)
+[2026-11-04 16:02:26.903] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 103 flags=128)
+[2026-11-04 16:02:26.903] ROUTER_WM JOIN_ROOM ack room_id=103 extra='38.49.212.120'
+[2026-11-04 16:02:26.905] ROUTER_WM TX[tx] len=38 sha256=6e6543368e119a0b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a5   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 16:02:32.179] ROUTER_WM RX len=35 sha256=49b07919bf9ac92a
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a3 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['103']]
+[2026-11-04 16:02:32.196] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:02:32.196] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 16:02:32.196] ROUTER_WM GROUP_LEAVE room=103 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 16:02:32.196] ROUTER_WM GROUP_LEAVE room=103 master=DOR-DOR room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=True
+[2026-11-04 16:02:32.198] LOBBY_BROADCAST -> 38.27.30.232:49605 len=17
+[2026-11-04 16:02:32.198] LOBBY_BROADCAST -> 24.69.254.96:56187 len=17
+[2026-11-04 16:02:32.198] LOBBY_BROADCAST -> 24.69.254.96:51537 len=17
+[2026-11-04 16:02:32.205] ROUTER_WM LOBBY room removed (host left): id=103
+[2026-11-04 16:02:32.205] ROUTER_WM GROUP_LEAVE reply shape=single payload=['103']
+[2026-11-04 16:02:32.206] ROUTER_WM TX[tx] len=22 sha256=774e5a6faa60d077
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a6 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 16:02:32.207] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:02:32.207] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 16:02:32.207] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 16:02:32.209] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 16:02:32.305] ROUTER_WM RX len=19 sha256=0b554c400c5c95dd
+0000  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0010  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 16:02:32.309] ROUTER_WM LOBBY_MSG subtype=9 from=DOR-DOR@24.69.254.96:56187
+[2026-11-04 16:02:32.309] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 16:02:32.309] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 16:02:32.311] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 16:02:32.603] ROUTER_WM pushing authoritative room list (1 room(s)) to all sessions
+[2026-11-04 16:02:32.604] LOBBY_BROADCAST -> 38.27.30.232:49605 len=273
+[2026-11-04 16:02:32.604] LOBBY_BROADCAST -> 24.69.254.96:56187 len=273
+[2026-11-04 16:02:32.604] LOBBY_BROADCAST -> 24.69.254.96:51537 len=273
+[2026-11-04 16:02:33.046] LOBBY_BROADCAST -> 38.27.30.232:49605 len=17
+[2026-11-04 16:02:33.046] LOBBY_BROADCAST -> 24.69.254.96:56187 len=17
+[2026-11-04 16:02:33.046] LOBBY_BROADCAST -> 24.69.254.96:51537 len=17
+[2026-11-04 16:02:33.809] ROUTER_WM pushing authoritative room list (1 room(s)) to all sessions
+[2026-11-04 16:02:33.809] LOBBY_BROADCAST -> 38.27.30.232:49605 len=273
+[2026-11-04 16:02:33.811] LOBBY_BROADCAST -> 24.69.254.96:56187 len=273
+[2026-11-04 16:02:33.811] LOBBY_BROADCAST -> 24.69.254.96:51537 len=273
+[2026-11-04 16:02:34.716] LOBBY_BROADCAST -> 38.27.30.232:49605 len=17
+[2026-11-04 16:02:34.716] LOBBY_BROADCAST -> 24.69.254.96:56187 len=17
+[2026-11-04 16:02:34.717] LOBBY_BROADCAST -> 24.69.254.96:51537 len=17
+[2026-11-04 16:02:38.846] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:02:38.898] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:02:42.694] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:02:42.748] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:02:44.091] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:02:44.147] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:02:52.670] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:02:52.698] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:03:02.868] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:03:02.900] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:03:03.080] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:03:03.085] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:03:09.873] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:03:09.896] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:03:13.691] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:03:13.693] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:03:15.089] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:03:15.097] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:03:19.726] ROUTER_WM RX len=32 sha256=a23781c948a00057
+0000  00 00 20 00 d1 42 fa bf fd 92 a5 ee b8 d6 a1 a7   .. ..B..........
+0010  9c ff 8c a0 e6 ab a1 be 94 e9 90 e0 99 b1 a0 af   ................
+<LOBBY_MSG	GS	P->S	32B>
+['24', ['100', '', '128', '0', '1.0']]
+[2026-11-04 16:03:19.747] ROUTER_WM LOBBY_MSG subtype=24 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:03:19.747] ROUTER_WM JOIN_ROOM request=['100', '', '128', '0', '1.0'] room_found=True mode=ip
+[2026-11-04 16:03:19.748] RELAY ctrl -> {'op': 'map', 'joiner': '24.69.254.96', 'host': '38.27.30.232', 'room': '100', 'user': 'COOLDOR'}
+[2026-11-04 16:03:19.749] ROUTER_WM JOIN_ROOM relay: joiner COOLDOR@24.69.254.96 dials 38.49.212.120 for room 100 (host 38.27.30.232)
+[2026-11-04 16:03:19.749] ROUTER_WM JOIN_ROOM joiner COOLDOR: room-level GROUP_INFO(53) sent before ack (room 100 flags=128)
+[2026-11-04 16:03:19.750] ROUTER_WM JOIN_ROOM ack room_id=100 extra='38.49.212.120'
+[2026-11-04 16:03:19.752] ROUTER_WM TX[tx] len=38 sha256=62c1a23172d5248b
+0000  00 00 26 00 d1 24 fa b3 fd c9 97 a4 b9 d6 91 a6   ..&..$..........
+0010  a8 8c 8c a4 a5 b5 93 a6 bd a5 a2 91 95 e0 aa ad   ................
+0020  96 f5 eb b0 92 fa                                 ......
+[2026-11-04 16:03:23.668] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:03:23.670] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:03:25.001] ROUTER_WM RX len=35 sha256=cc813edfafad2929
+0000  00 00 10 00 d1 42 fa 8b bf cf b2 fe 91 d7 a0 bf   .....B..........
+0010  00 00 13 00 d1 42 fa 8b bf a7 b3 fe a3 c8 d7 e3   .....B..........
+0020  94 8f a5                                          ...
+<LOBBY_MSG	GS	P->S	16B>
+['8', ['100']]
+[2026-11-04 16:03:25.049] ROUTER_WM LOBBY_MSG subtype=8 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:03:25.049] RELAY ctrl -> {'op': 'unmap_any', 'ip': '24.69.254.96', 'why': 'GROUP_LEAVE', 'user': 'COOLDOR'}
+[2026-11-04 16:03:25.049] ROUTER_WM GROUP_LEAVE room=100 master=SNK room_ip=38.49.212.120 sender='COOLDOR'/'COOLDOR'@24.69.254.96 sk=24.69.254.96:51537 host_match=False
+[2026-11-04 16:03:25.050] LOBBY_BROADCAST -> 38.27.30.232:49605 len=26
+[2026-11-04 16:03:25.051] LOBBY_BROADCAST -> 24.69.254.96:56187 len=26
+[2026-11-04 16:03:25.051] ROUTER_WM ROOM MEMBER_LEAVE(51) sent: COOLDOR left room 100
+[2026-11-04 16:03:25.052] ROUTER_WM GROUP_LEAVE reply shape=single payload=['100']
+[2026-11-04 16:03:25.054] ROUTER_WM TX[tx] len=22 sha256=4523d6e8183bc87b
+0000  00 00 16 00 d1 24 fa b3 fd e1 b9 d6 ca a5 8c 90   .....$..........
+0010  a4 ca b7 a2 96 c5                                 ......
+<LOBBY_MSG	GS	P->S	19B>
+['9', ['1', '256']]
+[2026-11-04 16:03:25.055] ROUTER_WM LOBBY_MSG subtype=9 from=COOLDOR@24.69.254.96:51537
+[2026-11-04 16:03:25.055] ROUTER_WM GROUP_INFO_GET reply shape=none req=['1', '256']
+[2026-11-04 16:03:25.056] ROUTER_WM LOBBY_MSG 9 (return to lobby) pushing 1 room(s)
+[2026-11-04 16:03:25.056] ROUTER_WM GROUP_INFO_GET: no reply, GROUP_INFO pushed only
+[2026-11-04 16:03:35.986] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:03:36.009] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:03:40.888] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:03:40.947] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:03:44.690] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:03:44.748] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:03:46.087] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:03:46.099] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:03:54.667] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:03:54.698] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:03:55.063] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:03:55.068] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:04:06.882] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:04:06.898] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:04:11.888] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:04:11.896] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:04:15.688] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:04:15.747] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:04:17.084] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:04:17.099] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:04:25.665] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:04:25.699] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:04:26.094] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:04:26.108] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:04:37.882] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:04:37.899] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:04:42.885] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:04:42.896] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:04:46.686] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:04:46.697] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:04:48.080] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:04:48.099] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:04:56.664] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:04:56.700] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:04:57.089] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:04:57.100] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:05:08.876] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:05:08.898] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:05:13.881] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:05:13.898] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:05:17.685] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:05:17.698] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:05:19.079] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:05:19.080] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:05:27.695] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:05:27.749] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:05:28.087] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:05:28.091] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:05:39.874] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:05:39.898] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:05:44.880] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:05:44.898] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:05:48.683] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:05:48.685] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:05:50.075] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:05:50.100] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:05:58.693] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:05:58.699] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:05:59.086] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:05:59.087] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:06:10.907] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:06:10.949] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:06:15.879] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:06:15.900] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:06:19.682] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:06:19.698] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:06:21.075] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:06:21.098] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:06:29.692] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:06:29.749] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:06:30.084] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:06:30.100] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:06:41.902] ROUTER_WM RX len=6 sha256=54eb1b7498731578
+0000  00 00 06 00 3a 42                                 ....:B
+<STILLALIVE	GS	P->S	6B>
+[2026-11-04 16:06:41.949] ROUTER_WM TX[tx] len=6 sha256=e3bc29eb3df96afc
+0000  00 00 06 00 3a 24                                 ....:$
+[2026-11-04 16:06:46.909] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:06:46.948] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:06:50.680] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:06:50.699] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.
+[2026-11-04 16:06:52.070] ROUTER_WM RX len=6 sha256=14f770089287ce19
+0000  00 00 06 00 3a 41                                 ....:A
+<STILLALIVE	GS	P->R	6B>
+[2026-11-04 16:06:52.098] ROUTER_WM TX[tx] len=6 sha256=4af8495ecef213eb
+0000  00 00 06 00 3a 14                                 ....:.

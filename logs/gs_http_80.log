@@ -170,3 +170,21 @@ GS HTTP server listening
 [2026-11-04 15:47:28.992] HTTP 38.27.30.232:55682  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=SNK
   q[dp] = 'SPLINTERCELL3PS2US'
   q[user] = 'SNK'
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs\gs_http_80.log
+  ctrl+c to stop
+[2026-11-04 15:54:21.530] HTTP 38.27.30.232:49611  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=SNK
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'SNK'
+[2026-11-04 15:54:31.955] HTTP 24.69.254.96:51543  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=PCSX2-DOR-TEST
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'PCSX2-DOR-TEST'
+[2026-11-04 15:55:08.023] HTTP 24.69.254.96:56192  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=DOR-DOR
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'DOR-DOR'
+[2026-11-04 16:02:04.785] HTTP 65.49.1.142:28182  GET /?
+[2026-11-04 16:05:43.475] HTTP 65.49.1.147:49783  GET /favicon.ico?
+[2026-11-04 16:06:55.608] HTTP 65.49.1.142:29656  GET /geoserver/web/?
