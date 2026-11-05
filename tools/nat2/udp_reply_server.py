@@ -132,6 +132,11 @@ def handle_ping(data: bytes, addr: tuple[str, int], now: float, nat_port: int = 
         return []
     clt, r = found
     clt.last_seen = now
+    if not r.get("extra") and nat_port == 45000:
+        sx = SOCKET_EXT.setdefault(addr[0], {})
+        if sx.get(str(r["sock"])) != addr[1]:
+            log(f"  socket {r['sock']} of {addr[0]} shows external port {addr[1]}" + (f" (was {sx[str(r['sock'])]})" if str(r["sock"]) in sx else ""))
+            sx[str(r["sock"])] = addr[1]
     if r.get("extra"):
         hit = r.get("hit", 0) + 1
         r["hit"] = hit
@@ -298,6 +303,10 @@ HOST_TRAFFIC: dict = {}     # host ip -> {hole port: monotonic time of the last 
 # host ip -> {hole port: external port the host's 3658 socket shows on that hole}. A router may give a re-created
 # mapping a different external port (2026-11-04 18:26: 3658 became 1096 on two holes while the third kept 3658).
 HOST_EXT: dict = {}
+# host ip -> {socket no ("1".."4"): external port seen on that socket's own NAT pings to 45000}. Used by the alt-socket
+# mode: every console socket keeps its 45000 hole open by itself (ping every 25 s), so a link delivered to socket k
+# from 45000 needs no steering at all.
+SOCKET_EXT: dict = {}
 HOLE_OPEN_MIN_S = float(os.environ.get("SCCT_RELAY_HOLE_OPEN_MIN_S", "15"))   # interval between the login steers that open every hole
 LINK_IDLE_S = 5.0           # a joiner endpoint silent for longer is not "live"
 LINK_ESTABLISHED = 20       # packets from an endpoint before a later endpoint gets its own hole (probe + room link share)
@@ -426,17 +435,14 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
     hv["last"] = now
     # host destination port for this joiner endpoint: first endpoint -> 3658, later ones -> alt host sockets (if enabled)
     hports = hv.setdefault("hports", {})
-    hport = hports.get(addr)
-    if hport is None:
-        used = set(hports.values())
-        if RELAY_HOST_PORT not in used:
-            hport = RELAY_HOST_PORT
-        else:
-            free = [p for p in RELAY_ALT_HOST_PORTS if p not in used]
-            hport = free[0] if free else RELAY_HOST_PORT
-        hports[addr] = hport
-        if hport != RELAY_HOST_PORT:
-            log(f"RELAY host {host}: joiner endpoint {addr[0]}:{addr[1]} -> host socket {hport} (alt port; replies from {hport} go back to it)")
+    hport = RELAY_HOST_PORT
+    if RELAY_ALT_HOST_PORTS and not RELAY_HOLES:
+        slot = pick_slot(hv, addr, now, prev_t, 1 + len(RELAY_ALT_HOST_PORTS))
+        nominal = ([RELAY_HOST_PORT] + RELAY_ALT_HOST_PORTS)[slot]
+        hport = SOCKET_EXT.get(host, {}).get(str(slot + 1)) or nominal
+        if hports.get(addr) != hport:
+            hports[addr] = hport
+            log(f"RELAY host {host}: joiner link {addr[0]}:{addr[1]} -> host socket {slot + 1} (port {nominal}, external {hport}) from 45000")
     if RELAY_DUMP and hv["dump_rx"] < RELAY_DUMP:
         hv["dump_rx"] += 1
         log(f"RELAY DUMP J->H {addr[0]}:{addr[1]} -> :{hport} {len(data)}B: {data[:64].hex(' ')}")
@@ -473,6 +479,8 @@ def relay_from_host(data: bytes, addr: tuple[str, int], now: float, nat_port: in
     hv["last"] = now
     dest, dsock = hv["joiner"], hv["sock"]
     cands = []
+    if RELAY_ALT_HOST_PORTS and not RELAY_HOLES:
+        SOCKET_EXT.setdefault(addr[0], {})   # replies come from the host socket the link was delivered to
     if RELAY_HOLES and nat_port in RELAY_HOLES:
         HOST_TRAFFIC.setdefault(addr[0], {})[nat_port] = now
         ext = HOST_EXT.setdefault(addr[0], {})
@@ -582,6 +590,31 @@ def hole_steering(now: float) -> None:
             clt.reqs.pop(k, None)
 
 
+def pick_slot(hv: dict, ep, now: float, prev_t, nslots: int) -> int:
+    """Link slot (0..nslots-1) for a joiner endpoint. Slot 0 is shared until an endpoint on it is established (the join
+    probe and the room link arrive 1 s apart and the host copes with both from one source); a later endpoint gets a slot
+    no established endpoint holds. Established endpoints keep their slot for good (links are resumed after idling);
+    a never-established endpoint that reappears after idling is re-evaluated (the client reuses port numbers across roles)."""
+    slots = hv.setdefault("slot", {})
+    counts = hv.setdefault("ep_rx", {})
+    if ep in slots:
+        if counts.get(ep, 0) >= LINK_ESTABLISHED or prev_t is None or now - prev_t <= LINK_IDLE_S:
+            return slots[ep]
+        old = slots.pop(ep)
+        counts[ep] = 0
+        log(f"RELAY host: endpoint {ep[0]}:{ep[1]} reappears after {now - prev_t:.0f}s idle without having been established; re-allocating (was slot {old})")
+    held = {slots[e] for e in slots if counts.get(e, 0) >= LINK_ESTABLISHED and e in hv["eps"]}
+    free = [i for i in range(nslots) if i not in held]
+    if free:
+        slot = free[0]
+    else:
+        lru = min(slots, key=lambda e: hv["eps"][e][1] if e in hv["eps"] else 0.0)
+        slot = slots[lru]
+        log(f"RELAY host: more links than slots, {ep[0]}:{ep[1]} shares slot {slot} with {lru[0]}:{lru[1]}")
+    slots[ep] = slot
+    return slot
+
+
 def pick_hole_port(hv: dict, ep, now: float, prev_t=None) -> int:
     """Source hole port for a joiner endpoint - permanent per joiner source port.
     The console's outbound links come from 10071/10072/10073; each maps to its own hole (45001/45002/45003) so the host
@@ -688,6 +721,8 @@ def main(argv=None) -> int:
         log(f"  EXTRA PORT_ID experiment: socket 1 also told to ping {NAT_EXTRA_PORTID} (these ports must be in --ports)")
     if RELAY_HOLES:
         log(f"  MULTI-HOLE: holes {RELAY_HOLES} (joiner port {HOLE_PORT_BASE}+i -> hole i); socket 1 steered to a needed hole only when stale (>{HOLE_STALE_S:.0f}s), min {HOLE_MIN_S:.0f}s apart, budget {HOLE_BUDGET}")
+    elif RELAY_ALT_HOST_PORTS:
+        log(f"  ALT-SOCKET mode: links delivered from 45000 to host sockets 3658 then {RELAY_ALT_HOST_PORTS} (external ports learned from each socket's pings); no steering")
     else:
         log("  RELAY: off")
     all_socks = list(socks) + list(relay_socks) + ([ctrl_sock] if ctrl_sock is not None else [])
