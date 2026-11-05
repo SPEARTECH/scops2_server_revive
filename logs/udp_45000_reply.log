@@ -3381,3 +3381,722 @@ UDP reply server listening
 [2026-11-04 16:06:52.684]   -> bare ACK to 38.27.30.232:10070 (socket 3)
 [2026-11-04 16:06:52.684] PING from 38.27.30.232:10073 id=81df5296
 [2026-11-04 16:06:52.684]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 16:17:42.617] GSNAT v3 listening
+[2026-11-04 16:17:42.622]   PORT_ID limit: all  gap: 25 ms
+[2026-11-04 16:17:42.634]   ADDRESS delay: 0 ms  repeat-ping ACKs: on  ADDRESS: sent  even-length datagrams: on
+[2026-11-04 16:17:42.636]   bind: 0.0.0.0  ports: 45000
+[2026-11-04 16:17:42.636]   ubi-gs modules: C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new
+[2026-11-04 16:17:42.636]   RELAY: joiner ports 3658, 10070, 10071, 10072, 10073, 10074, 10075, 10076, 10077, 10078, 10079, 10080 -> host:3658 from :45000; control 127.0.0.1:45099; idle 600s
+[2026-11-04 16:18:52.624] RELAY drop: 36B on :3658 from 38.27.30.232:59948 - no mapping from the lobby server (logged once)
+[2026-11-04 16:21:30.664] SRP 20B from 24.69.254.96:10070 flags=['SYN'] seg=0x0 ack=0x6e6e data_size=8
+[2026-11-04 16:21:30.664]   added client 24.69.254.96:10070
+[2026-11-04 16:21:30.664]   -> SYN+ACK (20 bytes)
+[2026-11-04 16:21:30.774] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x0 data_size=0
+[2026-11-04 16:21:30.774]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:30.807] SRP 548B from 24.69.254.96:10070 flags=[] seg=0x0 ack=0x2d52 data_size=224
+[2026-11-04 16:21:30.807]   data region 224B holds 4 message(s)
+[2026-11-04 16:21:30.807]   NAT request socket=1: ['1', ['1', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:30.807]   -> PORT_ID socket=1 ping_id=0x226a3e59 port=45000 (44 bytes)
+[2026-11-04 16:21:30.808]   NAT request socket=2: ['1', ['2', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:30.808]   -> PORT_ID socket=2 ping_id=0x27c6b617 port=45000 (44 bytes)
+[2026-11-04 16:21:30.808]   NAT request socket=3: ['1', ['3', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:30.808]   -> PORT_ID socket=3 ping_id=0x249eb66c port=45000 (44 bytes)
+[2026-11-04 16:21:30.808]   NAT request socket=4: ['1', ['4', 'DOR-DOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:30.808]   -> PORT_ID socket=4 ping_id=0x823bd6c8 port=45000 (46 bytes)
+[2026-11-04 16:21:30.906] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x1 data_size=0
+[2026-11-04 16:21:30.907]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:30.940] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x2 data_size=0
+[2026-11-04 16:21:30.940]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:30.942] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x3 data_size=0
+[2026-11-04 16:21:30.942]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:30.944] PING from 24.69.254.96:3658 id=226a3e59
+[2026-11-04 16:21:30.944]   -> ADDRESS socket=1 24.69.254.96:3658 (44 bytes) to 24.69.254.96:10070
+[2026-11-04 16:21:30.945] PING from 24.69.254.96:3658 id=226a3e59
+[2026-11-04 16:21:30.945]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 16:21:30.945] PING from 24.69.254.96:3658 id=226a3e59
+[2026-11-04 16:21:30.945]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 16:21:30.973] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x4 data_size=0
+[2026-11-04 16:21:30.973]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:30.975] PING from 24.69.254.96:10071 id=27c6b617
+[2026-11-04 16:21:30.975]   -> ADDRESS socket=2 24.69.254.96:10071 (44 bytes) to 24.69.254.96:10070
+[2026-11-04 16:21:30.975] PING from 24.69.254.96:10071 id=27c6b617
+[2026-11-04 16:21:30.976]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 16:21:30.977] PING from 24.69.254.96:10071 id=27c6b617
+[2026-11-04 16:21:30.977]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 16:21:31.009] PING from 24.69.254.96:10072 id=249eb66c
+[2026-11-04 16:21:31.010]   -> ADDRESS socket=3 24.69.254.96:10072 (44 bytes) to 24.69.254.96:10070
+[2026-11-04 16:21:31.011] PING from 24.69.254.96:10072 id=249eb66c
+[2026-11-04 16:21:31.011]   -> bare ACK to 24.69.254.96:10070 (socket 3)
+[2026-11-04 16:21:31.012] PING from 24.69.254.96:10072 id=249eb66c
+[2026-11-04 16:21:31.012]   -> bare ACK to 24.69.254.96:10070 (socket 3)
+[2026-11-04 16:21:31.042] PING from 24.69.254.96:10073 id=823bd6c8
+[2026-11-04 16:21:31.043]   -> ADDRESS socket=4 24.69.254.96:10073 (44 bytes) to 24.69.254.96:10070
+[2026-11-04 16:21:31.043] PING from 24.69.254.96:10073 id=823bd6c8
+[2026-11-04 16:21:31.043]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 16:21:31.044] PING from 24.69.254.96:10073 id=823bd6c8
+[2026-11-04 16:21:31.044]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 16:21:31.044] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x5 data_size=0
+[2026-11-04 16:21:31.044]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:31.072] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x6 data_size=0
+[2026-11-04 16:21:31.074]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:31.108] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x7 data_size=0
+[2026-11-04 16:21:31.109]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:31.141] SRP 12B from 24.69.254.96:10070 flags=['ACK'] seg=0xffff ack=0x8 data_size=0
+[2026-11-04 16:21:31.142]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.131] SRP 20B from 24.69.254.96:1113 flags=['SYN'] seg=0x0 ack=0x0 data_size=8
+[2026-11-04 16:21:39.131]   added client 24.69.254.96:1113
+[2026-11-04 16:21:39.133]   -> SYN+ACK (20 bytes)
+[2026-11-04 16:21:39.230] SRP 12B from 24.69.254.96:1113 flags=['ACK'] seg=0xffff ack=0x0 data_size=0
+[2026-11-04 16:21:39.230]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.261] SRP 548B from 24.69.254.96:1113 flags=[] seg=0x0 ack=0xd4c5 data_size=224
+[2026-11-04 16:21:39.263]   data region 224B holds 4 message(s)
+[2026-11-04 16:21:39.263]   NAT request socket=1: ['1', ['1', 'COOLDOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:39.265]   -> PORT_ID socket=1 ping_id=0x909cdb18 port=45000 (46 bytes)
+[2026-11-04 16:21:39.265]   NAT request socket=2: ['1', ['2', 'COOLDOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:39.265]   -> PORT_ID socket=2 ping_id=0x37d67948 port=45000 (44 bytes)
+[2026-11-04 16:21:39.266]   NAT request socket=3: ['1', ['3', 'COOLDOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:39.267]   -> PORT_ID socket=3 ping_id=0x06453509 port=45000 (44 bytes)
+[2026-11-04 16:21:39.267]   NAT request socket=4: ['1', ['4', 'COOLDOR', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:39.267]   -> PORT_ID socket=4 ping_id=0x2c8747ad port=45000 (44 bytes)
+[2026-11-04 16:21:39.362] SRP 12B from 24.69.254.96:1113 flags=['ACK'] seg=0xffff ack=0x1 data_size=0
+[2026-11-04 16:21:39.362]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.396] SRP 12B from 24.69.254.96:1113 flags=['ACK'] seg=0xffff ack=0x2 data_size=0
+[2026-11-04 16:21:39.396]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.397] PING from 24.69.254.96:1114 id=909cdb18
+[2026-11-04 16:21:39.397]   -> ADDRESS socket=1 24.69.254.96:1114 (44 bytes) to 24.69.254.96:1113
+[2026-11-04 16:21:39.399] PING from 24.69.254.96:1114 id=909cdb18
+[2026-11-04 16:21:39.399]   -> bare ACK to 24.69.254.96:1113 (socket 1)
+[2026-11-04 16:21:39.399] PING from 24.69.254.96:1114 id=909cdb18
+[2026-11-04 16:21:39.399]   -> bare ACK to 24.69.254.96:1113 (socket 1)
+[2026-11-04 16:21:39.430] SRP 12B from 24.69.254.96:1113 flags=['ACK'] seg=0xffff ack=0x3 data_size=0
+[2026-11-04 16:21:39.430]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.430] SRP 12B from 24.69.254.96:1113 flags=['ACK'] seg=0xffff ack=0x4 data_size=0
+[2026-11-04 16:21:39.430]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.432] PING from 24.69.254.96:1115 id=37d67948
+[2026-11-04 16:21:39.433]   -> ADDRESS socket=2 24.69.254.96:1115 (44 bytes) to 24.69.254.96:1113
+[2026-11-04 16:21:39.433] PING from 24.69.254.96:1115 id=37d67948
+[2026-11-04 16:21:39.433]   -> bare ACK to 24.69.254.96:1113 (socket 2)
+[2026-11-04 16:21:39.433] PING from 24.69.254.96:1115 id=37d67948
+[2026-11-04 16:21:39.433]   -> bare ACK to 24.69.254.96:1113 (socket 2)
+[2026-11-04 16:21:39.464] PING from 24.69.254.96:1116 id=06453509
+[2026-11-04 16:21:39.465]   -> ADDRESS socket=3 24.69.254.96:1116 (44 bytes) to 24.69.254.96:1113
+[2026-11-04 16:21:39.465] PING from 24.69.254.96:1116 id=06453509
+[2026-11-04 16:21:39.466]   -> bare ACK to 24.69.254.96:1113 (socket 3)
+[2026-11-04 16:21:39.466] PING from 24.69.254.96:1116 id=06453509
+[2026-11-04 16:21:39.466]   -> bare ACK to 24.69.254.96:1113 (socket 3)
+[2026-11-04 16:21:39.494] SRP 12B from 24.69.254.96:1113 flags=['ACK'] seg=0xffff ack=0x5 data_size=0
+[2026-11-04 16:21:39.494]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.497] PING from 24.69.254.96:1117 id=2c8747ad
+[2026-11-04 16:21:39.499]   -> ADDRESS socket=4 24.69.254.96:1117 (44 bytes) to 24.69.254.96:1113
+[2026-11-04 16:21:39.499] PING from 24.69.254.96:1117 id=2c8747ad
+[2026-11-04 16:21:39.501]   -> bare ACK to 24.69.254.96:1113 (socket 4)
+[2026-11-04 16:21:39.501] PING from 24.69.254.96:1117 id=2c8747ad
+[2026-11-04 16:21:39.501]   -> bare ACK to 24.69.254.96:1113 (socket 4)
+[2026-11-04 16:21:39.529] SRP 12B from 24.69.254.96:1113 flags=['ACK'] seg=0xffff ack=0x6 data_size=0
+[2026-11-04 16:21:39.531]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.563] SRP 12B from 24.69.254.96:1113 flags=['ACK'] seg=0xffff ack=0x7 data_size=0
+[2026-11-04 16:21:39.564]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.597] SRP 12B from 24.69.254.96:1113 flags=['ACK'] seg=0xffff ack=0x8 data_size=0
+[2026-11-04 16:21:39.597]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:39.956] SRP 20B from 38.27.30.232:10070 flags=['SYN'] seg=0x0 ack=0x0 data_size=8
+[2026-11-04 16:21:39.958]   added client 38.27.30.232:10070
+[2026-11-04 16:21:39.958]   -> SYN+ACK (20 bytes)
+[2026-11-04 16:21:40.004] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x0 data_size=0
+[2026-11-04 16:21:40.009]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:40.037] SRP 548B from 38.27.30.232:10070 flags=[] seg=0x0 ack=0x0 data_size=208
+[2026-11-04 16:21:40.037]   data region 208B holds 4 message(s)
+[2026-11-04 16:21:40.039]   NAT request socket=1: ['1', ['1', 'SNK', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:40.039]   -> PORT_ID socket=1 ping_id=0x1e37c694 port=45000 (44 bytes)
+[2026-11-04 16:21:40.039]   NAT request socket=2: ['1', ['2', 'SNK', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:40.039]   -> PORT_ID socket=2 ping_id=0x864a6e52 port=45000 (46 bytes)
+[2026-11-04 16:21:40.041]   NAT request socket=3: ['1', ['3', 'SNK', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:40.041]   -> PORT_ID socket=3 ping_id=0x30bf9045 port=45000 (44 bytes)
+[2026-11-04 16:21:40.041]   NAT request socket=4: ['1', ['4', 'SNK', 'SPLINTERCELL3PS2US', 'SC3PS2US1.0']]
+[2026-11-04 16:21:40.041]   -> PORT_ID socket=4 ping_id=0xab268baf port=45000 (46 bytes)
+[2026-11-04 16:21:40.118] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x1 data_size=0
+[2026-11-04 16:21:40.118]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:40.119] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x2 data_size=0
+[2026-11-04 16:21:40.120]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:40.120] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x3 data_size=0
+[2026-11-04 16:21:40.120]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:40.121] PING from 38.27.30.232:3658 id=1e37c694
+[2026-11-04 16:21:40.121]   -> ADDRESS socket=1 38.27.30.232:3658 (44 bytes) to 38.27.30.232:10070
+[2026-11-04 16:21:40.121] PING from 38.27.30.232:3658 id=1e37c694
+[2026-11-04 16:21:40.123]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 16:21:40.123] PING from 38.27.30.232:3658 id=1e37c694
+[2026-11-04 16:21:40.123]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 16:21:40.139] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x4 data_size=0
+[2026-11-04 16:21:40.139]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:40.139] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x5 data_size=0
+[2026-11-04 16:21:40.139]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:40.140] PING from 38.27.30.232:10071 id=864a6e52
+[2026-11-04 16:21:40.141]   -> ADDRESS socket=2 38.27.30.232:10071 (44 bytes) to 38.27.30.232:10070
+[2026-11-04 16:21:40.141] PING from 38.27.30.232:10071 id=864a6e52
+[2026-11-04 16:21:40.141]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 16:21:40.142] PING from 38.27.30.232:10071 id=864a6e52
+[2026-11-04 16:21:40.143]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 16:21:40.172] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x6 data_size=0
+[2026-11-04 16:21:40.173]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:40.173] PING from 38.27.30.232:10072 id=30bf9045
+[2026-11-04 16:21:40.173]   -> ADDRESS socket=3 38.27.30.232:10072 (44 bytes) to 38.27.30.232:10070
+[2026-11-04 16:21:40.173] PING from 38.27.30.232:10072 id=30bf9045
+[2026-11-04 16:21:40.174]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 16:21:40.174] PING from 38.27.30.232:10072 id=30bf9045
+[2026-11-04 16:21:40.174]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 16:21:40.205] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x7 data_size=0
+[2026-11-04 16:21:40.205]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:40.205] PING from 38.27.30.232:10073 id=ab268baf
+[2026-11-04 16:21:40.207]   -> ADDRESS socket=4 38.27.30.232:10073 (44 bytes) to 38.27.30.232:10070
+[2026-11-04 16:21:40.207] PING from 38.27.30.232:10073 id=ab268baf
+[2026-11-04 16:21:40.207]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 16:21:40.207] PING from 38.27.30.232:10073 id=ab268baf
+[2026-11-04 16:21:40.209]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 16:21:40.238] SRP 12B from 38.27.30.232:10070 flags=['ACK'] seg=0xffff ack=0x8 data_size=0
+[2026-11-04 16:21:40.238]   bare ACK from client (no reply needed)
+[2026-11-04 16:21:55.364] PING from 24.69.254.96:3658 id=226a3e59
+[2026-11-04 16:21:55.366]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 16:21:55.366] PING from 24.69.254.96:10071 id=27c6b617
+[2026-11-04 16:21:55.366]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 16:21:55.373] PING from 24.69.254.96:10072 id=249eb66c
+[2026-11-04 16:21:55.373]   -> bare ACK to 24.69.254.96:10070 (socket 3)
+[2026-11-04 16:21:55.374] PING from 24.69.254.96:10073 id=823bd6c8
+[2026-11-04 16:21:55.374]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 16:22:04.156] PING from 24.69.254.96:1116 id=06453509
+[2026-11-04 16:22:04.157]   -> bare ACK to 24.69.254.96:1113 (socket 3)
+[2026-11-04 16:22:04.157] PING from 24.69.254.96:1115 id=37d67948
+[2026-11-04 16:22:04.159]   -> bare ACK to 24.69.254.96:1113 (socket 2)
+[2026-11-04 16:22:04.161] PING from 24.69.254.96:1114 id=909cdb18
+[2026-11-04 16:22:04.161]   -> bare ACK to 24.69.254.96:1113 (socket 1)
+[2026-11-04 16:22:04.161] PING from 24.69.254.96:1117 id=2c8747ad
+[2026-11-04 16:22:04.163]   -> bare ACK to 24.69.254.96:1113 (socket 4)
+[2026-11-04 16:22:04.864] PING from 38.27.30.232:3658 id=1e37c694
+[2026-11-04 16:22:04.864]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 16:22:04.865] PING from 38.27.30.232:10071 id=864a6e52
+[2026-11-04 16:22:04.866]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 16:22:04.866] PING from 38.27.30.232:10072 id=30bf9045
+[2026-11-04 16:22:04.866]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 16:22:04.866] PING from 38.27.30.232:10073 id=ab268baf
+[2026-11-04 16:22:04.867]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 16:22:09.409] RELAY ctrl: map joiner 24.69.254.96 (COOLDOR) -> host 38.27.30.232 room 100
+[2026-11-04 16:22:09.626] RELAY host 38.27.30.232: joiner 24.69.254.96:1116 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:09.628] RELAY J->H 24.69.254.96:1116 -> 38.27.30.232:3658 34B (#1)
+[2026-11-04 16:22:09.680] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1116 68B (#1) from :3658
+[2026-11-04 16:22:09.763] RELAY J->H 24.69.254.96:1116 -> 38.27.30.232:3658 12B (#2)
+[2026-11-04 16:22:09.838] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1116 13B (#2) from :3658
+[2026-11-04 16:22:10.529] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:10.530] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 58B (#1)
+[2026-11-04 16:22:10.571] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 61B (#1) from :3658
+[2026-11-04 16:22:10.661] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 146B (#2)
+[2026-11-04 16:22:10.675] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 956B (#2) from :3658
+[2026-11-04 16:22:10.677] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 424B (#5) from :3658
+[2026-11-04 16:22:15.479] RELAY ctrl: map joiner 24.69.254.96 (DOR-DOR) -> host 38.27.30.232 room 100
+[2026-11-04 16:22:15.657] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:15.657] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 34B (#1)
+[2026-11-04 16:22:15.675] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 9B (#1) from :3658
+[2026-11-04 16:22:15.821] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 7B (#2)
+[2026-11-04 16:22:15.909] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 13B (#2) from :3658
+[2026-11-04 16:22:16.420] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#5)
+[2026-11-04 16:22:16.508] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 13B (#5) from :3658
+[2026-11-04 16:22:17.421] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#10)
+[2026-11-04 16:22:17.510] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 13B (#10) from :3658
+[2026-11-04 16:22:17.868] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:17.869] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 25B (#1)
+[2026-11-04 16:22:17.884] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 7B (#2)
+[2026-11-04 16:22:17.939] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 302B (#1) from :3658
+[2026-11-04 16:22:17.946] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 54B (#2) from :3658
+[2026-11-04 16:22:18.020] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.020] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:22:18.039] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.039] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 102B (#1)
+[2026-11-04 16:22:18.044] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 46B (#1) from :3658
+[2026-11-04 16:22:18.067] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 17B (#2)
+[2026-11-04 16:22:18.081] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 108B (#2) from :3658
+[2026-11-04 16:22:18.220] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.249] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:22:18.277] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 17B (#1) from :3658
+[2026-11-04 16:22:18.301] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.301] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 13B (#1)
+[2026-11-04 16:22:18.421] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.421] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:22:18.477] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 17B (#1) from :3658
+[2026-11-04 16:22:18.501] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.501] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 11B (#1)
+[2026-11-04 16:22:18.621] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.621] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:22:18.678] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 20B (#1) from :3658
+[2026-11-04 16:22:18.701] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.702] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:22:18.821] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.821] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:22:18.845] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 28B (#1) from :3658
+[2026-11-04 16:22:18.933] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:18.944] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:22:19.020] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.022] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:22:19.045] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 20B (#1) from :3658
+[2026-11-04 16:22:19.100] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.100] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:22:19.221] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.222] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:22:19.277] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 20B (#1) from :3658
+[2026-11-04 16:22:19.300] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.302] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:22:19.421] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.421] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:22:19.479] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 20B (#1) from :3658
+[2026-11-04 16:22:19.501] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.501] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:22:19.626] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.626] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:22:19.678] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 20B (#1) from :3658
+[2026-11-04 16:22:19.701] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.701] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:22:19.822] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.823] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:22:19.847] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 28B (#1) from :3658
+[2026-11-04 16:22:19.902] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:19.902] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:22:20.046] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 17B (#1) from :3658
+[2026-11-04 16:22:20.105] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 5B (#2)
+[2026-11-04 16:22:20.221] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:20.221] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:22:20.246] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 17B (#1) from :3658
+[2026-11-04 16:22:20.302] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:20.302] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:22:20.389] PING from 24.69.254.96:3658 id=226a3e59
+[2026-11-04 16:22:20.389]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 16:22:20.390] PING from 24.69.254.96:10073 id=823bd6c8
+[2026-11-04 16:22:20.390]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 16:22:20.390] PING from 24.69.254.96:10072 id=249eb66c
+[2026-11-04 16:22:20.392]   -> bare ACK to 24.69.254.96:10070 (socket 3)
+[2026-11-04 16:22:20.392] PING from 24.69.254.96:10071 id=27c6b617
+[2026-11-04 16:22:20.392]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 16:22:20.421] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:20.423] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:22:20.446] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 20B (#1) from :3658
+[2026-11-04 16:22:20.501] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:20.502] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:22:20.623] RELAY host 38.27.30.232: joiner 24.69.254.96:10072 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:20.623] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:22:20.647] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10072 20B (#1) from :3658
+[2026-11-04 16:22:20.658] RELAY J->H 24.69.254.96:10072 -> 38.27.30.232:3658 12B (#2)
+[2026-11-04 16:22:20.703] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:20.749] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:22:20.751] RELAY ctrl: unmap_any 24.69.254.96 (entries dropped: ['24.69.254.96'])
+[2026-11-04 16:22:20.855] bad packet from 38.27.30.232:3658 (28B): BufferError('Corrupted buffer or unknown type delimiter')
+[2026-11-04 16:22:20.864] Traceback (most recent call last):
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 470, in main
+    packets = handle_packet(data, addr, now, socks[s])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 394, in handle_packet
+    return handle_segment(data, addr, now, nat_port)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 170, in handle_segment
+    req = srp.SRPRequest(data)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 89, in __init__
+    self.segment = SRPSegment(data)
+                   ^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 118, in __init__
+    self.msg = gsm.Message(b'', in_buf=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\gsm.py", line 283, in __init__
+    self.decrypt(in_buf, bf_key)
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\gsm.py", line 293, in decrypt
+    self.dl: List = List.from_buf(bytearray(dec))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\data.py", line 118, in from_buf
+    raise BufferError('Corrupted buffer or unknown type delimiter')
+BufferError: Corrupted buffer or unknown type delimiter
+
+[2026-11-04 16:22:20.902] RELAY drop: 5B on :3658 from 24.69.254.96:1115 - no mapping from the lobby server (logged once)
+[2026-11-04 16:22:21.046] bad packet from 38.27.30.232:3658 (13B): BufferError('Message shorter than its header (1B).')
+[2026-11-04 16:22:21.050] Traceback (most recent call last):
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 470, in main
+    packets = handle_packet(data, addr, now, socks[s])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 394, in handle_packet
+    return handle_segment(data, addr, now, nat_port)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 170, in handle_segment
+    req = srp.SRPRequest(data)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 89, in __init__
+    self.segment = SRPSegment(data)
+                   ^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 118, in __init__
+    self.msg = gsm.Message(b'', in_buf=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\gsm.py", line 274, in __init__
+    raise BufferError(f"Message shorter than its header ({len(in_buf)}B).")
+BufferError: Message shorter than its header (1B).
+
+[2026-11-04 16:22:21.848] bad packet from 38.27.30.232:3658 (13B): BufferError('Message shorter than its header (1B).')
+[2026-11-04 16:22:21.849] Traceback (most recent call last):
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 470, in main
+    packets = handle_packet(data, addr, now, socks[s])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 394, in handle_packet
+    return handle_segment(data, addr, now, nat_port)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 170, in handle_segment
+    req = srp.SRPRequest(data)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 89, in __init__
+    self.segment = SRPSegment(data)
+                   ^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 118, in __init__
+    self.msg = gsm.Message(b'', in_buf=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\gsm.py", line 274, in __init__
+    raise BufferError(f"Message shorter than its header ({len(in_buf)}B).")
+BufferError: Message shorter than its header (1B).
+
+[2026-11-04 16:22:29.147] PING from 24.69.254.96:1114 id=909cdb18
+[2026-11-04 16:22:29.147]   -> bare ACK to 24.69.254.96:1113 (socket 1)
+[2026-11-04 16:22:29.149] PING from 24.69.254.96:1116 id=06453509
+[2026-11-04 16:22:29.150]   -> bare ACK to 24.69.254.96:1113 (socket 3)
+[2026-11-04 16:22:29.151] PING from 24.69.254.96:1115 id=37d67948
+[2026-11-04 16:22:29.151]   -> bare ACK to 24.69.254.96:1113 (socket 2)
+[2026-11-04 16:22:29.151] PING from 24.69.254.96:1117 id=2c8747ad
+[2026-11-04 16:22:29.152]   -> bare ACK to 24.69.254.96:1113 (socket 4)
+[2026-11-04 16:22:29.855] PING from 38.27.30.232:3658 id=1e37c694
+[2026-11-04 16:22:29.857]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 16:22:29.857] PING from 38.27.30.232:10071 id=864a6e52
+[2026-11-04 16:22:29.857]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 16:22:29.858] PING from 38.27.30.232:10072 id=30bf9045
+[2026-11-04 16:22:29.859]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 16:22:29.859] PING from 38.27.30.232:10073 id=ab268baf
+[2026-11-04 16:22:29.859]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 16:22:40.902] RELAY ctrl: map joiner 24.69.254.96 (DOR-DOR) -> host 38.27.30.232 room 100
+[2026-11-04 16:22:41.083] RELAY host 38.27.30.232: joiner 24.69.254.96:10071 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:41.083] RELAY J->H 24.69.254.96:10071 -> 38.27.30.232:3658 34B (#1)
+[2026-11-04 16:22:41.102] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10071 68B (#1) from :3658
+[2026-11-04 16:22:41.213] RELAY J->H 24.69.254.96:10071 -> 38.27.30.232:3658 12B (#2)
+[2026-11-04 16:22:41.267] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10071 13B (#2) from :3658
+[2026-11-04 16:22:41.979] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:41.980] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 58B (#1)
+[2026-11-04 16:22:42.003] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 62B (#1) from :3658
+[2026-11-04 16:22:42.083] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 146B (#2)
+[2026-11-04 16:22:42.102] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 956B (#2) from :3658
+[2026-11-04 16:22:42.104] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 424B (#5) from :3658
+[2026-11-04 16:22:44.152] RELAY ctrl: map joiner 24.69.254.96 (COOLDOR) -> host 38.27.30.232 room 100
+[2026-11-04 16:22:44.442] RELAY host 38.27.30.232: joiner 24.69.254.96:1115 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:22:44.477] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 34B (#1)
+[2026-11-04 16:22:44.505] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 9B (#1) from :3658
+[2026-11-04 16:22:44.610] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 7B (#2)
+[2026-11-04 16:22:44.704] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 13B (#2) from :3658
+[2026-11-04 16:22:45.209] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 9B (#5)
+[2026-11-04 16:22:45.305] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 13B (#5) from :3658
+[2026-11-04 16:22:46.211] RELAY J->H 24.69.254.96:1115 -> 38.27.30.232:3658 9B (#10)
+[2026-11-04 16:22:46.306] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1115 13B (#10) from :3658
+[2026-11-04 16:22:47.508] bad packet from 38.27.30.232:3658 (13B): BufferError('Message shorter than its header (1B).')
+[2026-11-04 16:22:47.510] Traceback (most recent call last):
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 470, in main
+    packets = handle_packet(data, addr, now, socks[s])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 394, in handle_packet
+    return handle_segment(data, addr, now, nat_port)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 170, in handle_segment
+    req = srp.SRPRequest(data)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 89, in __init__
+    self.segment = SRPSegment(data)
+                   ^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 118, in __init__
+    self.msg = gsm.Message(b'', in_buf=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\gsm.py", line 274, in __init__
+    raise BufferError(f"Message shorter than its header ({len(in_buf)}B).")
+BufferError: Message shorter than its header (1B).
+
+[2026-11-04 16:22:49.501] RELAY ctrl: unmap_any 24.69.254.96 (entries dropped: ['24.69.254.96'])
+[2026-11-04 16:22:49.509] bad packet from 38.27.30.232:3658 (17B): BufferError('Message shorter than its header (5B).')
+[2026-11-04 16:22:49.510] Traceback (most recent call last):
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 470, in main
+    packets = handle_packet(data, addr, now, socks[s])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 394, in handle_packet
+    return handle_segment(data, addr, now, nat_port)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 170, in handle_segment
+    req = srp.SRPRequest(data)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 89, in __init__
+    self.segment = SRPSegment(data)
+                   ^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 118, in __init__
+    self.msg = gsm.Message(b'', in_buf=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\gsm.py", line 274, in __init__
+    raise BufferError(f"Message shorter than its header ({len(in_buf)}B).")
+BufferError: Message shorter than its header (5B).
+
+[2026-11-04 16:22:49.710] bad packet from 38.27.30.232:3658 (13B): BufferError('Message shorter than its header (1B).')
+[2026-11-04 16:22:49.711] Traceback (most recent call last):
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 470, in main
+    packets = handle_packet(data, addr, now, socks[s])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 394, in handle_packet
+    return handle_segment(data, addr, now, nat_port)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 170, in handle_segment
+    req = srp.SRPRequest(data)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 89, in __init__
+    self.segment = SRPSegment(data)
+                   ^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 118, in __init__
+    self.msg = gsm.Message(b'', in_buf=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\gsm.py", line 274, in __init__
+    raise BufferError(f"Message shorter than its header ({len(in_buf)}B).")
+BufferError: Message shorter than its header (1B).
+
+[2026-11-04 16:22:49.849] PING from 24.69.254.96:3658 id=226a3e59
+[2026-11-04 16:22:49.849]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 16:22:49.850] PING from 24.69.254.96:10071 id=27c6b617
+[2026-11-04 16:22:49.852]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 16:22:49.853] RELAY drop: 25B on :3658 from 24.69.254.96:10073 - no mapping from the lobby server (logged once)
+[2026-11-04 16:22:49.854] PING from 24.69.254.96:10072 id=249eb66c
+[2026-11-04 16:22:49.854]   -> bare ACK to 24.69.254.96:10070 (socket 3)
+[2026-11-04 16:22:49.855] PING from 24.69.254.96:10073 id=823bd6c8
+[2026-11-04 16:22:49.856]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 16:22:54.154] PING from 24.69.254.96:1114 id=909cdb18
+[2026-11-04 16:22:54.154]   -> bare ACK to 24.69.254.96:1113 (socket 1)
+[2026-11-04 16:22:54.154] PING from 24.69.254.96:1115 id=37d67948
+[2026-11-04 16:22:54.156]   -> bare ACK to 24.69.254.96:1113 (socket 2)
+[2026-11-04 16:22:54.156] PING from 24.69.254.96:1116 id=06453509
+[2026-11-04 16:22:54.156]   -> bare ACK to 24.69.254.96:1113 (socket 3)
+[2026-11-04 16:22:54.156] PING from 24.69.254.96:1117 id=2c8747ad
+[2026-11-04 16:22:54.158]   -> bare ACK to 24.69.254.96:1113 (socket 4)
+[2026-11-04 16:22:54.848] PING from 38.27.30.232:3658 id=1e37c694
+[2026-11-04 16:22:54.848]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 16:22:54.850] PING from 38.27.30.232:10071 id=864a6e52
+[2026-11-04 16:22:54.850]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 16:22:54.850] PING from 38.27.30.232:10072 id=30bf9045
+[2026-11-04 16:22:54.851]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 16:22:54.852] PING from 38.27.30.232:10073 id=ab268baf
+[2026-11-04 16:22:54.852]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 16:23:19.146] PING from 24.69.254.96:1114 id=909cdb18
+[2026-11-04 16:23:19.146]   -> bare ACK to 24.69.254.96:1113 (socket 1)
+[2026-11-04 16:23:19.147] PING from 24.69.254.96:1115 id=37d67948
+[2026-11-04 16:23:19.147]   -> bare ACK to 24.69.254.96:1113 (socket 2)
+[2026-11-04 16:23:19.152] PING from 24.69.254.96:1116 id=06453509
+[2026-11-04 16:23:19.152]   -> bare ACK to 24.69.254.96:1113 (socket 3)
+[2026-11-04 16:23:19.154] PING from 24.69.254.96:1117 id=2c8747ad
+[2026-11-04 16:23:19.154]   -> bare ACK to 24.69.254.96:1113 (socket 4)
+[2026-11-04 16:23:19.840] PING from 38.27.30.232:3658 id=1e37c694
+[2026-11-04 16:23:19.841]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 16:23:19.842] PING from 38.27.30.232:10071 id=864a6e52
+[2026-11-04 16:23:19.842]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 16:23:19.842] PING from 38.27.30.232:10072 id=30bf9045
+[2026-11-04 16:23:19.843]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 16:23:19.843] PING from 38.27.30.232:10073 id=ab268baf
+[2026-11-04 16:23:19.843]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 16:23:20.916] PING from 24.69.254.96:3658 id=226a3e59
+[2026-11-04 16:23:20.918]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 16:23:20.918] PING from 24.69.254.96:10071 id=27c6b617
+[2026-11-04 16:23:20.918]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 16:23:20.920] PING from 24.69.254.96:10073 id=823bd6c8
+[2026-11-04 16:23:20.922]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 16:23:20.949] PING from 24.69.254.96:10072 id=249eb66c
+[2026-11-04 16:23:20.949]   -> bare ACK to 24.69.254.96:10070 (socket 3)
+[2026-11-04 16:23:29.251] RELAY ctrl: map joiner 24.69.254.96 (COOLDOR) -> host 38.27.30.232 room 100
+[2026-11-04 16:23:29.258] RELAY ctrl: map joiner 24.69.254.96 (DOR-DOR) -> host 38.27.30.232 room 100
+[2026-11-04 16:23:29.423] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:29.425] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 34B (#1)
+[2026-11-04 16:23:29.449] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:1117 9B (#1) from :3658
+[2026-11-04 16:23:29.460] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:29.460] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 34B (#1)
+[2026-11-04 16:23:29.590] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:29.600] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:23:29.625] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:29.625] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:29.651] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:29.791] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:29.793] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:23:29.824] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:29.824] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:23:29.850] bad packet from 38.27.30.232:3658 (24B): ValueError('147 is not a valid MESSAGE_TYPE')
+[2026-11-04 16:23:29.873] Traceback (most recent call last):
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 470, in main
+    packets = handle_packet(data, addr, now, socks[s])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 394, in handle_packet
+    return handle_segment(data, addr, now, nat_port)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\tools\nat2\udp_reply_server.py", line 170, in handle_segment
+    req = srp.SRPRequest(data)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 89, in __init__
+    self.segment = SRPSegment(data)
+                   ^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\srp.py", line 118, in __init__
+    self.msg = gsm.Message(b'', in_buf=data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\gsm.py", line 275, in __init__
+    self.header = header if header is not None else GSMessageHeader(in_buf[:GSMSG_HEADER_SIZE])
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new\gsm.py", line 241, in __init__
+    self.type = MESSAGE_TYPE(bts[4])
+                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\enum.py", line 751, in __call__
+    return cls.__new__(cls, value)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\enum.py", line 1170, in __new__
+    raise ve_exc
+ValueError: 147 is not a valid MESSAGE_TYPE
+
+[2026-11-04 16:23:29.989] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:29.989] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:30.026] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.026] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:23:30.050] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:30.184] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.185] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:30.225] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.227] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:23:30.251] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:30.390] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.390] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:30.425] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.425] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:30.451] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:30.597] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.597] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:30.625] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.626] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:30.651] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:30.790] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.791] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:30.826] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.826] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:30.852] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:30.993] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:30.993] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:31.026] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.026] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:31.052] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:31.189] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.189] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:31.225] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.227] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:31.251] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:31.390] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.390] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:31.426] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.449] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:31.452] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 17B (#1) from :3658
+[2026-11-04 16:23:31.588] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.588] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:31.626] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.627] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:31.652] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:31.790] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.791] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:31.828] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.828] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:31.852] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 24B (#1) from :3658
+[2026-11-04 16:23:31.989] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:31.991] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:32.026] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.027] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:32.053] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:32.191] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.191] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:32.227] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.227] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:32.253] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:32.391] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.391] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:32.428] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.428] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:32.453] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:32.590] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.592] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:32.628] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.628] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:32.652] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:32.791] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.791] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:32.829] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.829] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:32.854] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:32.991] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:32.991] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:33.027] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.027] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:33.053] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:33.191] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.199] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:33.229] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.229] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 9B (#1)
+[2026-11-04 16:23:33.254] SRP 20B from 38.27.30.232:3658 flags=['FIN', 'SYN', 'ACK', 'URG'] seg=0x4729 ack=0x81e8 data_size=63016
+[2026-11-04 16:23:33.392] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.393] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:33.428] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.428] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:23:33.454] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 20B (#1) from :3658
+[2026-11-04 16:23:33.591] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.592] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:33.628] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.628] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:23:33.654] SRP 20B from 38.27.30.232:3658 flags=['SYN', 'URG'] seg=0x64db ack=0x2bdf data_size=41254
+[2026-11-04 16:23:33.656]   added client 38.27.30.232:3658
+[2026-11-04 16:23:33.656]   -> SYN+ACK (20 bytes)
+[2026-11-04 16:23:33.788] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.788] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:33.828] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.829] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 7B (#1)
+[2026-11-04 16:23:33.855] SRP 20B from 38.27.30.232:3658 flags=['ACK', 'URG'] seg=0xe4bc ack=0xf77a data_size=14142
+[2026-11-04 16:23:33.855]   -> SYN+ACK (20 bytes)
+[2026-11-04 16:23:33.991] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:33.992] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:34.029] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:34.029] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:34.055] SRP 20B from 38.27.30.232:3658 flags=['SYN'] seg=0xc9d7 ack=0xf26b data_size=16419
+[2026-11-04 16:23:34.055]   added client 38.27.30.232:3658
+[2026-11-04 16:23:34.055]   -> SYN+ACK (20 bytes)
+[2026-11-04 16:23:34.190] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:34.192] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:34.229] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:34.230] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:34.255] SRP 20B from 38.27.30.232:3658 flags=['FIN', 'ACK'] seg=0xc579 ack=0x5296 data_size=7917
+[2026-11-04 16:23:34.255]   -> SYN+ACK (20 bytes)
+[2026-11-04 16:23:34.256]   removed client 38.27.30.232:3658
+[2026-11-04 16:23:34.392] RELAY host 38.27.30.232: joiner 24.69.254.96:1117 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:34.392] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:34.425] RELAY J->H 24.69.254.96:1117 -> 38.27.30.232:3658 10B (#2)
+[2026-11-04 16:23:34.430] RELAY host 38.27.30.232: joiner 24.69.254.96:10073 via relay port 3658 -> 38.27.30.232:3658 from 45000
+[2026-11-04 16:23:34.432] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 5B (#1)
+[2026-11-04 16:23:34.456] RELAY H->J 38.27.30.232:3658 -> 24.69.254.96:10073 24B (#1) from :3658
+[2026-11-04 16:23:34.461] RELAY J->H 24.69.254.96:10073 -> 38.27.30.232:3658 10B (#2)
+[2026-11-04 16:23:34.503] RELAY ctrl: unmap_any 24.69.254.96 (entries dropped: ['24.69.254.96'])
+[2026-11-04 16:23:34.656] SRP 20B from 38.27.30.232:3658 flags=['FIN', 'URG'] seg=0x2cf6 ack=0x3b90 data_size=21809
+[2026-11-04 16:23:34.855] ignored 9B datagram from 38.27.30.232:3658: 07004b22b5a88d3562
+[2026-11-04 16:23:44.135] PING from 24.69.254.96:1114 id=909cdb18
+[2026-11-04 16:23:44.137]   -> bare ACK to 24.69.254.96:1113 (socket 1)
+[2026-11-04 16:23:44.138] PING from 24.69.254.96:1115 id=37d67948
+[2026-11-04 16:23:44.138]   -> bare ACK to 24.69.254.96:1113 (socket 2)
+[2026-11-04 16:23:44.138] PING from 24.69.254.96:1116 id=06453509
+[2026-11-04 16:23:44.138]   -> bare ACK to 24.69.254.96:1113 (socket 3)
+[2026-11-04 16:23:44.140] PING from 24.69.254.96:1117 id=2c8747ad
+[2026-11-04 16:23:44.140]   -> bare ACK to 24.69.254.96:1113 (socket 4)
+[2026-11-04 16:23:44.866] PING from 38.27.30.232:3658 id=1e37c694
+[2026-11-04 16:23:44.866]   -> bare ACK to 38.27.30.232:10070 (socket 1)
+[2026-11-04 16:23:44.867] PING from 38.27.30.232:10071 id=864a6e52
+[2026-11-04 16:23:44.867]   -> bare ACK to 38.27.30.232:10070 (socket 2)
+[2026-11-04 16:23:44.867] PING from 38.27.30.232:10072 id=30bf9045
+[2026-11-04 16:23:44.867]   -> bare ACK to 38.27.30.232:10070 (socket 3)
+[2026-11-04 16:23:44.869] PING from 38.27.30.232:10073 id=ab268baf
+[2026-11-04 16:23:44.869]   -> bare ACK to 38.27.30.232:10070 (socket 4)
+[2026-11-04 16:23:45.375] PING from 24.69.254.96:3658 id=226a3e59
+[2026-11-04 16:23:45.375]   -> bare ACK to 24.69.254.96:10070 (socket 1)
+[2026-11-04 16:23:45.376] PING from 24.69.254.96:10071 id=27c6b617
+[2026-11-04 16:23:45.376]   -> bare ACK to 24.69.254.96:10070 (socket 2)
+[2026-11-04 16:23:45.376] PING from 24.69.254.96:10073 id=823bd6c8
+[2026-11-04 16:23:45.376]   -> bare ACK to 24.69.254.96:10070 (socket 4)
+[2026-11-04 16:23:45.378] PING from 24.69.254.96:10072 id=249eb66c
+[2026-11-04 16:23:45.378]   -> bare ACK to 24.69.254.96:10070 (socket 3)

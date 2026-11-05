@@ -63,3 +63,8 @@ UDP logger listening
   ports: 4400, 41006
   log:  logs/udp_manual_ports.log
   ctrl+c to stop
+UDP logger listening
+  bind: 0.0.0.0
+  ports: 4400, 41006
+  log:  logs/udp_manual_ports.log
+  ctrl+c to stop
