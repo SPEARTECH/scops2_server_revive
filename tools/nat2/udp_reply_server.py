@@ -307,7 +307,13 @@ HOST_EXT: dict = {}
 # mode: every console socket keeps its 45000 hole open by itself (ping every 25 s), so a link delivered to socket k
 # from 45000 needs no steering at all.
 SOCKET_EXT: dict = {}
-HOLE_OPEN_MIN_S = float(os.environ.get("SCCT_RELAY_HOLE_OPEN_MIN_S", "15"))   # interval between the login steers that open every hole
+# Hole keepalive: a conntrack entry that has carried traffic both ways is refreshed by ANY packet through it, so the relay
+# keeps such a hole open itself by sending a datagram inbound through it when it has been quiet for this long.
+HOLE_KEEPALIVE_S = float(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE_S", "45"))
+HOLE_KEEPALIVE_PAYLOAD = bytes.fromhex(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE_HEX", ""))   # default: empty datagram
+# Dead-hole rule: a joiner link is sending through a hole but the host has been silent on it for this long -> steer.
+HOLE_DEAD_S = float(os.environ.get("SCCT_RELAY_HOLE_DEAD_S", "15"))
+RELAY_TRAFFIC: dict = {}    # host ip -> {hole port: time of the last datagram the relay sent through it (joiner data or keepalive)}
 LINK_IDLE_S = 5.0           # a joiner endpoint silent for longer is not "live"
 LINK_ESTABLISHED = 20       # packets from an endpoint before a later endpoint gets its own hole (probe + room link share)
 RELAY_IDLE_S = float(os.environ.get("SCCT_RELAY_IDLE_S", "300"))   # flow dropped after this long without traffic (mappings no longer follow lobby leaves)
@@ -463,6 +469,8 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
             log(f"RELAY host {host}: hole {src_port} -> external port {hport}" + ("" if src_port in ext else " (not yet observed on this hole; guessing)"))
     try:
         src_sock.sendto(data, (host, hport))
+        if RELAY_HOLES:
+            RELAY_TRAFFIC.setdefault(host, {})[src_port] = now
     except OSError as e:
         log(f"RELAY -> host {host} send failed: {e}")
         return
@@ -531,44 +539,46 @@ def relay_expire(now: float) -> None:
         if now - hv["last"] > RELAY_IDLE_S:
             RELAY_HOSTS.pop(h, None)
             HOST_EXT.pop(h, None)
+            RELAY_TRAFFIC.pop(h, None)
             log(f"RELAY host {h}: idle {RELAY_IDLE_S:.0f}s, flow dropped (rx={hv['rx']} tx={hv['tx']})")
 
 
 def hole_steering(now: float) -> None:
-    """Multi-hole mode: send a PORT_ID for socket 1 only when a needed hole is stale (see HOLE_STALE_S)."""
+    """Multi-hole mode. A steer (unsolicited PORT_ID for socket 1) is sent only (a) once after login, to open the first
+    hole, and (b) when a joiner link is sending through a hole on which the host has been silent for HOLE_DEAD_S (the hole
+    was never opened or has expired). Holes that carried traffic both ways are kept open by relay keepalives instead."""
     main = NAT_MAIN_SOCK
     for clt in list(CLIENTS):
         msg = getattr(clt, "hole_msg", None)
-        if msg is None or now - clt.hole_last < HOLE_OPEN_MIN_S:
-            continue
-        never0 = [p for p in RELAY_HOLES if p not in HOST_TRAFFIC.get(clt.addr, {}) and p not in getattr(clt, "hole_steer_time", {})]
-        if not never0 and now - clt.hole_last < HOLE_MIN_S:
+        if msg is None:
             continue
         if clt.hole_count >= HOLE_BUDGET:
             if not getattr(clt, "hole_budget_logged", False):
                 clt.hole_budget_logged = True
-                log(f"HOLE budget: {clt.addr} reached {HOLE_BUDGET} steering messages; no more steers this login (holes now live on game traffic only)")
+                log(f"HOLE budget: {clt.addr} reached {HOLE_BUDGET} steering messages; no more steers this login")
+            continue
+        if now - clt.hole_last < HOLE_MIN_S and clt.hole_target is not None:
             continue
         traffic = HOST_TRAFFIC.get(clt.addr, {})
         hv = RELAY_HOSTS.get(clt.addr)
-        needed = {RELAY_HOLES[0]}
-        if hv is not None:
-            needed |= {p for e, p in hv.get("src", {}).items() if e in hv["eps"]}
-        steered = getattr(clt, "hole_steer_time", {})
-        never = [p for p in RELAY_HOLES if p not in traffic and p not in steered]
+        target = None
+        why = ""
         if clt.hole_target is None:
-            target = RELAY_HOLES[0]
-        elif never:
-            # open the remaining holes right after login (shorter interval), so links can use any of them at once
-            if now - clt.hole_last < HOLE_OPEN_MIN_S:
-                continue
-            target = never[0]
-        else:
-            stale = [(now - max(traffic.get(p, 0.0), steered.get(p, 0.0)), p) for p in needed if p != clt.hole_target]
-            stale = [(age, p) for age, p in stale if age > HOLE_STALE_S]
-            if not stale:
-                continue
-            target = max(stale)[1]
+            target, why = RELAY_HOLES[0], "login"
+        elif hv is not None:
+            dead = []
+            for ep, port in hv.get("src", {}).items():
+                if ep not in hv["eps"] or now - hv["eps"][ep][1] > LINK_IDLE_S:
+                    continue      # link not sending right now
+                if port == clt.hole_target:
+                    continue      # already the ping target
+                if now - traffic.get(port, 0.0) > HOLE_DEAD_S:
+                    dead.append((now - traffic.get(port, 0.0), port, ep))
+            if dead:
+                age, target, ep = max(dead)
+                why = f"link {ep[0]}:{ep[1]} sending, host silent on {target} for {age:.0f}s"
+        if target is None:
+            continue
         try:
             xr, xpid = nat_reply(msg, gsm.NAT_MSG.PORT_ID, 0, target, pick_id=True)
             clt.reqs[xpid] = {"msg": msg, "sock": "1", "pending": True, "extra": True, "port": target, "ts": now}
@@ -579,7 +589,7 @@ def hole_steering(now: float) -> None:
             if not hasattr(clt, "hole_steer_time"):
                 clt.hole_steer_time = {}
             clt.hole_steer_time[target] = now
-            log(f"HOLE steer #{clt.hole_count}: {clt.addr} socket 1 -> ping port {target} (needed {sorted(needed)}; " +
+            log(f"HOLE steer #{clt.hole_count}: {clt.addr} socket 1 -> ping port {target} ({why}; " +
                 ", ".join(f"{p}: {now - traffic[p]:.0f}s ago" if p in traffic else f"{p}: never" for p in RELAY_HOLES) + ")")
             if clt.hole_count >= HOLE_BUDGET - 2:
                 log(f"HOLE WARNING: {clt.addr} has received {clt.hole_count} steering messages (cap {HOLE_BUDGET}; the console stops reacting around 11)")
@@ -588,6 +598,29 @@ def hole_steering(now: float) -> None:
         old = [k for k, v in clt.reqs.items() if v.get("extra") and now - v.get("ts", now) > 600]
         for k in old:
             clt.reqs.pop(k, None)
+
+
+def hole_keepalive(now: float) -> None:
+    """Keep every hole that has carried host traffic open by sending a datagram inbound through it when quiet."""
+    for host, hv in list(RELAY_HOSTS.items()):
+        traffic = HOST_TRAFFIC.get(host, {})
+        sent = RELAY_TRAFFIC.setdefault(host, {})
+        ext = HOST_EXT.get(host, {})
+        for port in RELAY_HOLES:
+            if port not in traffic or port not in ext:
+                continue   # hole never carried host traffic: nothing to keep alive yet
+            last = max(traffic.get(port, 0.0), sent.get(port, 0.0))
+            if now - last < HOLE_KEEPALIVE_S:
+                continue
+            try:
+                HOLE_SOCKS[port].sendto(HOLE_KEEPALIVE_PAYLOAD, (host, ext[port]))
+                sent[port] = now
+                n = hv.setdefault("ka", {}).get(port, 0) + 1
+                hv["ka"][port] = n
+                if n <= 2 or n % 50 == 0:
+                    log(f"HOLE keepalive #{n}: {len(HOLE_KEEPALIVE_PAYLOAD)}B from :{port} -> {host}:{ext[port]} (hole quiet {now - last:.0f}s)")
+            except OSError as e:
+                log(f"HOLE keepalive from :{port} failed: {e}")
 
 
 def pick_slot(hv: dict, ep, now: float, prev_t, nslots: int) -> int:
@@ -616,28 +649,10 @@ def pick_slot(hv: dict, ep, now: float, prev_t, nslots: int) -> int:
 
 
 def pick_hole_port(hv: dict, ep, now: float, prev_t=None) -> int:
-    """Source hole port for a joiner endpoint - permanent per joiner source port.
-    The console's outbound links come from 10071/10072/10073; each maps to its own hole (45001/45002/45003) so the host
-    always sees the same distinct source port for that link, including when an idle link is resumed minutes later
-    (2026-11-04 18:17: the rematch reused a game link that had been idle for 2 minutes). Other source ports (an emulator
-    picking ephemeral ports) take holes in first-seen order; if there are more links than holes the least recently
-    heard link shares (logged)."""
+    """Source hole port for a joiner endpoint: slot allocation (see pick_slot) mapped onto RELAY_HOLES."""
     src = hv.setdefault("src", {})
-    if ep in src:
-        return src[ep]
-    port = None
-    idx = ep[1] - HOLE_PORT_BASE
-    if 0 <= idx < len(RELAY_HOLES):
-        port = RELAY_HOLES[idx]
-    else:
-        used = set(src.values())
-        free = [p for p in RELAY_HOLES if p not in used]
-        if free:
-            port = free[0]
-        else:
-            lru = min(src, key=lambda e: hv["eps"][e][1] if e in hv["eps"] else 0.0)
-            port = src[lru]
-            log(f"RELAY host: more links than holes, {ep[0]}:{ep[1]} shares hole {port} with {lru[0]}:{lru[1]}")
+    slot = pick_slot(hv, ep, now, prev_t, len(RELAY_HOLES))
+    port = RELAY_HOLES[slot]
     src[ep] = port
     return port
 
@@ -720,7 +735,7 @@ def main(argv=None) -> int:
     if NAT_EXTRA_PORTID and not RELAY_HOLES:
         log(f"  EXTRA PORT_ID experiment: socket 1 also told to ping {NAT_EXTRA_PORTID} (these ports must be in --ports)")
     if RELAY_HOLES:
-        log(f"  MULTI-HOLE: holes {RELAY_HOLES} (joiner port {HOLE_PORT_BASE}+i -> hole i); socket 1 steered to a needed hole only when stale (>{HOLE_STALE_S:.0f}s), min {HOLE_MIN_S:.0f}s apart, budget {HOLE_BUDGET}")
+        log(f"  MULTI-HOLE: holes {RELAY_HOLES}; steer at login and when a sending link finds the host silent >{HOLE_DEAD_S:.0f}s (min {HOLE_MIN_S:.0f}s apart, budget {HOLE_BUDGET}); established holes kept open by {len(HOLE_KEEPALIVE_PAYLOAD)}B keepalives every {HOLE_KEEPALIVE_S:.0f}s")
     elif RELAY_ALT_HOST_PORTS:
         log(f"  ALT-SOCKET mode: links delivered from 45000 to host sockets 3658 then {RELAY_ALT_HOST_PORTS} (external ports learned from each socket's pings); no steering")
     else:
@@ -731,6 +746,7 @@ def main(argv=None) -> int:
         now = time.monotonic()
         if RELAY_HOLES:
             hole_steering(now)
+            hole_keepalive(now)
         for c in [c for c in CLIENTS if now - c.last_seen > CLIENT_TIMEOUT]:
             CLIENTS.remove(c)
             log(f"expired client {c.addr}:{c.port}")

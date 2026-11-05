@@ -12,10 +12,10 @@ rem 3658/10070-10080 -> host via 45000). Needs no port forwarding on the host's 
 set SCCT_RELAY=1
 rem Hex-dump the first 24 datagrams per direction of each relayed flow (to learn the peer protocol for multi-joiner routing).
 set SCCT_RELAY_DUMP=300
-rem Link separation for the host. Steering holes (SCCT_RELAY_HOLES) cannot be kept open: a ping-only hole lives ~30 s and the
-rem console accepts only ~11 steering messages per login (2026-11-04 18:35-18:41). Alt-socket mode instead delivers each of a
-rem joiner's links to a different host socket (3658, 10071, 10072, 10073), all from 45000, which every socket keeps open
-rem by itself with its 25 s NAT ping. Experiment: does the host's game accept a peer link on 10071-10073?
-set SCCT_RELAY_HOLES=
-set SCCT_RELAY_ALT_HOST_PORTS=1
+rem Multi-hole relay v3: three holes on the host's 3658 socket (45001-45003), one per joiner link. A hole is OPENED by a
+rem steering PORT_ID (login + when a new link finds the host silent); once it has carried traffic both ways the relay keeps it
+rem open with an empty datagram every 45 s (conntrack refresh) - no steering budget spent. Host sockets 10071-10073 do not
+rem accept peer links (tested 18:53), so alt-socket mode is off.
+set SCCT_RELAY_HOLES=45001,45002,45003
+set SCCT_RELAY_ALT_HOST_PORTS=0
 call "%~dp0run_nat_even.bat"
