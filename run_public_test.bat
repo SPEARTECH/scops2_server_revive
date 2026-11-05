@@ -12,8 +12,9 @@ rem 3658/10070-10080 -> host via 45000). Needs no port forwarding on the host's 
 set SCCT_RELAY=1
 rem Hex-dump the first 24 datagrams per direction of each relayed flow (to learn the peer protocol for multi-joiner routing).
 set SCCT_RELAY_DUMP=300
-rem Experiment A: a joiner's 2nd game link goes to the host's socket 10071 instead of 3658 (distinct link for the host).
-set SCCT_RELAY_ALT_HOST_PORTS=1
-rem Experiment B: tell socket 1 to also ping 45001 (second NAT hole on 3658). Log-only; look for EXTRA-HOLE PING.
-set SCCT_NAT_EXTRA_PORTID=45001
+rem Multi-hole relay: every console's 3658 socket is steered to ping 45001 and 45002 alternately (an unsolicited PORT_ID
+rem replaces the ping target, test 2026-11-04 17:08), so the host keeps two NAT holes and the relay can give each joiner
+rem link its own source port (room link via 45001, game link via 45002) - what the host sees natively.
+set SCCT_RELAY_HOLES=45001,45002
+set SCCT_RELAY_HOLE_REFRESH_S=10
 call "%~dp0run_nat_even.bat"
