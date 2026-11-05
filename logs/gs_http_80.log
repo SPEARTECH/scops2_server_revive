@@ -228,3 +228,18 @@ GS HTTP server listening
   q[dp] = 'SPLINTERCELL3PS2US'
   q[user] = 'COOLDOR'
 [2026-11-04 16:48:11.462] HTTP 103.158.121.21:63209  GET /admin/config.php?
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs\gs_http_80.log
+  ctrl+c to stop
+[2026-11-04 16:53:46.165] HTTP 38.27.30.232:54702  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=SNK
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'SNK'
+[2026-11-04 16:53:58.686] HTTP 24.69.254.96:54620  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=COOLDOR
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'COOLDOR'
+[2026-11-04 16:54:55.207] HTTP 24.69.254.96:50113  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=noname
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'noname'
