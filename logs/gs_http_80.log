@@ -255,3 +255,16 @@ GS HTTP server listening
 [2026-11-04 17:08:25.107] HTTP 24.69.254.96:64574  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=COOLDOR
   q[dp] = 'SPLINTERCELL3PS2US'
   q[user] = 'COOLDOR'
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs\gs_http_80.log
+  ctrl+c to stop
+[2026-11-04 17:16:40.781] HTTP 24.69.254.96:60975  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=COOLDOR
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'COOLDOR'
+[2026-11-04 17:17:12.550] HTTP 38.27.30.232:54023  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=SNK
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'SNK'
+[2026-11-04 17:17:20.691] HTTP 45.171.28.13:48558  GET /?
