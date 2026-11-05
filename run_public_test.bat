@@ -15,7 +15,8 @@ set SCCT_RELAY_DUMP=300
 rem Multi-hole relay: every console's 3658 socket is steered to ping 45001 and 45002 alternately (an unsolicited PORT_ID
 rem replaces the ping target, test 2026-11-04 17:08), so the host keeps two NAT holes and the relay can give each joiner
 rem link its own source port (room link via 45001, game link via 45002) - what the host sees natively.
-set SCCT_RELAY_HOLES=45001,45002
-rem a steering PORT_ID is sent only when a needed hole saw no host traffic for this long (min 8 s apart)
-set SCCT_RELAY_HOLE_STALE_S=12
+rem three holes, one per joiner socket (10071/10072/10073 -> 45001/45002/45003), permanent per link
+set SCCT_RELAY_HOLES=45001,45002,45003
+rem a steering PORT_ID is sent only when a needed hole saw no host traffic for this long (min 30 s apart, cap 10 per login)
+set SCCT_RELAY_HOLE_STALE_S=100
 call "%~dp0run_nat_even.bat"

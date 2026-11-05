@@ -280,7 +280,12 @@ RELAY_HOLES = [int(x) for x in os.environ.get("SCCT_RELAY_HOLES", "").replace(";
 # from it; after ~11 of them the console stopped reacting (2026-11-04 17:19). So a steer is sent only when a hole that is
 # NEEDED (the first hole, or one a live joiner link uses) has seen no host traffic for SCCT_RELAY_HOLE_STALE_S seconds,
 # at most one every SCCT_RELAY_HOLE_MIN_S seconds per console. Typical session: login, game link, match start, match end.
-HOLE_STALE_S = float(os.environ.get("SCCT_RELAY_HOLE_STALE_S", "12"))
+# A consumer (Linux conntrack) router keeps an established UDP 5-tuple ~180 s; refresh a needed hole after this much idle.
+HOLE_STALE_S = float(os.environ.get("SCCT_RELAY_HOLE_STALE_S", "100"))
+HOLE_BUDGET = int(os.environ.get("SCCT_RELAY_HOLE_BUDGET", "10"))   # hard cap on steering messages per login
+# Joiner source port -> hole index (the console uses sockets 10071-10073 for its outbound links and reuses each link
+# later - a game link went idle for minutes and came back for a rematch - so the mapping must be permanent).
+HOLE_PORT_BASE = int(os.environ.get("SCCT_RELAY_HOLE_PORT_BASE", "10071"))
 # A steer does not make the console ping at once (it only re-targets its 25 s cycle), so a steered hole counts as fresh
 # for HOLE_MIN_S and steers are at least HOLE_MIN_S apart per console.
 HOLE_MIN_S = float(os.environ.get("SCCT_RELAY_HOLE_MIN_S", "30"))
@@ -509,6 +514,11 @@ def hole_steering(now: float) -> None:
         msg = getattr(clt, "hole_msg", None)
         if msg is None or now - clt.hole_last < HOLE_MIN_S:
             continue
+        if clt.hole_count >= HOLE_BUDGET:
+            if not getattr(clt, "hole_budget_logged", False):
+                clt.hole_budget_logged = True
+                log(f"HOLE budget: {clt.addr} reached {HOLE_BUDGET} steering messages; no more steers this login (holes now live on game traffic only)")
+            continue
         traffic = HOST_TRAFFIC.get(clt.addr, {})
         hv = RELAY_HOSTS.get(clt.addr)
         needed = {RELAY_HOLES[0]}
@@ -535,8 +545,8 @@ def hole_steering(now: float) -> None:
             clt.hole_steer_time[target] = now
             log(f"HOLE steer #{clt.hole_count}: {clt.addr} socket 1 -> ping port {target} (needed {sorted(needed)}; " +
                 ", ".join(f"{p}: {now - traffic[p]:.0f}s ago" if p in traffic else f"{p}: never" for p in RELAY_HOLES) + ")")
-            if clt.hole_count >= 9:
-                log(f"HOLE WARNING: {clt.addr} has received {clt.hole_count} steering messages; the console may stop reacting around 11")
+            if clt.hole_count >= HOLE_BUDGET - 2:
+                log(f"HOLE WARNING: {clt.addr} has received {clt.hole_count} steering messages (cap {HOLE_BUDGET}; the console stops reacting around 11)")
         except Exception as e:
             log(f"HOLE steer failed for {clt.addr}: {e!r}")
         old = [k for k, v in clt.reqs.items() if v.get("extra") and now - v.get("ts", now) > 600]
@@ -545,29 +555,28 @@ def hole_steering(now: float) -> None:
 
 
 def pick_hole_port(hv: dict, ep, now: float, prev_t=None) -> int:
-    """Source hole port for a joiner endpoint. The first hole is shared until one endpoint on it is established
-    (the join probe and the room link arrive 1 s apart and the host copes with both from one source); a later endpoint
-    (the game link) gets a hole no live endpoint uses, so the host sees it as a distinct peer.
-    An endpoint that never got established (the 2-packet probe) and reappears after idling is treated as a new link:
-    the client reuses port numbers across roles (2026-11-04 17:48: the probe's port came back as the game link and
-    inherited the room link's hole, so the host merged the two links)."""
+    """Source hole port for a joiner endpoint - permanent per joiner source port.
+    The console's outbound links come from 10071/10072/10073; each maps to its own hole (45001/45002/45003) so the host
+    always sees the same distinct source port for that link, including when an idle link is resumed minutes later
+    (2026-11-04 18:17: the rematch reused a game link that had been idle for 2 minutes). Other source ports (an emulator
+    picking ephemeral ports) take holes in first-seen order; if there are more links than holes the least recently
+    heard link shares (logged)."""
     src = hv.setdefault("src", {})
-    counts = hv.setdefault("ep_rx", {})
     if ep in src:
-        if counts.get(ep, 0) >= LINK_ESTABLISHED or prev_t is None or now - prev_t <= LINK_IDLE_S:
-            return src[ep]
-        old = src.pop(ep)
-        counts[ep] = 0
-        log(f"RELAY host: endpoint {ep[0]}:{ep[1]} reappears after {now - prev_t:.0f}s idle without having been established; re-allocating (was hole {old})")
-    live = {e for e, (sk, t) in hv["eps"].items() if e != ep and now - t <= LINK_IDLE_S and e in src}
-    busy = {src[e] for e in live if counts.get(e, 0) >= LINK_ESTABLISHED}
-    free = [p for p in RELAY_HOLES if p not in busy]
-    if free:
-        port = free[0]
+        return src[ep]
+    port = None
+    idx = ep[1] - HOLE_PORT_BASE
+    if 0 <= idx < len(RELAY_HOLES):
+        port = RELAY_HOLES[idx]
     else:
-        lru = min((e for e in src if e in hv["eps"]), key=lambda e: hv["eps"][e][1], default=None)
-        port = src[lru] if lru is not None else RELAY_HOLES[0]
-        log(f"RELAY host: all hole ports busy, reusing {port} for {ep[0]}:{ep[1]}")
+        used = set(src.values())
+        free = [p for p in RELAY_HOLES if p not in used]
+        if free:
+            port = free[0]
+        else:
+            lru = min(src, key=lambda e: hv["eps"][e][1] if e in hv["eps"] else 0.0)
+            port = src[lru]
+            log(f"RELAY host: more links than holes, {ep[0]}:{ep[1]} shares hole {port} with {lru[0]}:{lru[1]}")
     src[ep] = port
     return port
 
@@ -650,7 +659,7 @@ def main(argv=None) -> int:
     if NAT_EXTRA_PORTID and not RELAY_HOLES:
         log(f"  EXTRA PORT_ID experiment: socket 1 also told to ping {NAT_EXTRA_PORTID} (these ports must be in --ports)")
     if RELAY_HOLES:
-        log(f"  MULTI-HOLE: holes {RELAY_HOLES}; socket 1 steered to a needed hole only when it is stale (>{HOLE_STALE_S:.0f}s), min {HOLE_MIN_S:.0f}s apart")
+        log(f"  MULTI-HOLE: holes {RELAY_HOLES} (joiner port {HOLE_PORT_BASE}+i -> hole i); socket 1 steered to a needed hole only when stale (>{HOLE_STALE_S:.0f}s), min {HOLE_MIN_S:.0f}s apart, budget {HOLE_BUDGET}")
     else:
         log("  RELAY: off")
     all_socks = list(socks) + list(relay_socks) + ([ctrl_sock] if ctrl_sock is not None else [])
