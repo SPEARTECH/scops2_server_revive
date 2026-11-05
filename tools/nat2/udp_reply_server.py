@@ -317,7 +317,11 @@ HOLE_KEEPALIVE_S = float(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE_S", "45"))
 HOLE_KEEPALIVE_PAYLOAD = bytes.fromhex(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE_HEX", "0000"))  # 2 B (some routers drop empty UDP)
 # Dead-hole rule: a joiner link is sending through a hole but the host has been silent on it for this long -> steer.
 HOLE_DEAD_S = float(os.environ.get("SCCT_RELAY_HOLE_DEAD_S", "15"))
+# Pre-open this many holes per console right after login (one per ping cycle, each confirmed by its ping before the
+# next steer) and keep them warm with keepalives, so joiners' room and game links find open holes immediately.
+HOLE_PREOPEN = int(os.environ.get("SCCT_RELAY_HOLE_PREOPEN", "4"))
 RELAY_TRAFFIC: dict = {}    # host ip -> {hole port: time of the last datagram the relay sent through it (joiner data or keepalive)}
+KA_STATE: dict = {}         # keepalive counters for consoles that have no joiner flow yet (pre-opened holes)
 LINK_IDLE_S = 5.0           # a joiner endpoint silent for longer is not "live"
 LINK_ESTABLISHED = 20       # packets from an endpoint before a later endpoint gets its own hole (probe + room link share)
 RELAY_IDLE_S = float(os.environ.get("SCCT_RELAY_IDLE_S", "300"))   # flow dropped after this long without traffic (mappings no longer follow lobby leaves)
@@ -592,28 +596,38 @@ def hole_steering(now: float) -> None:
                 clt.hole_budget_logged = True
                 log(f"HOLE budget: {clt.addr} reached {HOLE_BUDGET} steering messages; no more steers this login")
             continue
-        if now - clt.hole_last < HOLE_MIN_S and clt.hole_target is not None:
-            continue
         traffic = HOST_TRAFFIC.get(clt.addr, {})
         hv = RELAY_HOSTS.get(clt.addr)
+        # serialize: the previous steer must have been confirmed by a ping (or be HOLE_MIN_S old) before the next one
+        confirmed = clt.hole_target is None or traffic.get(clt.hole_target, 0.0) >= clt.hole_last
+        if not confirmed and now - clt.hole_last < HOLE_MIN_S:
+            continue
         target = None
         why = ""
         if clt.hole_target is None:
             target, why = RELAY_HOLES[0], "login"
-        elif hv is not None:
-            dead = []
-            since = hv.get("joiner_since", {})
-            for ep, port in hv.get("src", {}).items():
-                if ep not in hv["eps"] or now - hv["eps"][ep][1] > LINK_IDLE_S:
-                    continue      # link not sending right now
-                if port == clt.hole_target:
-                    continue      # already the ping target
-                # the joiner has been sending through this hole for HOLE_DEAD_S without any answer from the host
-                if now - traffic.get(port, 0.0) > HOLE_DEAD_S and now - since.get(port, now) > HOLE_DEAD_S:
-                    dead.append((now - traffic.get(port, 0.0), port, ep))
-            if dead:
-                age, target, ep = max(dead)
-                why = f"link {ep[0]}:{ep[1]} sending, host silent on {target} for {age:.0f}s"
+        else:
+            if hv is not None:
+                dead = []
+                since = hv.get("joiner_since", {})
+                for ep, port in hv.get("src", {}).items():
+                    if ep not in hv["eps"] or now - hv["eps"][ep][1] > LINK_IDLE_S:
+                        continue      # link not sending right now
+                    if port == clt.hole_target:
+                        continue      # already the ping target
+                    if port not in traffic:
+                        dead.append((1e9, port, ep))   # never opened: steer at once
+                    elif now - traffic.get(port, 0.0) > HOLE_DEAD_S and now - since.get(port, now) > HOLE_DEAD_S:
+                        dead.append((now - traffic.get(port, 0.0), port, ep))
+                if dead:
+                    age, target, ep = max(dead)
+                    why = f"link {ep[0]}:{ep[1]} sending, host silent on {target} " + ("(never opened)" if age >= 1e9 else f"for {age:.0f}s")
+            if target is None and confirmed:
+                opened = [p for p in RELAY_HOLES if p in traffic]
+                if len(opened) < HOLE_PREOPEN:
+                    nxt = [p for p in RELAY_HOLES if p not in traffic]
+                    if nxt:
+                        target, why = nxt[0], f"pre-open {len(opened) + 1}/{HOLE_PREOPEN}"
         if target is None:
             continue
         try:
@@ -642,7 +656,8 @@ def hole_steering(now: float) -> None:
 
 def hole_keepalive(now: float) -> None:
     """Keep every hole that has carried host traffic open by sending a datagram inbound through it when quiet."""
-    for host, hv in list(RELAY_HOSTS.items()):
+    for host in list(HOST_TRAFFIC):
+        hv = RELAY_HOSTS.get(host) or KA_STATE.setdefault(host, {})
         traffic = HOST_TRAFFIC.get(host, {})
         sent = RELAY_TRAFFIC.setdefault(host, {})
         ext = HOST_EXT.get(host, {})
@@ -778,7 +793,7 @@ def main(argv=None) -> int:
     if NAT_EXTRA_PORTID and not RELAY_HOLES:
         log(f"  EXTRA PORT_ID experiment: socket 1 also told to ping {NAT_EXTRA_PORTID} (these ports must be in --ports)")
     if RELAY_HOLES:
-        log(f"  MULTI-HOLE: holes {RELAY_HOLES}; steer at login and when a sending link finds the host silent >{HOLE_DEAD_S:.0f}s (min {HOLE_MIN_S:.0f}s apart, budget {HOLE_BUDGET}); established holes kept open by {len(HOLE_KEEPALIVE_PAYLOAD)}B keepalives every {HOLE_KEEPALIVE_S:.0f}s")
+        log(f"  MULTI-HOLE: {len(RELAY_HOLES)} holes; pre-open {HOLE_PREOPEN} per console after login, then steer when a sending link finds a hole never opened / host silent >{HOLE_DEAD_S:.0f}s (budget {HOLE_BUDGET}); opened holes kept warm by {len(HOLE_KEEPALIVE_PAYLOAD)}B keepalives every {HOLE_KEEPALIVE_S:.0f}s")
     elif RELAY_ALT_HOST_PORTS:
         log(f"  ALT-SOCKET mode: links delivered from 45000 to host sockets 3658 then {RELAY_ALT_HOST_PORTS} (external ports learned from each socket's pings); no steering")
     else:
@@ -793,6 +808,9 @@ def main(argv=None) -> int:
         for c in [c for c in CLIENTS if now - c.last_seen > CLIENT_TIMEOUT]:
             CLIENTS.remove(c)
             log(f"expired client {c.addr}:{c.port}")
+            if not any(o.addr == c.addr for o in CLIENTS) and c.addr not in RELAY_HOSTS:
+                for d in (HOST_TRAFFIC, HOST_EXT, HOST_EXT_LOCK, RELAY_TRAFFIC, KA_STATE):
+                    d.pop(c.addr, None)
         if RELAY_HOSTS:
             relay_expire(now)
         for s in r:
