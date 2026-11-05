@@ -238,6 +238,11 @@ RELAY_MAP: dict = {}        # joiner_ip -> {"host": host_ip, "room": ..., "user"
 RELAY_HOSTS: dict = {}      # host_ip -> {"joiner": (ip, port), "sock": relay socket, "rx": n, "tx": n, "last": t, "first": t}
 RELAY_UNMAPPED_LOGGED: set = set()
 RELAY_SNAPSHOT = os.environ.get("SCCT_RELAY_SNAPSHOT", "state/relay_map.json")
+# SCCT_RELAY_DUMP=N: hex-dump the first N datagrams of each direction per host flow (to learn the peer protocol).
+RELAY_DUMP = int(os.environ.get("SCCT_RELAY_DUMP", "0") or 0)
+# SCCT_RELAY_FANOUT_S: the host's replies go to the LAST joiner endpoint that sent; with a value > 0 they also go to
+# every other endpoint of the same joiner IP seen within that many seconds (a client may use two ports for one join).
+RELAY_FANOUT_S = float(os.environ.get("SCCT_RELAY_FANOUT_S", "0") or 0)
 NAT_MAIN_SOCK = None        # the 45000 socket (host-facing side of the relay)
 
 
@@ -336,14 +341,23 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
         return
     host = ent["host"]
     hv = RELAY_HOSTS.get(host)
-    if hv is None or hv["joiner"] != addr or hv["sock"] is not sock:
-        if hv is not None and hv["joiner"][0] != addr[0]:
-            log(f"RELAY host {host}: joiner changes {hv['joiner'][0]} -> {addr[0]} (v1 relays one joiner per host)")
-        hv = {"joiner": addr, "sock": sock, "rx": 0, "tx": 0, "last": now, "first": now}
+    if hv is None:
+        hv = {"joiner": addr, "sock": sock, "rx": 0, "tx": 0, "last": now, "first": now, "eps": {}, "dump_rx": 0, "dump_tx": 0}
         RELAY_HOSTS[host] = hv
-        log(f"RELAY host {host}: joiner {addr[0]}:{addr[1]} via relay port {sock.getsockname()[1]} -> {host}:{RELAY_HOST_PORT} from {NAT_MAIN_SOCK.getsockname()[1]}")
+        log(f"RELAY host {host}: flow opened by {addr[0]}:{addr[1]} via relay port {sock.getsockname()[1]} -> {host}:{RELAY_HOST_PORT} from {NAT_MAIN_SOCK.getsockname()[1]}")
+    elif hv["joiner"] != addr or hv["sock"] is not sock:
+        if hv["joiner"][0] != addr[0]:
+            log(f"RELAY host {host}: joiner IP changes {hv['joiner'][0]} -> {addr[0]} (v1: one joiner per host, replies follow the last sender)")
+        elif addr not in hv["eps"]:
+            log(f"RELAY host {host}: joiner {addr[0]} now also sends from port {addr[1]} (replies follow the last sender)")
+        hv["joiner"] = addr
+        hv["sock"] = sock
+    hv["eps"][addr] = (sock, now)
     hv["rx"] += 1
     hv["last"] = now
+    if RELAY_DUMP and hv["dump_rx"] < RELAY_DUMP:
+        hv["dump_rx"] += 1
+        log(f"RELAY DUMP J->H {addr[0]}:{addr[1]} {len(data)}B: {data[:64].hex(' ')}")
     try:
         NAT_MAIN_SOCK.sendto(data, (host, RELAY_HOST_PORT))
     except OSError as e:
@@ -360,11 +374,25 @@ def relay_from_host(data: bytes, addr: tuple[str, int], now: float) -> bool:
         return False
     hv["tx"] += 1
     hv["last"] = now
+    if RELAY_DUMP and hv["dump_tx"] < RELAY_DUMP:
+        hv["dump_tx"] += 1
+        log(f"RELAY DUMP H->J {addr[0]}:{addr[1]} {len(data)}B: {data[:64].hex(' ')}")
     try:
         hv["sock"].sendto(data, hv["joiner"])
     except OSError as e:
         log(f"RELAY -> joiner {hv['joiner']} send failed: {e}")
         return True
+    if RELAY_FANOUT_S > 0:
+        for ep, (esock, et) in list(hv["eps"].items()):
+            if ep == hv["joiner"] or ep[0] != hv["joiner"][0]:
+                continue
+            if now - et > RELAY_FANOUT_S:
+                hv["eps"].pop(ep, None)
+                continue
+            try:
+                esock.sendto(data, ep)
+            except OSError:
+                pass
     if hv["tx"] in (1, 2, 5, 10, 50) or hv["tx"] % 500 == 0:
         log(f"RELAY H->J {addr[0]}:{addr[1]} -> {hv['joiner'][0]}:{hv['joiner'][1]} {len(data)}B (#{hv['tx']}) from :{hv['sock'].getsockname()[1]}")
     return True
@@ -439,7 +467,7 @@ def main(argv=None) -> int:
     log(f"  bind: {args.bind}  ports: {', '.join(str(p) for p in ports)}")
     log(f"  ubi-gs modules: {NEW_UBIGS}")
     if RELAY_PORTS:
-        log(f"  RELAY: joiner ports {', '.join(str(p) for p in RELAY_PORTS)} -> host:{RELAY_HOST_PORT} from :{socks[NAT_MAIN_SOCK]}; control 127.0.0.1:{RELAY_CTRL_PORT}; idle {RELAY_IDLE_S:.0f}s")
+        log(f"  RELAY: joiner ports {', '.join(str(p) for p in RELAY_PORTS)} -> host:{RELAY_HOST_PORT} from :{socks[NAT_MAIN_SOCK]}; control 127.0.0.1:{RELAY_CTRL_PORT}; idle {RELAY_IDLE_S:.0f}s; dump {RELAY_DUMP} pkts/dir; fanout {RELAY_FANOUT_S:.0f}s")
     else:
         log("  RELAY: off")
     all_socks = list(socks) + list(relay_socks) + ([ctrl_sock] if ctrl_sock is not None else [])
