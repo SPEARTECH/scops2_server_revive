@@ -322,6 +322,11 @@ HOLE_KEEPALIVE_S = float(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE_S", "45"))
 HOLE_KEEPALIVE_PAYLOAD = bytes.fromhex(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE_HEX", "0000"))  # 2 B (some routers drop empty UDP)
 # Dead-hole rule: a joiner link is sending through a hole but the host has been silent on it for this long -> steer.
 HOLE_DEAD_S = float(os.environ.get("SCCT_RELAY_HOLE_DEAD_S", "15"))
+# A hole the host STOPPED pinging is still open on the host's NAT until the mapping expires (~60 s of no host traffic).
+# So a new joiner link can REUSE a hole the host sent through up to this long ago with no steer: the first reply the host
+# sends refreshes it. Wider than HOLE_DEAD_S (which is only about when to give up and steer) - this is what lets 3 joiners
+# whose NATs churn ports every match keep going without a steer per joiner per match (2026-11-05 20:40 4-player session).
+HOLE_REUSE_S = float(os.environ.get("SCCT_RELAY_HOLE_REUSE_S", "50"))
 # Pre-open this many holes per console right after login (one per ping cycle, each confirmed by its ping before the
 # next steer) and keep them warm with keepalives, so joiners' room and game links find open holes immediately.
 HOLE_PREOPEN = int(os.environ.get("SCCT_RELAY_HOLE_PREOPEN", "1"))   # (informational; one spare hole is kept ready)
@@ -649,6 +654,10 @@ def hole_steering(now: float) -> None:
                     if port not in traffic:
                         dead.append((1e9, port, ep))   # never opened: steer at once
                     elif now - traffic.get(port, 0.0) > HOLE_DEAD_S and now - since.get(port, now) > HOLE_DEAD_S:
+                        # A link that is actively sending but getting no host reply needs prompt rescue: if the host has
+                        # been silent on its hole longer than HOLE_DEAD_S the mapping has really gone, so steer now. (At
+                        # allocation we already prefer reusing a hole that is still open, so a healthy reuse never reaches
+                        # here - the host's reply refreshes its traffic within HOLE_DEAD_S.)
                         dead.append((now - traffic.get(port, 0.0), port, ep))
                 if dead:
                     age, target, ep = max(dead)
@@ -664,7 +673,7 @@ def hole_steering(now: float) -> None:
                     return all(e not in hv["eps"] or now - hv["eps"][e][1] > LINK_IDLE_S
                                for e in src_map if src_map[e] == pt)
                 have_ready = any(
-                    (pt == clt.hole_target or (traffic.get(pt, 0.0) > 0 and now - traffic.get(pt, 0.0) < HOLE_DEAD_S))
+                    (pt == clt.hole_target or (traffic.get(pt, 0.0) > 0 and now - traffic.get(pt, 0.0) < HOLE_REUSE_S))
                     and (pt not in assigned or all_idle(pt))
                     for pt in RELAY_HOLES)
                 if clt.hole_target in assigned and not all_idle(clt.hole_target) and not have_ready:
@@ -813,7 +822,7 @@ def pick_hole_port(hv: dict, ep, now: float, prev_t=None, host: str = None) -> i
             if not all_idle(pt):
                 continue
             is_ping = target == pt
-            host_open = traffic.get(pt, 0.0) > 0 and now - traffic.get(pt, 0.0) < HOLE_DEAD_S
+            host_open = traffic.get(pt, 0.0) > 0 and now - traffic.get(pt, 0.0) < HOLE_REUSE_S
             if is_ping or host_open:
                 reusable.append((is_ping, traffic.get(pt, 0.0), pt))
         if reusable:
