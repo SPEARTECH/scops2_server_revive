@@ -319,7 +319,7 @@ HOLE_KEEPALIVE_PAYLOAD = bytes.fromhex(os.environ.get("SCCT_RELAY_HOLE_KEEPALIVE
 HOLE_DEAD_S = float(os.environ.get("SCCT_RELAY_HOLE_DEAD_S", "15"))
 # Pre-open this many holes per console right after login (one per ping cycle, each confirmed by its ping before the
 # next steer) and keep them warm with keepalives, so joiners' room and game links find open holes immediately.
-HOLE_PREOPEN = int(os.environ.get("SCCT_RELAY_HOLE_PREOPEN", "6"))
+HOLE_PREOPEN = int(os.environ.get("SCCT_RELAY_HOLE_PREOPEN", "1"))   # (informational; one spare hole is kept ready)
 RELAY_TRAFFIC: dict = {}    # host ip -> {hole port: time of the last datagram the relay sent through it (joiner data or keepalive)}
 KA_STATE: dict = {}         # keepalive counters for consoles that have no joiner flow yet (pre-opened holes)
 LINK_SUMMARY_S = float(os.environ.get("SCCT_RELAY_LINK_SUMMARY_S", "30"))   # per-link activity summary interval (0 = off)
@@ -443,6 +443,8 @@ def reset_joiner(j: str, why: str) -> None:
             hv.get("ep_rx", {}).pop(e, None)
             hv.get("hports", {}).pop(e, None)
             hv.get("src_logged", {}).pop(e, None)
+            hv.get("probe", set()).discard(e)
+            hv.get("first_seen", {}).pop(e, None)
             n += 1
         if hv["joiner"][0] == j and eps:
             hv["joiner"] = eps[0]   # stale, replaced by the next packet
@@ -491,11 +493,8 @@ def relay_from_joiner(sock: socket.socket, data: bytes, addr: tuple[str, int], n
     src_sock, src_port = NAT_MAIN_SOCK, NAT_MAIN_SOCK.getsockname()[1]
     if RELAY_HOLES:
         hport = RELAY_HOST_PORT
-        src_port = pick_hole_port(hv, addr, now, prev_t)
+        src_port = pick_hole_port(hv, addr, now, prev_t, host)
         src_sock = HOLE_SOCKS[src_port]
-        if hv.get("src_logged", {}).get(addr) != src_port:
-            hv.setdefault("src_logged", {})[addr] = src_port
-            log(f"RELAY host {host}: joiner link {addr[0]}:{addr[1]} <-> host:{hport} via hole port {src_port}")
     hv.setdefault("ep_rx", {})[addr] = hv.setdefault("ep_rx", {}).get(addr, 0) + 1
     if RELAY_HOLES:
         ext = HOST_EXT.get(host, {})
@@ -609,9 +608,10 @@ def relay_expire(now: float) -> None:
 
 
 def hole_steering(now: float) -> None:
-    """Multi-hole mode. A steer (unsolicited PORT_ID for socket 1) is sent only (a) once after login, to open the first
-    hole, and (b) when a joiner link is sending through a hole on which the host has been silent for HOLE_DEAD_S (the hole
-    was never opened or has expired). Holes that carried traffic both ways are kept open by relay keepalives instead."""
+    """Multi-hole mode. A steer (unsolicited PORT_ID for socket 1) is sent (a) once after login, to open the first hole,
+    (b) when a joiner link is sending through a hole on which the host has been silent for HOLE_DEAD_S (never opened or
+    expired), and (c) when the hole the console currently pings has been taken by a joiner link, to open the next spare.
+    The console keeps only the hole it pings; established links keep theirs with their own traffic."""
     main = NAT_MAIN_SOCK
     for clt in list(CLIENTS):
         msg = getattr(clt, "hole_msg", None)
@@ -648,12 +648,15 @@ def hole_steering(now: float) -> None:
                 if dead:
                     age, target, ep = max(dead)
                     why = f"link {ep[0]}:{ep[1]} sending, host silent on {target} " + ("(never opened)" if age >= 1e9 else f"for {age:.0f}s")
-            if target is None and confirmed:
-                opened = [p for p in RELAY_HOLES if p in traffic]
-                if len(opened) < HOLE_PREOPEN:
-                    nxt = [p for p in RELAY_HOLES if p not in traffic]
+            if target is None and confirmed and hv is not None:
+                # keep one spare: the hole the console pings is the only one its NAT keeps open, so once a joiner link
+                # has taken it, move the console's pings to the next unassigned hole for the next link
+                assigned = set(hv.get("src", {}).values())
+                if clt.hole_target in assigned:
+                    nxt = [p for p in RELAY_HOLES if p not in assigned]
                     if nxt:
-                        target, why = nxt[0], f"pre-open {len(opened) + 1}/{HOLE_PREOPEN}"
+                        target = min(nxt, key=lambda p: traffic.get(p, 0.0))
+                        why = f"spare: hole {clt.hole_target} now carries a joiner link"
         if target is None:
             continue
         try:
@@ -732,12 +735,68 @@ def pick_slot(hv: dict, ep, now: float, prev_t, nslots: int) -> int:
     return slot
 
 
-def pick_hole_port(hv: dict, ep, now: float, prev_t=None) -> int:
-    """Source hole port for a joiner endpoint: slot allocation (see pick_slot) mapped onto RELAY_HOLES."""
+def host_nat_client(host: str):
+    """The NatClient (SRP session on 10070) of a relayed host console, if it is logged in."""
+    for c in CLIENTS:
+        if c.addr == host and getattr(c, "hole_msg", None) is not None:
+            return c
+    return None
+
+
+def pick_hole_port(hv: dict, ep, now: float, prev_t=None, host: str = None) -> int:
+    """Source hole port for a joiner endpoint (ip, port).
+
+    Facts this is built on (2026-11-05): the host's NAT keeps a hole only while the HOST sends through it - its 3658 socket
+    pings exactly one hole (the last PORT_ID target) every 25 s, and a hole it stopped pinging is gone after ~60 s; the
+    relay's inbound keepalives do not refresh it. A steer (PORT_ID) costs budget (~10 per login) and takes effect at the
+    console's next ping, up to 25 s later. A link that the host answers keeps its own hole open with its game traffic.
+
+    So: one hole per endpoint for good (the host keys the peer by (ip, port) and never sees it move), a new endpoint takes
+    the READY hole (the one the host is pinging right now, unassigned), after which hole_steering steers the console to the
+    next spare. Exceptions: a joiner's second link right behind its join probe shares the probe's hole (the host copes with
+    the two from one source; this keeps the spare for the next joiner and saves a steer), and the probe's port, when the
+    client reuses it later for another link, gets a hole of its own again."""
     src = hv.setdefault("src", {})
-    slot = pick_slot(hv, ep, now, prev_t, len(RELAY_HOLES))
-    port = RELAY_HOLES[slot]
+    probes = hv.setdefault("probe", set())
+    first = hv.setdefault("first_seen", {})
+    traffic = HOST_TRAFFIC.get(host, {}) if host else {}
+    if ep in src:
+        if ep in probes and prev_t is not None and now - prev_t > LINK_IDLE_S:
+            old = src.pop(ep)
+            probes.discard(ep)
+            log(f"RELAY host {host}: join-probe port {ep[0]}:{ep[1]} reused after {now - prev_t:.0f}s idle; leaves shared hole {old} for one of its own")
+        else:
+            return src[ep]
+    first[ep] = now
+    assigned = set(src.values())
+    clt = host_nat_client(host) if host else None
+    target = clt.hole_target if clt is not None else None
+    ready = target is not None and target not in assigned and traffic.get(target, 0.0) >= clt.hole_last
+    port, why = None, ""
+    # same joiner, second link within 3 s of its join probe (which has sent only a couple of packets): share the probe's hole
+    for e, p in src.items():
+        if e[0] == ep[0] and e not in probes and now - first.get(e, 0.0) <= 3.0 and hv.get("ep_rx", {}).get(e, 0) <= 4 \
+                and list(src.values()).count(p) == 1 and traffic.get(p, 0.0) > 0:
+            port, why = p, f"shares the hole of join probe {e[0]}:{e[1]}"
+            probes.add(e)
+            break
+    if port is None and ready:
+        port, why = target, "ready: the host is pinging it"
+    elif port is None and target is not None and target not in assigned:
+        port, why = target, f"steered {now - clt.hole_last:.0f}s ago, waiting for the host's ping"
+    elif port is None:
+        free = [p for p in RELAY_HOLES if p not in assigned]
+        if free:
+            port = min(free, key=lambda p: traffic.get(p, 0.0))
+            why = "free hole, needs a steer" + (" (never pinged)" if port not in traffic else f" (host silent {now - traffic[port]:.0f}s)")
+        else:
+            lru = min(src, key=lambda e: hv["eps"][e][1] if e in hv["eps"] else 0.0)
+            port = src.pop(lru)
+            probes.discard(lru)
+            idle = now - hv["eps"][lru][1] if lru in hv["eps"] else 0.0
+            why = f"all {len(RELAY_HOLES)} holes in use, taken over from {lru[0]}:{lru[1]} (idle {idle:.0f}s)"
     src[ep] = port
+    log(f"RELAY host {host}: joiner link {ep[0]}:{ep[1]} <-> host:{RELAY_HOST_PORT} via hole port {port} ({why})")
     return port
 
 
@@ -819,7 +878,7 @@ def main(argv=None) -> int:
     if NAT_EXTRA_PORTID and not RELAY_HOLES:
         log(f"  EXTRA PORT_ID experiment: socket 1 also told to ping {NAT_EXTRA_PORTID} (these ports must be in --ports)")
     if RELAY_HOLES:
-        log(f"  MULTI-HOLE: {len(RELAY_HOLES)} holes; pre-open {HOLE_PREOPEN} per console after login, then steer when a sending link finds a hole never opened / host silent >{HOLE_DEAD_S:.0f}s (budget {HOLE_BUDGET}); opened holes kept warm by {len(HOLE_KEEPALIVE_PAYLOAD)}B keepalives every {HOLE_KEEPALIVE_S:.0f}s")
+        log(f"  MULTI-HOLE: {len(RELAY_HOLES)} holes; one hole per joiner endpoint; the console pings one spare hole, a new link takes it and the next spare is steered; steer also when a sending link finds a hole never opened / host silent >{HOLE_DEAD_S:.0f}s (budget {HOLE_BUDGET}); {len(HOLE_KEEPALIVE_PAYLOAD)}B keepalives every {HOLE_KEEPALIVE_S:.0f}s")
     elif RELAY_ALT_HOST_PORTS:
         log(f"  ALT-SOCKET mode: links delivered from 45000 to host sockets 3658 then {RELAY_ALT_HOST_PORTS} (external ports learned from each socket's pings); no steering")
     else:
