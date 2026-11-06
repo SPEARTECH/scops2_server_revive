@@ -8,7 +8,7 @@ This fork adds fixes for the lobby and room list so that real PS2 consoles and P
 
 ## Status
 
-> **Playing over the internet requires port forwarding on your router.** See [Port forwarding is required](#port-forwarding-is-required-for-internet-play). Playing on one LAN needs none.
+> **Internet play needs one of two things for whoever hosts a room:** the server's **UDP relay** (`SCCT_RELAY=1`, no router setup, see [UDP relay](#internet-play-without-port-forwarding-udp-relay)) **or port forwarding** on the host's router (see [Port forwarding](#port-forwarding-direct-internet-play)). Players who only *join* never need either. Playing on one LAN needs neither.
 
 Tested on a LAN with real PS2 consoles (via OPL, and with the original disc) and up to three PCSX2 clients (full 2v2 matches, including ranked ones with PCSX2). Working:
 
@@ -28,13 +28,49 @@ Tested on a LAN with real PS2 consoles (via OPL, and with the original disc) and
 - **Live lobby player count:** the number on the Lobby Selection screen updates while you look at it
 - **Dead rooms disappear:** when a host's connection drops, their room is removed from everyone's list within a few seconds
 
-**Internet play (tested):** with the server on a home PC and a real PS2 on another network (and PCSX2 on the server's network), players joined each other's rooms in both directions, played unranked 1v1 matches to the end (Cinema and Station Sabotage), and joined through the Games List, the friend list and game invites. See "Port forwarding is required" below and "Hosting from a home PC".
+**Internet play (tested):** with the server on a home PC and a real PS2 on another network (and PCSX2 on the server's network), players joined each other's rooms in both directions, played unranked 1v1 matches to the end (Cinema and Station Sabotage), and joined through the Games List, the friend list and game invites. See "Port forwarding" below and "Hosting from a home PC".
 
-Not tested or not supported yet: ranked matches over the internet and ranked 2v2 on the original disc (only unranked "Free" matches were played; unranked games record no stats), 4-player games over the internet, a PCSX2 joiner on a different network, Quick Join on the original disc, a PAL disc, full-room refusal, disconnect/quit penalties in ranked matches, ignore lists and friend-request approval.
+**Internet play on a VPS (tested, Nov 2026):** the server runs on a Windows VPS (Servarica) with its public IP as the game DNS. A stock PS2 and PCSX2 on different networks logged in, played unranked 1v1 and 2v2 rooms in both directions, and with the relay on, hosts needed no port forwarding. The relay has known limits, see below.
 
-## Port forwarding is required for internet play
+Not tested or not supported yet: ranked matches over the internet and ranked 2v2 on the original disc (only unranked "Free" matches were played; unranked games record no stats), reliable long 4-player sessions through the relay (see relay limits), a PCSX2 joiner on a different network, Quick Join on the original disc, a PAL disc, full-room refusal, disconnect/quit penalties in ranked matches, ignore lists and friend-request approval.
 
-**Nobody outside your home network can connect unless you forward ports on your router.** This is the single most common reason an internet test fails. Playing on one LAN needs no forwarding at all; everything below is only for players on other networks.
+## Internet play without port forwarding (UDP relay)
+
+Game traffic between players is peer to peer: the joiner sends UDP to the host on 3658 and 10070-10080. Normally the **host** must forward those ports. With the relay, the server sits in the middle so the host needs **no router setup**.
+
+How it works (details and test notes in [docs/RELAY.md](docs/RELAY.md)):
+
+1. When a player outside the server's network creates a room, the room is advertised with the **server's public address** instead of the host's.
+2. Joiners therefore send their game packets to the server on UDP 3658 and 10070-10080.
+3. The host's console keeps a NAT "ping" open to the server on UDP 45000. The relay forwards joiner datagrams to the host through that hole and sends the host's replies back to the joiner.
+4. A console has only one 3658 socket, so with several joiners the relay steers it between **holes** 45001-45012 using PORT_ID messages. The lobby server tells the relay who joined which room (loopback control port `127.0.0.1:45099`, never exposed).
+
+Turn it on in `run_public_test.bat` (already set there):
+
+| Variable | Purpose |
+|---|---|
+| `SCCT_RELAY=1` | enable the relay (needs the NAT v2 responder, enabled automatically) |
+| `SCCT_PUBLIC_IP=<server public IP>` | address advertised to joiners (`SCCT_RELAY_IP` overrides it) |
+| `SCCT_RELAY_HOLES=45001,...,45012` | holes used to steer the host's 3658 socket |
+| `SCCT_RELAY_DUMP=0` | hex-dump N packets per flow for debugging. Leave at 0 in normal use; it grows the log and records traffic |
+| `SCCT_RELAY_UNMAP_ON_LEAVE`, `SCCT_RELAY_RESET_ON_JOINER_LEAVE` | forget links when a player leaves the room |
+| `SCCT_AUTO_REGISTER=1` | create an account on first login (off by default; anyone could then create accounts) |
+
+Open these on the **server's** firewall: UDP 3658, 10070-10080, 45000-45012 (`open_ports.ps1` does it). Relayed traffic goes through the server, so check your VPS bandwidth allowance.
+
+**Known limits**
+
+- **A host can be steered only about 11 times per login.** After that its console ignores further PORT_IDs, and new joiners get a link that never answers (they send, nothing comes back). Joiners that leave and rejoin repeatedly use up steers fast. Workaround: the host fully logs out of the online lobby (or restarts the console) between sessions. A fix that reuses a rejoining player's hole is planned.
+- Joiners should arrive about 30 seconds apart.
+- Two players behind the same public IP are not supported through the relay.
+- The log can fill with "joiner IP changes" lines during multi-joiner sessions; rotate logs.
+- `tools/nat_check/` has small probes (`nat_type_probe.py`, `udp_dmz_listen.py`, `udp_dmz_send.py`) to test what kind of NAT a player has.
+
+## Port forwarding (direct internet play)
+
+If you run **without the relay**, or want the lowest latency, hosts forward the game ports instead. With the relay on, only the server needs these ports; room hosts do not.
+
+**Without the relay, nobody outside your home network can join a room you host unless you forward ports on your router.** This is the most common reason a direct internet test fails. Playing on one LAN needs no forwarding at all; everything below is only for players on other networks.
 
 Do this on the router of **whoever runs the server** and on the router of **whoever hosts a room** (they can be different people):
 
@@ -44,6 +80,7 @@ Do this on the router of **whoever runs the server** and on the router of **whoe
 | Server host | the server PC | **UDP** 53, 45000-45003 |
 | Whoever hosts a room (a console or PCSX2) | that console or PCSX2's own LAN IP | **UDP** 3658 and 10070-10080 |
 
+- Find your own gateway with `ipconfig` (Default Gateway) and use it for PCSX2 and for the router page; do not assume 192.168.1.1.
 - Only one machine on a network can receive the game ports (UDP 3658, 10070-10080) at a time, so only one player per household can host. A player who only **joins** a room does not need to forward anything on their own router.
 - Do not rely on UPnP, and do not use the router's DMZ (it exposes every port on the PC). Forward exactly the ports above.
 - A console plugged straight into the modem (no router) needs no forwarding.
@@ -292,9 +329,18 @@ Start the server with `run_public_test.bat` (copy it, put your public IP in `SCC
 | `SCCT_PUBLIC_IP=<your public IP>` | outside clients get this address (DNS answers, gsinit, router and lobby replies, and a LAN-hosted room's address) instead of the LAN one; DNS for outside clients is answer-only (everything else is refused) |
 | `SCCT_NAT_PUBLIC_ADDR=1` | the NAT service reports the public address for LAN players, so rooms hosted on the LAN can be joined from outside; LAN players then reach each other through the router (NAT loopback), so leave it off for pure LAN sessions |
 
-The port forwards are listed in "Port forwarding is required" near the top.
+The port forwards are listed in "Port forwarding" near the top.
 
 **PCSX2 players:** if your PCSX2 adapter has no gateway, a console on it can't send packets off the local network, and internet joins time out with "The game is no longer available" (see the PCSX2 note under Connecting clients).
+
+## Hosting on a VPS (tested)
+
+The server has been run on a **Windows VPS** (Servarica, 38.49.212.120) with this address as the game DNS for the console and PCSX2. Notes from that setup:
+
+- Install Python 3 (tick "Add to PATH"). The DNAS answer is the Go program `dnasrep.exe` (in `dnasrep_test\`), so **OpenSSL is not needed**: with `SCCT_DNAS_EXTERNAL=1` the start script skips the OpenSSL check and certificate step.
+- Run `SCOPS Server.bat` (it asks for administrator rights) and choose **Internet**. Edit `HostIP`/public IP to the VPS address first, and run `open_ports.ps1` once for the Windows firewall. Also open the same ports in the VPS provider's panel.
+- Keep `state/users.json` and logs out of git (see `.gitignore`). Passwords are stored in plain text.
+- For unattended running, use a scheduled task that starts the launcher at boot. A weekly reboot is optional.
 
 ## Hosting on the Internet
 
@@ -304,16 +350,19 @@ A small VPS (1 vCPU, 1–2 GB RAM) is enough for the Python services. Internet p
 - The NAT service reports the address it observes (or the public IP with `SCCT_NAT_PUBLIC_ADDR=1` for LAN players). A real PS2 behind a different network reaching a PCSX2 host worked in the home test; two consoles both behind home routers have not been tried.
 - DNS for outside clients is answer-only: it answers the game's override hostnames and refuses everything else, so it is not an open resolver. Bots still probe ports 53 and 80 within hours.
 - `state/users.json` stores passwords in plain text. Hash them (or at least keep the file private and out of git) before the server is public.
-- Open only the ports listed under "Port forwarding is required". Don't use a router DMZ.
+- Open only the ports listed under "Port forwarding". Don't use a router DMZ.
 - Trim or rotate logs, since they contain players' IP addresses.
-- Players who host rooms need UDP 3658 and 10070-10080 forwarded on their own router (see "Port forwarding is required").
+- Players who host rooms need UDP 3658 and 10070-10080 forwarded on their own router, unless the relay is on (see "UDP relay" and "Port forwarding").
 
 ## Repository layout
 
 ```
 tools/ubigs_router_wm_server.py   lobby / wait-module server (main file)
 tools/ubigs_router_server.py      router (port 40000), optional KE1 variant
-tools/nat2/udp_reply_server.py    NAT service on UDP 45000+ (even-length replies)
+tools/nat2/udp_reply_server.py    NAT service on UDP 45000+ (even-length replies) and the UDP relay
+tools/nat_check/                  NAT type probes for the relay design
+open_ports.ps1                    adds the Windows firewall rules for the server and relay
+docs/RELAY.md                     relay design, test log and limits
 tools/net_utils.py                LAN/outside client checks and public-IP selection (SCCT_PUBLIC_IP)
 tools/dns_override_forwarder.py   DNS overrides (LAN-only by default)
 tools/gs_http_server.py           gsinit HTTP server (LAN-only by default)
