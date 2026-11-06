@@ -654,14 +654,24 @@ def hole_steering(now: float) -> None:
                     age, target, ep = max(dead)
                     why = f"link {ep[0]}:{ep[1]} sending, host silent on {target} " + ("(never opened)" if age >= 1e9 else f"for {age:.0f}s")
             if target is None and confirmed and hv is not None:
-                # keep one spare: the hole the console pings is the only one its NAT keeps open, so once a joiner link
-                # has taken it, move the console's pings to the next unassigned hole for the next link
-                assigned = set(hv.get("src", {}).values())
-                if clt.hole_target in assigned:
+                # Keep one spare hole the console pings, so the next NEW joiner link gets an instant reply. But steer
+                # only when no already-open hole could serve that link, because every steer spends the console's scarce
+                # budget (~11 per login). An open hole (host pinging it, or host sent <HOLE_DEAD_S ago) whose occupants
+                # are all idle is reusable with no steer - so during a lobby/rematch lull there is no need to steer.
+                src_map = hv.get("src", {})
+                assigned = set(src_map.values())
+                def all_idle(pt):
+                    return all(e not in hv["eps"] or now - hv["eps"][e][1] > LINK_IDLE_S
+                               for e in src_map if src_map[e] == pt)
+                have_ready = any(
+                    (pt == clt.hole_target or (traffic.get(pt, 0.0) > 0 and now - traffic.get(pt, 0.0) < HOLE_DEAD_S))
+                    and (pt not in assigned or all_idle(pt))
+                    for pt in RELAY_HOLES)
+                if clt.hole_target in assigned and not all_idle(clt.hole_target) and not have_ready:
                     nxt = [p for p in RELAY_HOLES if p not in assigned]
                     if nxt:
                         target = min(nxt, key=lambda p: traffic.get(p, 0.0))
-                        why = f"spare: hole {clt.hole_target} now carries a joiner link"
+                        why = f"spare: hole {clt.hole_target} now carries a live link and no open hole is free"
         if target is None:
             continue
         try:
@@ -786,10 +796,35 @@ def pick_hole_port(hv: dict, ep, now: float, prev_t=None, host: str = None) -> i
             probes.add(e)
             break
     if port is None and ready:
-        port, why = target, "ready: the host is pinging it"
-    elif port is None and target is not None and target not in assigned:
+        port, why = target, "ready: the host is pinging it (unassigned)"
+    if port is None:
+        # Reuse an already-OPEN hole whose occupants are all idle, with no steer. A hole the host is pinging now
+        # (clt.hole_target) or has sent through within HOLE_DEAD_S is open on the host NAT; if the link(s) assigned to
+        # it have gone quiet (everyone back in the lobby for a rematch, or an old match link finished) a new link can
+        # take it and the host answers at once - sequential links on one hole do not collide (routing follows the last
+        # sender). This is what lets a long session keep going past the console's ~11-steer ceiling: rematches land on
+        # holes that are already open instead of each demanding a fresh steer the console will eventually ignore.
+        def occupants(pt):
+            return [e for e in src if src[e] == pt and e != ep]
+        def all_idle(pt):
+            return all(e not in hv["eps"] or now - hv["eps"][e][1] > LINK_IDLE_S for e in occupants(pt))
+        reusable = []
+        for pt in RELAY_HOLES:
+            if not all_idle(pt):
+                continue
+            is_ping = target == pt
+            host_open = traffic.get(pt, 0.0) > 0 and now - traffic.get(pt, 0.0) < HOLE_DEAD_S
+            if is_ping or host_open:
+                reusable.append((is_ping, traffic.get(pt, 0.0), pt))
+        if reusable:
+            reusable.sort(reverse=True)   # prefer the ping target, then the most recently open
+            port = reusable[0][2]
+            for e in occupants(port):      # drop the stale idle occupant(s); the new link owns the hole now
+                src.pop(e, None); probes.discard(e)
+            why = "reuses open hole the host is pinging" if reusable[0][0] else f"reuses open hole (host sent {now - reusable[0][1]:.0f}s ago)"
+    if port is None and target is not None and target not in assigned:
         port, why = target, f"steered {now - clt.hole_last:.0f}s ago, waiting for the host's ping"
-    elif port is None:
+    if port is None:
         free = [p for p in RELAY_HOLES if p not in assigned]
         if free:
             port = min(free, key=lambda p: traffic.get(p, 0.0))
