@@ -93,3 +93,35 @@ same-LAN sessions.
 - Genuine 4-player: host SNK + joiners SNAKE, DORDOR-SLIM, COOLDOR - ALL THREE behind symmetric NATs (Windows ICS / VPN) that hand each link a fresh external port every match. Three LIVE joiners cannot share holes, so each match-transition needed fresh holes for three new ports. The deployed build (15 s reuse window) could not reuse holes across the lobby lull and burned steers to #14; past the ~11 console ceiling, 45012 (DORDOR 62841) and SNAKE reopens never got a host ping, so those links got no replies - DORDOR-SLIM socket 10072 sent steadily with zero inbound (pcap), SNAKE kicked on the revenge switch.
 - Fixes: (1) HOLE_REUSE_S=50 s - a hole the host sent through up to ~50 s ago is still open on the host NAT, so a new link reuses it with no steer and the host reply refreshes it; this is what lets churning-NAT joiners rematch without a steer each. (2) the lazy spare and dead-hole steer use this wider window so a reused-but-stale hole is not needlessly re-steered. Dead-hole steer still fires at HOLE_DEAD_S as the fallback when a reuse bet fails (mapping really expired).
 - Tick-level sim (models the ~60 s host-NAT mapping life): 2/3/4 churning joiners with prompt rematches (<~45 s lulls) -> 0 failed joins; 4 stable-NAT joiners -> 5 steers, 0 fails; BUT long lobby waits (>~50 s) let the holes die and churning NATs then fail (steers exhausted). Guidance: rematch promptly; the lasting cure for many-player churn is stable joiner NATs (no Windows ICS).
+
+## Healthy-session baseline (2026-11-06 00:36-01:30, rooms 104-119)
+
+Reference for what a good session looks like. Host 24.68.117.253 (PCSX2, fully port-forwarded); joiner on
+stable PS2 sockets 10071/10072/10073 (no VPN, no port churn). ~11 rooms = 11 map changes / rematches / team
+swaps over ~50 minutes, zero drops.
+
+Signature of a HEALTHY session (check with `tools/nat2/relay_health.py`):
+- Total steers in the low single digits per host (here: port-forwarded host = 2 steers total), never near the
+  console's ~11-per-login ceiling.
+- Each joiner socket (10071/10072/10073) keeps ONE hole (45001/45002/45003) and reuses it across every room -
+  the mapping is stable, not re-allocated per map change.
+- Every hole carries traffic BOTH ways (`RELAY J->H` and `RELAY H->J` on the same hole). No socket sends for
+  tens of seconds with no reply.
+- No `needs a steer` / `waiting for the host's ping` lines that are not promptly followed by a host ping.
+- `reuses open hole ...` on rematch/map-change links (the 50 s reuse window doing its job).
+
+Signature of a FAILING session (e.g. 2026-11-05 20:40, SNK hard-NAT host + 3 ProtonVPN/ICS joiners):
+- Steers climb toward / past 11 in a single room; `HOLE budget` / `near the steer budget` lines.
+- A joiner's external port CHANGES every socket/map (628xx incrementing = symmetric NAT: Windows ICS or VPN).
+- `free hole, needs a steer` or `waiting for the host's ping` with no host ping after it -> that link is dead
+  (joiner keeps sending, host never answers), player gets "no longer available".
+
+What makes a session healthy, in order of leverage:
+1. HOST on a clean / port-forwarded / DMZ connection with no VPN. A clean host needs ~1 steer total; a
+   symmetric-NAT host (SNK's hard NAT, or an ICS box hosting) is the worst case (~90 steers observed).
+2. JOINERS without a port-churning NAT (no ProtonVPN, no Windows ICS). Stable sockets => one hole each, reused.
+3. Prompt rematches (< ~45 s in the lobby) so holes stay inside the ~50 s NAT-mapping window and are reused
+   with no steer.
+
+Quick check of any pulled log:
+    python3 tools/nat2/relay_health.py logs/udp_45000_reply.log 00:36 01:30
