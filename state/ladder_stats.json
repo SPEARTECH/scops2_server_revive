@@ -1003,5 +1003,20 @@
   "SEN_GAMES": 0,
   "SEN_WON": 0,
   "SEN_TIME": 0
+ },
+ "SNAKE": {
+  "GEN_LEVEL": 1,
+  "GEN_SCORE": 0,
+  "GEN_GAMES": 0,
+  "GEN_WON": 0,
+  "GEN_TIME": 0,
+  "SPY_SCORE": 0,
+  "SPY_GAMES": 0,
+  "SPY_WON": 0,
+  "SPY_TIME": 0,
+  "SEN_SCORE": 0,
+  "SEN_GAMES": 0,
+  "SEN_WON": 0,
+  "SEN_TIME": 0
  }
 }

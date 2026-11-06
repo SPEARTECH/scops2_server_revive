@@ -939,3 +939,26 @@ GS HTTP server listening
 [2026-11-05 15:10:21.760] HTTP 24.69.254.96:62741  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=DORDOR-SLIM
   q[dp] = 'SPLINTERCELL3PS2US'
   q[user] = 'DORDOR-SLIM'
+GS HTTP server listening
+  bind:  0.0.0.0:80
+  file:  gsinit_diag_localweb.php
+  web:   webroot
+  log:   logs\gs_http_80.log
+  ctrl+c to stop
+[2026-11-05 19:08:47.590] HTTP 38.27.30.232:61844  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=SNK
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'SNK'
+[2026-11-05 19:10:04.411] HTTP 24.69.254.96:62753  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=DORDOR-SLIM
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'DORDOR-SLIM'
+[2026-11-05 19:12:34.293] HTTP 159.26.103.62:5845  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=COOLDOR
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'COOLDOR'
+[2026-11-05 19:15:40.341] HTTP 159.203.22.146:46658  GET /?
+[2026-11-05 19:15:40.584] HTTP 159.203.22.146:46694  GET /.well-known/security.txt?
+[2026-11-05 19:15:40.585] HTTP 159.203.22.146:46682  GET /robots.txt?
+[2026-11-05 19:15:40.585] HTTP 159.203.22.146:46666  GET /favicon.ico?
+[2026-11-05 19:15:40.691] HTTP 159.203.22.146:46706  GET /security.txt?
+[2026-11-05 19:17:21.078] HTTP 47.17.103.130:53101  GET /gsinit.php?dp=SPLINTERCELL3PS2US&user=noname
+  q[dp] = 'SPLINTERCELL3PS2US'
+  q[user] = 'noname'
