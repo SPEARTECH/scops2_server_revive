@@ -294,7 +294,12 @@ RELAY_HOLES = [int(x) for x in os.environ.get("SCCT_RELAY_HOLES", "").replace(";
 # at most one every SCCT_RELAY_HOLE_MIN_S seconds per console. Typical session: login, game link, match start, match end.
 # A consumer (Linux conntrack) router keeps an established UDP 5-tuple ~180 s; refresh a needed hole after this much idle.
 HOLE_STALE_S = float(os.environ.get("SCCT_RELAY_HOLE_STALE_S", "100"))
-HOLE_BUDGET = int(os.environ.get("SCCT_RELAY_HOLE_BUDGET", "10"))   # hard cap on steering messages per login
+# Hard cap on steering messages per login. The console acks each PORT_ID over SRP and frees the window, so a SERIALIZED
+# steer (one per confirmed ping / HOLE_MIN_S apart, as hole_steering does) can go well past the old limit of 10: on
+# 2026-11-05 19:xx the console acked 18 segments with no stall and only our self-imposed cap of 10 dropped DORDOR's 11th
+# link. A joiner behind a symmetric NAT (Windows ICS) gets a fresh external port per match, so a long 3-player session
+# needs dozens. The "stops reacting around 11" seen on 2026-11-04 was unserialized steers overflowing the 536 B window.
+HOLE_BUDGET = int(os.environ.get("SCCT_RELAY_HOLE_BUDGET", "40"))
 # Joiner source port -> hole index (the console uses sockets 10071-10073 for its outbound links and reuses each link
 # later - a game link went idle for minutes and came back for a rematch - so the mapping must be permanent).
 HOLE_PORT_BASE = int(os.environ.get("SCCT_RELAY_HOLE_PORT_BASE", "10071"))
@@ -675,7 +680,7 @@ def hole_steering(now: float) -> None:
                 ", ".join(f"{p}: {now - traffic[p]:.0f}s ago" if p in traffic else f"{p}: never" for p in RELAY_HOLES if p in traffic or p == target) +
                 f"; keepalives on {target}: {ka_n}" + (f", last relay send {now - ka_t:.0f}s ago" if ka_t else "") + ")")
             if clt.hole_count >= HOLE_BUDGET - 2:
-                log(f"HOLE WARNING: {clt.addr} has received {clt.hole_count} steering messages (cap {HOLE_BUDGET}; the console stops reacting around 11)")
+                log(f"HOLE WARNING: {clt.addr} is near the steer budget: {clt.hole_count}/{HOLE_BUDGET} this login")
         except Exception as e:
             log(f"HOLE steer failed for {clt.addr}: {e!r}")
         old = [k for k, v in clt.reqs.items() if v.get("extra") and now - v.get("ts", now) > 600]
