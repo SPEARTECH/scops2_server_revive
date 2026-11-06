@@ -1962,3 +1962,52 @@ DNS 47.17.103.130:51021  A gate1.us.dnas.playstation.org
   -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
 DNS 47.17.103.130:51020  A gsconnect.ubisoft.com
   -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS override+forwarder listening
+  listen:   0.0.0.0:53
+  upstream: 1.1.1.1:53
+  overrides:
+    A noname -> 192.168.1.100  ttl=60
+  suffix overrides:
+    A *.dnas.playstation.org -> 192.168.1.100  ttl=60
+    A *.ubisoft.com -> 192.168.1.100  ttl=60
+    A *.gamespy.com -> 192.168.1.100  ttl=60
+    A *.gamespy.net -> 192.168.1.100  ttl=60
+    A *.ubi.com -> 192.168.1.100  ttl=60
+  log:      logs/dns_53.log
+  ctrl+c to stop
+DNS 38.27.30.232:61002  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 38.27.30.232:61001  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS 159.26.103.62:54977  A ipv6.msftconnecttest.com
+  -> REFUSED (outside client, not an override)
+DNS 159.26.103.62:54556  A www.msftconnecttest.com
+  -> REFUSED (outside client, not an override)
+DNS 159.26.103.62:47038  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 24.69.254.96:62821  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 24.69.254.96:62823  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS 159.26.103.62:46369  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS 159.26.103.62:57117  A ipv6.msftconnecttest.com
+  -> REFUSED (outside client, not an override)
+DNS 159.26.103.62:64447  A ipv6.msftconnecttest.com
+  -> REFUSED (outside client, not an override)
+DNS 47.17.103.130:52227  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 47.17.103.130:52226  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
+DNS 159.26.103.62:27961  A ipv6.msftncsi.com
+  -> REFUSED (outside client, not an override)
+DNS 159.26.103.62:52078  A ipv6.msftncsi.com
+  -> REFUSED (outside client, not an override)
+DNS 159.26.103.62:31125  A ipv6.msftncsi.com
+  -> REFUSED (outside client, not an override)
+DNS 159.26.103.62:15666  AAAA dns.msftncsi.com
+  -> REFUSED (outside client, not an override)
+DNS 47.17.103.130:52093  A gate1.us.dnas.playstation.org
+  -> OVERRIDE(suffix=*.dnas.playstation.org) A gate1.us.dnas.playstation.org = 38.49.212.120
+DNS 47.17.103.130:52092  A gsconnect.ubisoft.com
+  -> OVERRIDE(suffix=*.ubisoft.com) A gsconnect.ubisoft.com = 38.49.212.120
