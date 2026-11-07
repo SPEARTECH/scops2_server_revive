@@ -75779,3 +75779,32 @@ Ubisoft GS Router WM listening
 [2026-11-06 02:54:50.839] ROUTER_WM RX len=8 sha256=7e071fd9b023ed8f
 0000  30 30 30 30 30 30 30 30                           00000000
 [2026-11-06 02:54:50.853] ROUTER_WM 85.217.149.56:55608 DISCONNECT
+[2026-11-06 04:58:31.044] ROUTER_WM fixed-rsa loaded from state\shared_router_rsa.json
+[2026-11-06 04:58:31.058] ROUTER_WM pre-built boot_ke1 len=284
+Ubisoft GS Router WM listening
+  bind:  0.0.0.0:40005
+  proxy: 192.168.1.100:44002
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  login-boot-delay: 0.0s
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=192.168.1.100:44002
+
+[2026-11-06 13:04:16.486] ROUTER_WM 198.235.24.64:62946 -> 38.49.212.120:40005 CONNECT pre_ke1=yes
+[2026-11-06 13:04:16.492] ROUTER_WM RX len=222 sha256=0a937313e2331baf
+0000  47 45 54 20 2f 20 48 54 54 50 2f 31 2e 31 0d 0a   GET / HTTP/1.1..
+0010  48 6f 73 74 3a 20 33 38 2e 34 39 2e 32 31 32 2e   Host: 38.49.212.
+0020  31 32 30 3a 34 30 30 30 35 0d 0a 55 73 65 72 2d   120:40005..User-
+0030  41 67 65 6e 74 3a 20 48 65 6c 6c 6f 20 66 72 6f   Agent: Hello fro
+0040  6d 20 50 61 6c 6f 20 41 6c 74 6f 20 4e 65 74 77   m Palo Alto Netw
+0050  6f 72 6b 73 2c 20 66 69 6e 64 20 6f 75 74 20 6d   orks, find out m
+0060  6f 72 65 20 61 62 6f 75 74 20 6f 75 72 20 73 63   ore about our sc
+0070  61 6e 73 20 69 6e 20 68 74 74 70 73 3a 2f 2f 64   ans in https://d
+0080  6f 63 73 2d 63 6f 72 74 65 78 2e 70 61 6c 6f 61   ocs-cortex.paloa
+0090  6c 74 6f 6e 65 74 77 6f 72 6b 73 2e 63 6f 6d 2f   ltonetworks.com/
+00a0  72 2f 31 2f 43 6f 72 74 65 78 2d 58 70 61 6e 73   r/1/Cortex-Xpans
+00b0  65 2f 53 63 61 6e 6e 69 6e 67 2d 61 63 74 69 76   e/Scanning-activ
+00c0  69 74 79 0d 0a 41 63 63 65 70 74 2d 45 6e 63 6f   ity..Accept-Enco
+00d0  64 69 6e 67 3a 20 67 7a 69 70 0d 0a 0d 0a         ding: gzip....
+[2026-11-06 13:04:16.679] ROUTER_WM 198.235.24.64:62946 DISCONNECT

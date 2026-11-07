@@ -17005,3 +17005,581 @@ Ubisoft GS Router listening
 [2026-11-06 04:13:36.408] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=recv_error:ConnectionResetError dur_ms=782798 post_ke2_ms=-1
 [2026-11-06 04:13:36.409] ROUTER 31.56.20.123 conn counter reset (no frames)
 [2026-11-06 04:13:36.409] ROUTER 31.56.20.123:65410 DISCONNECT
+[2026-11-06 04:58:30.950] ROUTER fixed-rsa loaded from state\shared_router_rsa.json
+Ubisoft GS Router listening
+  build-marker: router_fallback_gate_v2
+  bind: 0.0.0.0:40000
+  wm:   192.168.1.100:40005
+  joinwait-format: u32le
+  keyex2-mode: echo-client
+  post-ke2-push: off
+  post-ke2-replay-files: 0 frame(s)
+  fixed-rsa-key-file: state/shared_router_rsa.json
+  ct34: profile=ct_ps2 enabled=True mode=a base=persistantdata proxy=192.168.1.100:44001
+[2026-11-06 04:58:30.974] ROUTER unified: pre-built WM boot_ke1 len=284
+[2026-11-06 04:58:30.979] ROUTER unified: WM handler loaded, same port 40000
+[2026-11-06 07:50:25.620] ROUTER unified: connection #1 from 69.5.169.208:47426
+
+[2026-11-06 07:50:25.623] ROUTER 69.5.169.208:47426 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 07:50:25.627] ROUTER RX len=144 sha256=973598b044a4648e
+0000  47 45 54 20 2f 20 48 54 54 50 2f 31 2e 31 0d 0a   GET / HTTP/1.1..
+0010  48 6f 73 74 3a 20 31 39 32 2e 30 2e 32 2e 31 0d   Host: 192.0.2.1.
+0020  0a 55 73 65 72 2d 41 67 65 6e 74 3a 20 4d 6f 7a   .User-Agent: Moz
+0030  69 6c 6c 61 2f 35 2e 30 20 28 63 6f 6d 70 61 74   illa/5.0 (compat
+0040  69 62 6c 65 3b 20 49 6e 66 72 61 77 61 74 63 68   ible; Infrawatch
+0050  2f 31 2e 30 3b 20 2b 68 74 74 70 73 3a 2f 2f 69   /1.0; +https://i
+0060  6e 66 72 61 77 61 74 2e 63 68 2f 29 0d 0a 41 63   nfrawat.ch/)..Ac
+0070  63 65 70 74 3a 20 2a 2f 2a 0d 0a 43 6f 6e 6e 65   cept: */*..Conne
+0080  63 74 69 6f 6e 3a 20 63 6c 6f 73 65 0d 0a 0d 0a   ction: close....
+[2026-11-06 07:51:27.047] ROUTER unified: connection #1 from 2.57.17.46:11038
+
+[2026-11-06 07:51:27.049] ROUTER 2.57.17.46:11038 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 07:51:27.051] ROUTER RX len=22 sha256=debf73b9570a542d
+0000  13 00 2f 0d 33 38 2e 34 39 2e 32 31 32 2e 31 32   ../.38.49.212.12
+0010  30 9c 40 01 01 00                                 0.@...
+[2026-11-06 07:51:37.047] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=recv_error:ConnectionResetError dur_ms=9997 post_ke2_ms=-1
+[2026-11-06 07:51:37.049] ROUTER 2.57.17.46 conn counter reset (no frames)
+[2026-11-06 07:51:37.049] ROUTER 2.57.17.46:11038 DISCONNECT
+[2026-11-06 07:51:37.124] ROUTER unified: connection #1 from 2.57.17.209:13022
+
+[2026-11-06 07:51:37.126] ROUTER 2.57.17.209:13022 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 07:51:37.129] ROUTER RX len=2 sha256=4b24f4cca7e61459
+0000  fe 01                                             ..
+[2026-11-06 07:51:47.124] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=recv_error:ConnectionResetError dur_ms=9996 post_ke2_ms=-1
+[2026-11-06 07:51:47.125] ROUTER 2.57.17.209 conn counter reset (no frames)
+[2026-11-06 07:51:47.125] ROUTER 2.57.17.209:13022 DISCONNECT
+[2026-11-06 07:51:47.200] ROUTER unified: connection #1 from 5.252.83.105:9120
+
+[2026-11-06 07:51:47.204] ROUTER 5.252.83.105:9120 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 07:51:47.207] ROUTER RX len=53 sha256=baf27bc655f65da3
+0000  03 00 00 35 30 e0 00 00 00 00 00 43 6f 6f 6b 69   ...50......Cooki
+0010  65 3a 20 6d 73 74 73 68 61 73 68 3d 61 64 6d 69   e: mstshash=admi
+0020  6e 69 73 74 72 61 74 6f 72 0d 0a 0d 0a 01 00 08   nistrator.......
+0030  00 0f 00 00 00                                    .....
+[2026-11-06 07:51:57.201] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=recv_error:ConnectionResetError dur_ms=9997 post_ke2_ms=-1
+[2026-11-06 07:51:57.203] ROUTER 5.252.83.105 conn counter reset (no frames)
+[2026-11-06 07:51:57.203] ROUTER 5.252.83.105:9120 DISCONNECT
+[2026-11-06 07:51:57.278] ROUTER unified: connection #1 from 5.252.83.91:16166
+
+[2026-11-06 07:51:57.279] ROUTER 5.252.83.91:16166 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 07:51:57.283] ROUTER RX len=19 sha256=0003c8efa0acdc0c
+0000  03 00 00 13 0e e0 00 00 00 00 00 01 00 08 00 0b   ................
+0010  00 00 00                                          ...
+[2026-11-06 07:52:07.277] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=recv_error:ConnectionResetError dur_ms=9996 post_ke2_ms=-1
+[2026-11-06 07:52:07.279] ROUTER 5.252.83.91 conn counter reset (no frames)
+[2026-11-06 07:52:07.279] ROUTER 5.252.83.91:16166 DISCONNECT
+[2026-11-06 07:52:07.354] ROUTER unified: connection #1 from 5.252.83.27:10338
+
+[2026-11-06 07:52:07.356] ROUTER 5.252.83.27:10338 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 07:52:07.359] ROUTER RX len=55 sha256=32203f4e50ae1850
+0000  4f 50 54 49 4f 4e 53 20 2a 20 52 54 53 50 2f 31   OPTIONS * RTSP/1
+0010  2e 30 0d 0a 43 53 65 71 3a 20 31 0d 0a 55 73 65   .0..CSeq: 1..Use
+0020  72 2d 41 67 65 6e 74 3a 20 56 4c 43 2f 33 2e 30   r-Agent: VLC/3.0
+0030  2e 32 30 0d 0a 0d 0a                              .20....
+[2026-11-06 07:52:17.354] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=recv_error:ConnectionResetError dur_ms=9996 post_ke2_ms=-1
+[2026-11-06 07:52:17.356] ROUTER 5.252.83.27 conn counter reset (no frames)
+[2026-11-06 07:52:17.356] ROUTER 5.252.83.27:10338 DISCONNECT
+[2026-11-06 08:42:42.972] ROUTER unified: connection #1 from 185.247.137.102:51517
+
+[2026-11-06 08:42:42.974] ROUTER 185.247.137.102:51517 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:42:45.974] ROUTER RX len=199 sha256=bbd3d6c32f9a19a7
+0000  47 45 54 20 2f 20 48 54 54 50 2f 31 2e 31 0d 0a   GET / HTTP/1.1..
+0010  48 6f 73 74 3a 20 33 38 2e 34 39 2e 32 31 32 2e   Host: 38.49.212.
+0020  31 32 30 3a 34 30 30 30 30 0d 0a 55 73 65 72 2d   120:40000..User-
+0030  41 67 65 6e 74 3a 20 4d 6f 7a 69 6c 6c 61 2f 35   Agent: Mozilla/5
+0040  2e 30 20 28 63 6f 6d 70 61 74 69 62 6c 65 3b 20   .0 (compatible; 
+0050  49 6e 74 65 72 6e 65 74 4d 65 61 73 75 72 65 6d   InternetMeasurem
+0060  65 6e 74 2f 31 2e 30 3b 20 2b 68 74 74 70 73 3a   ent/1.0; +https:
+0070  2f 2f 69 6e 74 65 72 6e 65 74 2d 6d 65 61 73 75   //internet-measu
+0080  72 65 6d 65 6e 74 2e 63 6f 6d 2f 29 0d 0a 43 6f   rement.com/)..Co
+0090  6e 6e 65 63 74 69 6f 6e 3a 20 63 6c 6f 73 65 0d   nnection: close.
+00a0  0a 41 63 63 65 70 74 3a 20 2a 2f 2a 0d 0a 41 63   .Accept: */*..Ac
+00b0  63 65 70 74 2d 45 6e 63 6f 64 69 6e 67 3a 20 67   cept-Encoding: g
+00c0  7a 69 70 0d 0a 0d 0a                              zip....
+[2026-11-06 08:42:57.973] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=14996 post_ke2_ms=-1
+[2026-11-06 08:42:57.975] ROUTER 185.247.137.102 conn counter reset (no frames)
+[2026-11-06 08:42:57.975] ROUTER 185.247.137.102:51517 DISCONNECT
+[2026-11-06 08:43:10.047] ROUTER unified: connection #1 from 87.236.176.108:50061
+
+[2026-11-06 08:43:10.048] ROUTER 87.236.176.108:50061 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:43:13.048] ROUTER RX len=3 sha256=da075e9d699084fc
+0000  05 01 00                                          ...
+[2026-11-06 08:43:16.048] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5999 post_ke2_ms=-1
+[2026-11-06 08:43:16.050] ROUTER 87.236.176.108 conn counter reset (no frames)
+[2026-11-06 08:43:16.050] ROUTER 87.236.176.108:50061 DISCONNECT
+[2026-11-06 08:43:16.121] ROUTER unified: connection #1 from 87.236.176.108:50811
+
+[2026-11-06 08:43:16.123] ROUTER 87.236.176.108:50811 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:43:16.126] ROUTER RX len=9 sha256=32ba442fa1518597
+0000  04 01 79 68 57 ec b0 6c 00                        ..yhW..l.
+[2026-11-06 08:43:19.135] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=3010 post_ke2_ms=-1
+[2026-11-06 08:43:19.135] ROUTER 87.236.176.108 conn counter reset (no frames)
+[2026-11-06 08:43:19.135] ROUTER 87.236.176.108:50811 DISCONNECT
+[2026-11-06 08:43:31.208] ROUTER unified: connection #1 from 195.96.139.96:48625
+
+[2026-11-06 08:43:31.209] ROUTER 195.96.139.96:48625 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:43:34.209] ROUTER RX len=72 sha256=b103d9fa9f6f709f
+0000  05 00 0b 03 10 00 00 00 48 00 00 00 01 00 00 00   ........H.......
+0010  b8 10 b8 10 00 00 00 00 01 00 00 00 00 00 01 00   ................
+0020  08 83 af e1 1f 5d c9 11 91 a4 08 00 2b 14 a0 fa   .....]......+...
+0030  03 00 00 00 04 5d 88 8a eb 1c c9 11 9f e8 08 00   .....]..........
+0040  2b 10 48 60 02 00 00 00                           +.H`....
+[2026-11-06 08:43:37.209] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5997 post_ke2_ms=-1
+[2026-11-06 08:43:37.209] ROUTER 195.96.139.96 conn counter reset (no frames)
+[2026-11-06 08:43:37.209] ROUTER 195.96.139.96:48625 DISCONNECT
+[2026-11-06 08:43:49.283] ROUTER unified: connection #1 from 195.96.139.95:49083
+
+[2026-11-06 08:43:49.286] ROUTER 195.96.139.95:49083 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:43:52.284] ROUTER RX len=44 sha256=e4aec0a16976cd28
+0000  80 00 00 28 d9 04 01 63 00 00 00 00 00 00 00 02   ...(...c........
+0010  00 01 86 a0 00 00 00 04 00 00 00 00 00 00 00 00   ................
+0020  00 00 00 00 00 00 00 00 00 00 00 00               ............
+[2026-11-06 08:43:55.282] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5995 post_ke2_ms=-1
+[2026-11-06 08:43:55.284] ROUTER 195.96.139.95 conn counter reset (no frames)
+[2026-11-06 08:43:55.284] ROUTER 195.96.139.95:49083 DISCONNECT
+[2026-11-06 08:44:07.358] ROUTER unified: connection #1 from 87.236.176.105:55959
+
+[2026-11-06 08:44:07.360] ROUTER 87.236.176.105:55959 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:44:10.368] ROUTER RX len=44 sha256=04bb535988b111c4
+0000  03 00 00 2c 27 e0 00 00 00 00 00 43 6f 6f 6b 69   ...,'......Cooki
+0010  65 3a 20 6d 73 74 73 68 61 73 68 3d 65 6c 74 6f   e: mstshash=elto
+0020  6e 73 0d 0a 01 00 08 00 03 00 00 00               ns..........
+[2026-11-06 08:44:13.368] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6008 post_ke2_ms=-1
+[2026-11-06 08:44:13.368] ROUTER 87.236.176.105 conn counter reset (no frames)
+[2026-11-06 08:44:13.369] ROUTER 87.236.176.105:55959 DISCONNECT
+[2026-11-06 08:44:25.440] ROUTER unified: connection #1 from 185.247.137.85:59473
+
+[2026-11-06 08:44:25.442] ROUTER 185.247.137.85:59473 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:44:28.442] ROUTER RX len=31 sha256=22efd140cf33afa6
+0000  4f 50 54 49 4f 4e 53 20 2a 20 52 54 53 50 2f 31   OPTIONS * RTSP/1
+0010  2e 30 0d 0a 43 53 65 71 3a 20 31 0d 0a 0d 0a      .0..CSeq: 1....
+[2026-11-06 08:44:31.442] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5999 post_ke2_ms=-1
+[2026-11-06 08:44:31.442] ROUTER 185.247.137.85 conn counter reset (no frames)
+[2026-11-06 08:44:31.443] ROUTER 185.247.137.85:59473 DISCONNECT
+[2026-11-06 08:44:43.514] ROUTER unified: connection #1 from 87.236.176.94:43977
+
+[2026-11-06 08:44:43.516] ROUTER 87.236.176.94:43977 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:44:46.516] ROUTER RX len=261 sha256=aa3348039a00780c
+0000  4f 50 54 49 4f 4e 53 20 73 69 70 3a 33 38 2e 34   OPTIONS sip:38.4
+0010  39 2e 32 31 32 2e 31 32 30 20 53 49 50 2f 32 2e   9.212.120 SIP/2.
+0020  30 0d 0a 56 69 61 3a 20 53 49 50 2f 32 2e 30 2f   0..Via: SIP/2.0/
+0030  54 43 50 20 38 37 2e 32 33 36 2e 31 37 36 2e 39   TCP 87.236.176.9
+0040  34 3a 35 30 36 30 3b 72 70 6f 72 74 3b 62 72 61   4:5060;rport;bra
+0050  6e 63 68 3d 7a 39 68 47 34 62 4b 77 79 71 79 73   nch=z9hG4bKwyqys
+0060  74 70 76 0d 0a 4d 61 78 2d 46 6f 72 77 61 72 64   tpv..Max-Forward
+0070  73 3a 20 30 0d 0a 54 6f 3a 20 73 69 70 3a 33 38   s: 0..To: sip:38
+0080  2e 34 39 2e 32 31 32 2e 31 32 30 0d 0a 46 72 6f   .49.212.120..Fro
+0090  6d 3a 20 73 69 70 3a 38 37 2e 32 33 36 2e 31 37   m: sip:87.236.17
+00a0  36 2e 39 34 3b 74 61 67 3d 77 79 71 79 73 74 70   6.94;tag=wyqystp
+00b0  76 0d 0a 43 61 6c 6c 2d 49 44 3a 20 77 79 71 79   v..Call-ID: wyqy
+00c0  73 74 70 76 0d 0a 43 53 65 71 3a 20 31 20 4f 50   stpv..CSeq: 1 OP
+00d0  54 49 4f 4e 53 0d 0a 41 63 63 65 70 74 3a 20 61   TIONS..Accept: a
+00e0  70 70 6c 69 63 61 74 69 6f 6e 2f 73 64 70 0d 0a   pplication/sdp..
+00f0  43 6f 6e 74 65 6e 74 2d 4c 65 6e 67 74 68 3a 20   Content-Length: 
+??? (truncated to 256 bytes)
+[2026-11-06 08:44:52.514] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=8998 post_ke2_ms=-1
+[2026-11-06 08:44:52.521] ROUTER 87.236.176.94 conn counter reset (no frames)
+[2026-11-06 08:44:52.521] ROUTER 87.236.176.94:43977 DISCONNECT
+[2026-11-06 08:45:04.588] ROUTER unified: connection #1 from 87.236.176.84:38721
+
+[2026-11-06 08:45:04.590] ROUTER 87.236.176.84:38721 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:45:07.602] ROUTER RX len=16 sha256=98dc3a446485b1c6
+0000  00 0e 38 0f 96 40 44 e5 42 95 7b 00 00 00 00 00   ..8..@D.B.{.....
+[2026-11-06 08:45:11.602] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=7011 post_ke2_ms=-1
+[2026-11-06 08:45:11.602] ROUTER 87.236.176.84 conn counter reset (no frames)
+[2026-11-06 08:45:11.602] ROUTER 87.236.176.84:38721 DISCONNECT
+[2026-11-06 08:45:23.676] ROUTER unified: connection #1 from 185.247.137.87:38699
+
+[2026-11-06 08:45:23.680] ROUTER 185.247.137.87:38699 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:45:26.676] ROUTER RX len=156 sha256=b9f1f33d492dc809
+0000  00 9c 00 01 1a 2b 3c 4d 00 01 00 00 01 00 00 00   .....+<M........
+0010  00 00 00 03 00 00 00 03 00 00 00 01 00 00 00 00   ................
+0020  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0030  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0040  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0050  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0060  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0070  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0080  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0090  00 00 00 00 00 00 00 00 00 00 00 00               ............
+[2026-11-06 08:45:29.678] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5997 post_ke2_ms=-1
+[2026-11-06 08:45:29.678] ROUTER 185.247.137.87 conn counter reset (no frames)
+[2026-11-06 08:45:29.678] ROUTER 185.247.137.87:38699 DISCONNECT
+[2026-11-06 08:45:41.750] ROUTER unified: connection #1 from 87.236.176.98:36469
+
+[2026-11-06 08:45:41.753] ROUTER 87.236.176.98:36469 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:45:44.753] ROUTER RX len=9 sha256=4327d3afce06e3fa
+0000  00 00 00 09 00 03 00 00 00                        .........
+[2026-11-06 08:45:47.753] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5999 post_ke2_ms=-1
+[2026-11-06 08:45:47.755] ROUTER 87.236.176.98 conn counter reset (no frames)
+[2026-11-06 08:45:47.755] ROUTER 87.236.176.98:36469 DISCONNECT
+[2026-11-06 08:45:59.825] ROUTER unified: connection #1 from 195.96.139.109:44647
+
+[2026-11-06 08:45:59.828] ROUTER 195.96.139.109:44647 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:46:02.828] ROUTER RX len=53 sha256=0fedad600ef6ff19
+0000  00 00 00 31 ff 53 4d 42 72 00 00 00 00 00 00 00   ...1.SMBr.......
+0010  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0020  00 00 01 00 00 0e 00 02 4e 54 20 4c 4d 20 30 2e   ........NT LM 0.
+0030  31 32 00 02 00                                    12...
+[2026-11-06 08:46:02.880] ROUTER decode error: 3 is not a valid PROPERTY
+[2026-11-06 08:46:05.826] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=1 last_msg=none close=peer_eof dur_ms=5997 post_ke2_ms=-1
+[2026-11-06 08:46:05.828] ROUTER 195.96.139.109 conn counter reset (no frames)
+[2026-11-06 08:46:05.828] ROUTER 195.96.139.109:44647 DISCONNECT
+[2026-11-06 08:46:05.899] ROUTER unified: connection #1 from 195.96.139.109:34961
+
+[2026-11-06 08:46:05.903] ROUTER 195.96.139.109:34961 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:46:05.906] ROUTER RX len=114 sha256=0eeda74702b9d40a
+0000  00 00 00 6e fe 53 4d 42 40 00 00 00 00 00 00 00   ...n.SMB@.......
+0010  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0020  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0030  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0040  00 00 00 00 24 00 04 00 01 00 00 00 00 00 00 00   ....$...........
+0050  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0060  00 00 00 00 00 00 00 00 02 02 10 02 00 03 02 03   ................
+0070  11 03                                             ..
+[2026-11-06 08:46:05.931] ROUTER decode error: 3 is not a valid PROPERTY
+[2026-11-06 08:46:08.903] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=1 last_msg=none close=peer_eof dur_ms=2999 post_ke2_ms=-1
+[2026-11-06 08:46:08.904] ROUTER 195.96.139.109 conn counter reset (no frames)
+[2026-11-06 08:46:08.904] ROUTER 195.96.139.109:34961 DISCONNECT
+[2026-11-06 08:46:20.977] ROUTER unified: connection #1 from 87.236.176.109:45719
+
+[2026-11-06 08:46:20.979] ROUTER 87.236.176.109:45719 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:46:23.978] ROUTER RX len=14 sha256=4f9ff4b8ec862480
+0000  2a 31 0d 0a 24 34 0d 0a 69 6e 66 6f 0d 0a         *1..$4..info..
+[2026-11-06 08:46:26.976] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5990 post_ke2_ms=-1
+[2026-11-06 08:46:26.978] ROUTER 87.236.176.109 conn counter reset (no frames)
+[2026-11-06 08:46:26.978] ROUTER 87.236.176.109:45719 DISCONNECT
+[2026-11-06 08:46:39.050] ROUTER unified: connection #1 from 87.236.176.96:35157
+
+[2026-11-06 08:46:39.054] ROUTER 87.236.176.96:35157 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:46:42.353] ROUTER RX len=20 sha256=67a0c4c14be22599
+0000  10 12 00 04 4d 51 54 54 05 02 00 3c 05 11 00 00   ....MQTT...<....
+0010  00 00 00 00                                       ....
+[2026-11-06 08:46:45.055] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6001 post_ke2_ms=-1
+[2026-11-06 08:46:45.057] ROUTER 87.236.176.96 conn counter reset (no frames)
+[2026-11-06 08:46:45.058] ROUTER 87.236.176.96:35157 DISCONNECT
+[2026-11-06 08:46:45.126] ROUTER unified: connection #1 from 87.236.176.96:32985
+
+[2026-11-06 08:46:45.130] ROUTER 87.236.176.96:32985 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:46:45.133] ROUTER RX len=14 sha256=5a48086c4358e8ef
+0000  10 0c 00 04 4d 51 54 54 04 02 00 3c 00 00         ....MQTT...<..
+[2026-11-06 08:46:48.131] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=3001 post_ke2_ms=-1
+[2026-11-06 08:46:48.131] ROUTER 87.236.176.96 conn counter reset (no frames)
+[2026-11-06 08:46:48.133] ROUTER 87.236.176.96:32985 DISCONNECT
+[2026-11-06 08:46:48.204] ROUTER unified: connection #1 from 87.236.176.96:42533
+
+[2026-11-06 08:46:48.208] ROUTER 87.236.176.96:42533 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:46:48.210] ROUTER RX len=52 sha256=06d110f1b4b1d133
+0000  10 32 00 06 4d 51 49 73 64 70 03 02 00 3c 00 24   .2..MQIsdp...<.$
+0010  36 32 64 38 62 35 66 36 2d 39 65 66 36 2d 34 34   62d8b5f6-9ef6-44
+0020  38 32 2d 39 31 38 33 2d 34 39 33 63 38 34 64 39   82-9183-493c84d9
+0030  31 64 31 63                                       1d1c
+[2026-11-06 08:46:51.205] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=2996 post_ke2_ms=-1
+[2026-11-06 08:46:51.208] ROUTER 87.236.176.96 conn counter reset (no frames)
+[2026-11-06 08:46:51.210] ROUTER 87.236.176.96:42533 DISCONNECT
+[2026-11-06 08:47:03.277] ROUTER unified: connection #1 from 195.96.139.83:39935
+
+[2026-11-06 08:47:03.280] ROUTER 195.96.139.83:39935 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:47:06.280] ROUTER RX len=32 sha256=a50a3f06888608cc
+0000  a4 00 00 00 00 00 00 00 08 00 00 00 00 00 00 00   ................
+0010  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+[2026-11-06 08:47:09.278] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5997 post_ke2_ms=-1
+[2026-11-06 08:47:09.280] ROUTER 195.96.139.83 conn counter reset (no frames)
+[2026-11-06 08:47:09.280] ROUTER 195.96.139.83:39935 DISCONNECT
+[2026-11-06 08:47:21.352] ROUTER unified: connection #1 from 195.96.139.108:47117
+
+[2026-11-06 08:47:21.354] ROUTER 195.96.139.108:47117 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:47:24.354] ROUTER RX len=26 sha256=d78f671a24b64ce7
+0000  12 01 00 1a 00 00 00 00 00 00 0b 00 06 01 00 11   ................
+0010  00 01 ff 08 00 01 55 00 00 01                     ......U...
+[2026-11-06 08:47:27.353] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5997 post_ke2_ms=-1
+[2026-11-06 08:47:27.355] ROUTER 195.96.139.108 conn counter reset (no frames)
+[2026-11-06 08:47:27.355] ROUTER 195.96.139.108:47117 DISCONNECT
+[2026-11-06 08:47:39.426] ROUTER unified: connection #1 from 87.236.176.86:36179
+
+[2026-11-06 08:47:39.428] ROUTER 87.236.176.86:36179 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:47:42.429] ROUTER RX len=55 sha256=0d173591b81c0279
+0000  37 00 00 00 24 82 cb a5 00 00 00 00 d4 07 00 00   7...$...........
+0010  00 00 00 00 61 64 6d 69 6e 2e 24 63 6d 64 00 00   ....admin.$cmd..
+0020  00 00 00 01 00 00 00 10 00 00 00 10 68 65 6c 6c   ............hell
+0030  6f 00 01 00 00 00 00                              o......
+[2026-11-06 08:47:45.434] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6006 post_ke2_ms=-1
+[2026-11-06 08:47:45.436] ROUTER 87.236.176.86 conn counter reset (no frames)
+[2026-11-06 08:47:45.436] ROUTER 87.236.176.86:36179 DISCONNECT
+[2026-11-06 08:47:57.509] ROUTER unified: connection #1 from 87.236.176.94:43439
+
+[2026-11-06 08:47:57.512] ROUTER 87.236.176.94:43439 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:48:00.509] ROUTER RX len=5 sha256=a1cb20470d89874f
+0000  01 00 00 00 01                                    .....
+[2026-11-06 08:48:03.509] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5997 post_ke2_ms=-1
+[2026-11-06 08:48:03.528] ROUTER 87.236.176.94 conn counter reset (no frames)
+[2026-11-06 08:48:03.528] ROUTER 87.236.176.94:43439 DISCONNECT
+[2026-11-06 08:48:15.583] ROUTER unified: connection #1 from 195.96.139.103:44547
+
+[2026-11-06 08:48:15.585] ROUTER 195.96.139.103:44547 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:48:18.585] ROUTER RX len=14 sha256=c7e753b8dc97d2b6
+0000  30 0c 02 01 01 60 07 02 01 03 04 00 80 00         0....`........
+[2026-11-06 08:48:21.583] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5996 post_ke2_ms=-1
+[2026-11-06 08:48:21.583] ROUTER 195.96.139.103 conn counter reset (no frames)
+[2026-11-06 08:48:21.585] ROUTER 195.96.139.103:44547 DISCONNECT
+[2026-11-06 08:48:33.676] ROUTER unified: connection #1 from 195.96.139.90:51153
+
+[2026-11-06 08:48:33.678] ROUTER 195.96.139.90:51153 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:48:36.756] ROUTER RX len=149 sha256=dbe1a27c867fb1a2
+0000  3c 3f 78 6d 6c 20 76 65 72 73 69 6f 6e 3d 27 31   <?xml version='1
+0010  2e 30 27 3f 3e 3c 73 74 72 65 61 6d 3a 73 74 72   .0'?><stream:str
+0020  65 61 6d 20 76 65 72 73 69 6f 6e 3d 27 31 2e 30   eam version='1.0
+0030  27 20 78 6d 6c 3a 6c 61 6e 67 3d 27 65 6e 27 20   ' xml:lang='en' 
+0040  78 6d 6c 6e 73 3a 73 74 72 65 61 6d 3d 27 68 74   xmlns:stream='ht
+0050  74 70 3a 2f 2f 65 74 68 65 72 78 2e 6a 61 62 62   tp://etherx.jabb
+0060  65 72 2e 6f 72 67 2f 73 74 72 65 61 6d 73 27 20   er.org/streams' 
+0070  78 6d 6c 6e 73 3d 27 6a 61 62 62 65 72 3a 63 6c   xmlns='jabber:cl
+0080  69 65 6e 74 27 20 74 6f 3d 27 6c 6f 63 61 6c 68   ient' to='localh
+0090  6f 73 74 27 3e                                    ost'>
+[2026-11-06 08:48:39.758] ROUTER RX len=149 sha256=36cdb071418cd356
+0000  3c 3f 78 6d 6c 20 76 65 72 73 69 6f 6e 3d 27 31   <?xml version='1
+0010  2e 30 27 3f 3e 3c 73 74 72 65 61 6d 3a 73 74 72   .0'?><stream:str
+0020  65 61 6d 20 76 65 72 73 69 6f 6e 3d 27 31 2e 30   eam version='1.0
+0030  27 20 78 6d 6c 3a 6c 61 6e 67 3d 27 65 6e 27 20   ' xml:lang='en' 
+0040  78 6d 6c 6e 73 3a 73 74 72 65 61 6d 3d 27 68 74   xmlns:stream='ht
+0050  74 70 3a 2f 2f 65 74 68 65 72 78 2e 6a 61 62 62   tp://etherx.jabb
+0060  65 72 2e 6f 72 67 2f 73 74 72 65 61 6d 73 27 20   er.org/streams' 
+0070  78 6d 6c 6e 73 3d 27 6a 61 62 62 65 72 3a 73 65   xmlns='jabber:se
+0080  72 76 65 72 27 20 74 6f 3d 27 6c 6f 63 61 6c 68   rver' to='localh
+0090  6f 73 74 27 3e                                    ost'>
+[2026-11-06 08:48:42.756] ROUTER SUMMARY reads=2 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=9077 post_ke2_ms=-1
+[2026-11-06 08:48:42.758] ROUTER 195.96.139.90 conn counter reset (no frames)
+[2026-11-06 08:48:42.758] ROUTER 195.96.139.90:51153 DISCONNECT
+[2026-11-06 08:48:54.830] ROUTER unified: connection #1 from 195.96.139.94:59015
+
+[2026-11-06 08:48:54.833] ROUTER 195.96.139.94:59015 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:48:57.831] ROUTER RX len=11 sha256=ffec93d6d8e2494c
+0000  9b 90 00 00 00 05 01 2b 0e 01 00                  .......+...
+[2026-11-06 08:49:07.835] ROUTER RX len=8 sha256=1103c3d0280b762b
+0000  9b 91 00 00 00 02 01 11                           ........
+[2026-11-06 08:49:17.842] ROUTER SUMMARY reads=2 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=23008 post_ke2_ms=-1
+[2026-11-06 08:49:17.844] ROUTER 195.96.139.94 conn counter reset (no frames)
+[2026-11-06 08:49:17.845] ROUTER 195.96.139.94:59015 DISCONNECT
+[2026-11-06 08:49:29.918] ROUTER unified: connection #1 from 87.236.176.77:41791
+
+[2026-11-06 08:49:29.919] ROUTER 87.236.176.77:41791 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:49:32.919] ROUTER RX len=120 sha256=23d3c06c35f8c6cb
+0000  00 78 00 00 01 00 00 00 01 40 01 2c 00 81 20 00   .x.......@.,.. .
+0010  ff ff 7f 08 00 00 01 00 00 2e 00 4a 00 00 07 f8   ...........J....
+0020  04 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0030  00 00 00 00 00 00 00 00 00 00 00 00 20 00 00 20   ............ .. 
+0040  00 00 00 00 00 00 00 00 00 00 28 44 45 53 43 52   ..........(DESCR
+0050  49 50 54 49 4f 4e 3d 28 43 4f 4e 4e 45 43 54 5f   IPTION=(CONNECT_
+0060  44 41 54 41 3d 28 43 4f 4d 4d 41 4e 44 3d 76 65   DATA=(COMMAND=ve
+0070  72 73 69 6f 6e 29 29 29                           rsion)))
+[2026-11-06 08:49:35.917] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5996 post_ke2_ms=-1
+[2026-11-06 08:49:35.917] ROUTER 87.236.176.77 conn counter reset (no frames)
+[2026-11-06 08:49:35.919] ROUTER 87.236.176.77:41791 DISCONNECT
+[2026-11-06 08:49:47.991] ROUTER unified: connection #1 from 195.96.139.75:37121
+
+[2026-11-06 08:49:47.993] ROUTER 195.96.139.75:37121 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:49:50.993] ROUTER RX len=20 sha256=0f9615236cb2e463
+0000  13 2f 6d 75 6c 74 69 73 74 72 65 61 6d 2f 31 2e   ./multistream/1.
+0010  30 2e 30 0a                                       0.0.
+[2026-11-06 08:49:53.991] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5995 post_ke2_ms=-1
+[2026-11-06 08:49:53.992] ROUTER 195.96.139.75 conn counter reset (no frames)
+[2026-11-06 08:49:53.992] ROUTER 195.96.139.75:37121 DISCONNECT
+[2026-11-06 08:50:06.084] ROUTER unified: connection #1 from 185.247.137.94:35831
+
+[2026-11-06 08:50:06.086] ROUTER 185.247.137.94:35831 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:50:09.249] ROUTER RX len=52 sha256=137f935da2adfd37
+0000  66 6f 78 20 61 20 31 20 2d 31 20 66 6f 78 20 68   fox a 1 -1 fox h
+0010  65 6c 6c 6f 0a 7b 0a 66 6f 78 2e 76 65 72 73 69   ello.{.fox.versi
+0020  6f 6e 3d 73 3a 31 2e 30 0a 69 64 3d 69 3a 31 0a   on=s:1.0.id=i:1.
+0030  7d 3b 3b 0a                                       };;.
+[2026-11-06 08:50:12.247] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6160 post_ke2_ms=-1
+[2026-11-06 08:50:12.249] ROUTER 185.247.137.94 conn counter reset (no frames)
+[2026-11-06 08:50:12.249] ROUTER 185.247.137.94:35831 DISCONNECT
+[2026-11-06 08:50:24.323] ROUTER unified: connection #1 from 87.236.176.93:59151
+
+[2026-11-06 08:50:24.325] ROUTER 87.236.176.93:59151 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:50:27.324] ROUTER RX len=43 sha256=0919330898ff50d5
+0000  01 21 01 01 01 01 01 01 0a 00 00 00 00 00 00 00   .!..............
+0010  01 eb 03 00 00 00 00 00 00 01 00 00 00 01 00 00   ................
+0020  00 01 11 01 01 01 01 02 01 01 00                  ...........
+[2026-11-06 08:50:30.324] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5999 post_ke2_ms=-1
+[2026-11-06 08:50:30.326] ROUTER 87.236.176.93 conn counter reset (no frames)
+[2026-11-06 08:50:30.326] ROUTER 87.236.176.93:59151 DISCONNECT
+[2026-11-06 08:50:42.396] ROUTER unified: connection #1 from 195.96.139.99:53825
+
+[2026-11-06 08:50:42.398] ROUTER 195.96.139.99:53825 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:50:45.400] ROUTER RX len=188 sha256=ec884bdd16755144
+0000  43 87 00 00 00 00 00 8c 00 02 3d 00 00 00 00 00   C.........=.....
+0010  00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00   ................
+0020  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0030  53 65 73 73 69 6f 6e 54 79 70 65 3d 44 69 73 63   SessionType=Disc
+0040  6f 76 65 72 79 00 4d 61 78 52 65 63 76 44 61 74   overy.MaxRecvDat
+0050  61 53 65 67 6d 65 6e 74 4c 65 6e 67 74 68 3d 33   aSegmentLength=3
+0060  32 37 36 38 00 49 6e 69 74 69 61 74 6f 72 4e 61   2768.InitiatorNa
+0070  6d 65 3d 69 71 6e 2e 32 30 30 33 2d 30 31 2e 63   me=iqn.2003-01.c
+0080  6f 6d 2e 6c 69 6e 75 78 2d 69 73 63 73 69 3a 34   om.linux-iscsi:4
+0090  39 38 38 30 38 31 34 32 37 00 48 65 61 64 65 72   988081427.Header
+00a0  44 69 67 65 73 74 3d 4e 6f 6e 65 00 44 61 74 61   Digest=None.Data
+00b0  44 69 67 65 73 74 3d 4e 6f 6e 65 00               Digest=None.
+[2026-11-06 08:50:48.406] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6006 post_ke2_ms=-1
+[2026-11-06 08:50:48.408] ROUTER 195.96.139.99 conn counter reset (no frames)
+[2026-11-06 08:50:48.408] ROUTER 195.96.139.99:53825 DISCONNECT
+[2026-11-06 08:51:00.481] ROUTER unified: connection #1 from 87.236.176.87:35169
+
+[2026-11-06 08:51:00.485] ROUTER 87.236.176.87:35169 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:51:03.483] ROUTER RX len=50 sha256=c4a6add3811b59fc
+0000  00 32 d0 01 00 01 00 2c 10 41 00 04 11 5e 00 04   .2.....,.A...^..
+0010  11 6d 00 04 11 5a 00 18 14 04 14 03 00 07 24 07   .m...Z........$.
+0020  00 08 24 0f 00 08 14 40 00 08 14 74 00 08 00 04   ..$....@...t....
+0030  11 47                                             .G
+[2026-11-06 08:51:06.481] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5995 post_ke2_ms=-1
+[2026-11-06 08:51:06.483] ROUTER 87.236.176.87 conn counter reset (no frames)
+[2026-11-06 08:51:06.484] ROUTER 87.236.176.87:35169 DISCONNECT
+[2026-11-06 08:51:18.554] ROUTER unified: connection #1 from 195.96.139.83:38855
+
+[2026-11-06 08:51:18.557] ROUTER 195.96.139.83:38855 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:51:21.557] ROUTER RX len=211 sha256=0edf8e6519c7980d
+0000  01 00 00 00 00 cd 00 01 00 00 41 4e 59 2d 53 43   ..........ANY-SC
+0010  50 20 20 20 20 20 20 20 20 20 45 43 48 4f 53 43   P         ECHOSC
+0020  55 20 20 20 20 20 20 20 20 20 00 00 00 00 00 00   U         ......
+0030  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0040  00 00 00 00 00 00 00 00 00 00 10 00 00 15 31 2e   ..............1.
+0050  32 2e 38 34 30 2e 31 30 30 30 38 2e 33 2e 31 2e   2.840.10008.3.1.
+0060  31 2e 31 20 00 00 2e 01 00 00 00 30 00 00 11 31   1.1 .......0...1
+0070  2e 32 2e 38 34 30 2e 31 30 30 30 38 2e 31 2e 31   .2.840.10008.1.1
+0080  40 00 00 11 31 2e 32 2e 38 34 30 2e 31 30 30 30   @...1.2.840.1000
+0090  38 2e 31 2e 32 50 00 00 3a 51 00 00 04 00 00 00   8.1.2P..:Q......
+00a0  00 52 00 00 1b 31 2e 32 2e 32 37 36 2e 30 2e 37   .R...1.2.276.0.7
+00b0  32 33 30 30 31 30 2e 33 2e 30 2e 33 2e 36 2e 32   230010.3.0.3.6.2
+00c0  55 00 00 0f 4f 46 46 49 53 5f 44 43 4d 54 4b 5f   U...OFFIS_DCMTK_
+00d0  33 36 32                                          362
+[2026-11-06 08:51:24.555] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5997 post_ke2_ms=-1
+[2026-11-06 08:51:24.557] ROUTER 195.96.139.83 conn counter reset (no frames)
+[2026-11-06 08:51:24.557] ROUTER 195.96.139.83:38855 DISCONNECT
+[2026-11-06 08:51:36.629] ROUTER unified: connection #1 from 87.236.176.96:39599
+
+[2026-11-06 08:51:36.631] ROUTER 87.236.176.96:39599 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:51:39.806] ROUTER RX len=37 sha256=e88a4fd6d1e5b3ea
+0000  43 4f 4e 4e 45 43 54 0a 61 63 63 65 70 74 2d 76   CONNECT.accept-v
+0010  65 72 73 69 6f 6e 3a 31 2e 30 2c 31 2e 31 2c 32   ersion:1.0,1.1,2
+0020  2e 30 0a 0a 00                                    .0...
+[2026-11-06 08:51:42.814] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6183 post_ke2_ms=-1
+[2026-11-06 08:51:42.814] ROUTER 87.236.176.96 conn counter reset (no frames)
+[2026-11-06 08:51:42.816] ROUTER 87.236.176.96:39599 DISCONNECT
+[2026-11-06 08:51:54.886] ROUTER unified: connection #1 from 185.247.137.77:59127
+
+[2026-11-06 08:51:54.890] ROUTER 185.247.137.77:59127 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:51:57.888] ROUTER RX len=7 sha256=11e629574907d3a9
+0000  73 74 61 74 73 0d 0a                              stats..
+[2026-11-06 08:52:00.888] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5997 post_ke2_ms=-1
+[2026-11-06 08:52:00.891] ROUTER 185.247.137.77 conn counter reset (no frames)
+[2026-11-06 08:52:00.891] ROUTER 185.247.137.77:59127 DISCONNECT
+[2026-11-06 08:52:12.960] ROUTER unified: connection #1 from 87.236.176.109:37503
+
+[2026-11-06 08:52:12.964] ROUTER 87.236.176.109:37503 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:52:15.965] ROUTER RX len=12 sha256=ad33d13d6bc3bd05
+0000  6c 00 0b 00 00 00 00 00 00 00 00 00               l...........
+[2026-11-06 08:52:19.262] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6298 post_ke2_ms=-1
+[2026-11-06 08:52:19.263] ROUTER 87.236.176.109 conn counter reset (no frames)
+[2026-11-06 08:52:19.263] ROUTER 87.236.176.109:37503 DISCONNECT
+[2026-11-06 08:52:31.335] ROUTER unified: connection #1 from 195.96.139.76:49117
+
+[2026-11-06 08:52:31.339] ROUTER 195.96.139.76:49117 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:52:34.340] ROUTER RX len=320 sha256=85a2f1da941fb30e
+0000  a8 34 3d 9c cb fb 61 6a bf 62 95 e3 0f a9 0c 73   .4=...aj.b.....s
+0010  a9 09 d1 8b 8f 7d 6f ee 1e 9b d7 c1 e6 c5 9b 06   .....}o.........
+0020  99 26 b7 bf 17 d3 fa b3 7d 0e 5c fc ba de 8f 10   .&......}.\.....
+0030  b0 80 64 ab e9 b9 d0 0c 94 14 87 1e de 9b 76 45   ..d...........vE
+0040  dd 2d e6 8f bc c2 38 06 e0 dc a0 f6 cf 1f a2 c2   .-....8.........
+0050  44 a3 2e 32 c2 ff 47 8d 28 84 9e 4f 36 65 cd 59   D..2..G.(..O6e.Y
+0060  b6 a7 15 74 af d1 0e 83 10 63 29 25 7f 00 7c d5   ...t.....c)%..|.
+0070  c4 a8 ae ae 0c e4 2f 62 9a 8c 80 16 0b aa e6 02   ....../b........
+0080  9a 94 f5 67 e7 fb bd d3 59 1e 25 22 ad 26 eb 8f   ...g....Y.%".&..
+0090  f8 8a 0b 86 d7 cb 13 33 82 84 00 52 9e b6 47 9c   .......3...R..G.
+00a0  52 28 ae 46 12 7b a8 36 3c 78 cf b2 96 f8 3c 23   R(.F.{.6<x....<#
+00b0  7f 1a c6 56 f2 3e 85 8f d2 5a 3b f3 b6 87 4e fc   ...V.>...Z;...N.
+00c0  9e b1 11 f8 f9 57 10 b9 6c b9 65 b7 5d f9 72 4b   .....W..l.e.].rK
+00d0  f3 b5 f3 7b 72 e8 62 19 ef 4c 56 75 99 a5 e5 8a   ...{r.b..LVu....
+00e0  bc 9d 79 a6 a9 f1 8f 3a 9c 6d 28 9f 1c 7e 6e 1d   ..y....:.m(..~n.
+00f0  56 9e 78 b9 82 6d 9d 4f 28 21 f6 67 98 29 81 7e   V.x..m.O(!.g.).~
+??? (truncated to 256 bytes)
+[2026-11-06 08:52:37.340] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6001 post_ke2_ms=-1
+[2026-11-06 08:52:37.340] ROUTER 195.96.139.76 conn counter reset (no frames)
+[2026-11-06 08:52:37.342] ROUTER 195.96.139.76:49117 DISCONNECT
+[2026-11-06 08:52:37.413] ROUTER unified: connection #1 from 195.96.139.76:34029
+
+[2026-11-06 08:52:37.417] ROUTER 195.96.139.76:34029 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:52:37.418] ROUTER RX len=110 sha256=1eb6d95a195b7d26
+0000  f9 be b4 d9 76 65 72 73 69 6f 6e 00 00 00 00 00   ....version.....
+0010  56 00 00 00 91 47 cb 08 80 11 01 00 00 00 00 00   V....G..........
+0020  00 00 00 00 d2 05 ee 6a 00 00 00 00 00 00 00 00   .......j........
+0030  00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff   ................
+0040  7f 00 00 01 20 8d 00 00 00 00 00 00 00 00 00 00   .... ...........
+0050  00 00 00 00 00 00 00 00 ff ff 7f 00 00 01 20 8d   .............. .
+0060  00 00 00 00 00 00 00 00 00 00 00 00 00 00         ..............
+[2026-11-06 08:52:40.413] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=2996 post_ke2_ms=-1
+[2026-11-06 08:52:40.415] ROUTER 195.96.139.76 conn counter reset (no frames)
+[2026-11-06 08:52:40.415] ROUTER 195.96.139.76:34029 DISCONNECT
+[2026-11-06 08:52:52.487] ROUTER unified: connection #1 from 195.96.139.108:56905
+
+[2026-11-06 08:52:52.490] ROUTER 195.96.139.108:56905 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:52:55.489] ROUTER RX len=68 sha256=25ff696378674b05
+0000  48 45 4c 46 44 00 00 00 00 00 00 00 ff ff ff 7f   HELFD...........
+0010  ff ff ff 7f 00 00 00 00 00 00 00 00 24 00 00 00   ............$...
+0020  6f 70 63 2e 74 63 70 3a 2f 2f 6c 6f 63 61 6c 68   opc.tcp://localh
+0030  6f 73 74 3a 34 38 34 30 2f 55 41 44 69 73 63 6f   ost:4840/UADisco
+0040  76 65 72 79                                       very
+[2026-11-06 08:52:58.488] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5996 post_ke2_ms=-1
+[2026-11-06 08:52:58.493] ROUTER 195.96.139.108 conn counter reset (no frames)
+[2026-11-06 08:52:58.493] ROUTER 195.96.139.108:56905 DISCONNECT
+[2026-11-06 08:53:10.562] ROUTER unified: connection #1 from 195.96.139.93:52019
+
+[2026-11-06 08:53:10.566] ROUTER 195.96.139.93:52019 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:53:13.564] ROUTER RX len=64 sha256=a864284f203a0705
+0000  40 00 0d 00 01 00 00 00 00 00 00 00 00 00 51 04   @.............Q.
+0010  c0 a8 38 01 00 00 00 00 0a 00 00 00 3c 00 00 00   ..8.........<...
+0020  c8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0030  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+[2026-11-06 08:53:16.564] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5997 post_ke2_ms=-1
+[2026-11-06 08:53:16.564] ROUTER 195.96.139.93 conn counter reset (no frames)
+[2026-11-06 08:53:16.565] ROUTER 195.96.139.93:52019 DISCONNECT
+[2026-11-06 08:53:28.638] ROUTER unified: connection #1 from 195.96.139.75:40585
+
+[2026-11-06 08:53:28.641] ROUTER 195.96.139.75:40585 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:53:31.648] ROUTER RX len=2 sha256=f4e2f1a103bb922f
+0000  fb 01                                             ..
+[2026-11-06 08:53:34.648] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6007 post_ke2_ms=-1
+[2026-11-06 08:53:34.650] ROUTER 195.96.139.75 conn counter reset (no frames)
+[2026-11-06 08:53:34.650] ROUTER 195.96.139.75:40585 DISCONNECT
+[2026-11-06 08:53:46.722] ROUTER unified: connection #1 from 185.247.137.109:39599
+
+[2026-11-06 08:53:46.725] ROUTER 185.247.137.109:39599 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:53:49.723] ROUTER RX len=14 sha256=f6905c6a5140413f
+0000  b1 68 65 00 0e 00 2f 30 30 49 44 45 44 0d         .he.../00IDED.
+[2026-11-06 08:53:52.722] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=5996 post_ke2_ms=-1
+[2026-11-06 08:53:52.723] ROUTER 185.247.137.109 conn counter reset (no frames)
+[2026-11-06 08:53:52.723] ROUTER 185.247.137.109:39599 DISCONNECT
+[2026-11-06 08:54:04.795] ROUTER unified: connection #1 from 87.236.176.80:55601
+
+[2026-11-06 08:54:04.797] ROUTER 87.236.176.80:55601 -> 38.49.212.120:40000 CONNECT
+[2026-11-06 08:54:05.796] ROUTER RX len=271 sha256=1bbceea3fd77ca19
+0000  16 03 01 01 0a 01 00 01 06 03 03 0c c7 de 67 1a   ..............g.
+0010  6d 58 40 e8 6a a3 40 a9 35 1d 89 a4 34 73 84 aa   mX@.j.@.5...4s..
+0020  6e 2a 04 87 7a 4b 8d fd 55 23 b3 20 97 83 62 6c   n*..zK..U#. ..bl
+0030  77 0e 65 b0 bb 9d d0 72 b3 5f 98 ac 3e a6 d0 2b   w.e....r._..>..+
+0040  98 bf 3d ca 05 a8 37 8d a4 b8 71 61 00 3c c0 2b   ..=...7...qa.<.+
+0050  c0 2f c0 2c c0 30 cc a9 cc a8 c0 09 c0 13 c0 0a   ./.,.0..........
+0060  c0 14 00 9c 00 9d 00 2f 00 35 c0 08 c0 12 00 0a   ......./.5......
+0070  c0 24 c0 28 c0 23 c0 27 00 3c 00 3d c0 07 c0 11   .$.(.#.'.<.=....
+0080  00 05 00 04 13 01 13 02 13 03 01 00 00 81 00 05   ................
+0090  00 05 01 00 00 00 00 00 0a 00 0a 00 08 00 1d 00   ................
+00a0  17 00 18 00 19 00 0b 00 02 01 00 00 0d 00 1a 00   ................
+00b0  18 08 04 04 03 08 07 08 05 08 06 04 01 05 01 06   ................
+00c0  01 05 03 06 03 02 01 02 03 ff 01 00 01 00 00 17   ................
+00d0  00 00 00 12 00 00 00 2b 00 0b 0a 03 04 03 03 03   .......+........
+00e0  02 03 01 03 00 00 33 00 26 00 24 00 1d 00 20 df   ......3.&.$... .
+00f0  a8 ef f9 57 6a f1 d7 0c 5b 9d 3e 9a be a1 f5 9b   ...Wj...[.>.....
+??? (truncated to 256 bytes)
+[2026-11-06 08:54:11.796] ROUTER SUMMARY reads=1 frames=0 keyex1=0 keyex2=0 newuser=0 login=0 joinwait=0 gs_encrypt=0 post_ke2_app=0 decode_err=0 last_msg=none close=peer_eof dur_ms=6998 post_ke2_ms=-1
+[2026-11-06 08:54:11.798] ROUTER 87.236.176.80 conn counter reset (no frames)
+[2026-11-06 08:54:11.798] ROUTER 87.236.176.80:55601 DISCONNECT

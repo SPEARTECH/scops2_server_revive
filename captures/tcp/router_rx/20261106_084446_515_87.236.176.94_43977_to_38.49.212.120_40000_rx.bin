@@ -1,0 +1,10 @@
+OPTIONS sip:38.49.212.120 SIP/2.0
+Via: SIP/2.0/TCP 87.236.176.94:5060;rport;branch=z9hG4bKwyqystpv
+Max-Forwards: 0
+To: sip:38.49.212.120
+From: sip:87.236.176.94;tag=wyqystpv
+Call-ID: wyqystpv
+CSeq: 1 OPTIONS
+Accept: application/sdp
+Content-Length: 0
+

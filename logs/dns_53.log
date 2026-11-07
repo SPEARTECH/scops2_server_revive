@@ -2064,3 +2064,66 @@ DNS 185.73.23.133:54956  A ims.mnc001.mcc262.3gppnetwork.org
   -> REFUSED (outside client, not an override)
 DNS 71.6.233.135:53  TXT version.bind
   -> REFUSED (outside client, not an override)
+DNS override+forwarder listening
+  listen:   0.0.0.0:53
+  upstream: 1.1.1.1:53
+  overrides:
+    A noname -> 192.168.1.100  ttl=60
+  suffix overrides:
+    A *.dnas.playstation.org -> 192.168.1.100  ttl=60
+    A *.ubisoft.com -> 192.168.1.100  ttl=60
+    A *.gamespy.com -> 192.168.1.100  ttl=60
+    A *.gamespy.net -> 192.168.1.100  ttl=60
+    A *.ubi.com -> 192.168.1.100  ttl=60
+  log:      logs/dns_53.log
+  ctrl+c to stop
+DNS 51.158.205.203:61000  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 151.243.11.230:59634  ANY wisc.edu
+  -> REFUSED (outside client, not an override)
+DNS 66.132.186.222:44308  A ip.parrotdns.com
+  -> REFUSED (outside client, not an override)
+DNS 66.132.172.137:39034  A ip.parrotdns.com
+  -> REFUSED (outside client, not an override)
+DNS 66.132.172.137:49826  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 183.204.62.125:40001  A config.pinyin.sogou.com
+  -> REFUSED (outside client, not an override)
+DNS 183.204.62.125:40003  A ime.sogou.com
+  -> REFUSED (outside client, not an override)
+DNS 151.243.11.230:37963  TXT united.com
+  -> REFUSED (outside client, not an override)
+DNS 141.98.11.129:29641  ANY ni
+  -> REFUSED (outside client, not an override)
+DNS 130.245.42.162:41774  A research-optout.ubcnet.ca
+  -> REFUSED (outside client, not an override)
+DNS 193.163.125.143:19578  A example.com
+  -> REFUSED (outside client, not an override)
+DNS 195.96.139.82:53478  A w6lvsqjuvlkwk.r5-82-52.dnscheck.internet-measurement.com
+  -> REFUSED (outside client, not an override)
+DNS 195.96.139.82:52001  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 195.96.139.82:48153  TXT hostname.bind
+  -> REFUSED (outside client, not an override)
+DNS 81.19.219.252:31669  A cloudflare.com
+  -> REFUSED (outside client, not an override)
+DNS 154.16.44.87:12267  A cloudflare.com
+  -> REFUSED (outside client, not an override)
+DNS 154.16.44.87:12267  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 154.16.44.87:12267  TXT hostname.bind
+  -> REFUSED (outside client, not an override)
+DNS 154.16.44.87:12267  TXT id.server
+  -> REFUSED (outside client, not an override)
+DNS 151.243.11.230:39564  TXT xxx.heimaoip.com
+  -> REFUSED (outside client, not an override)
+DNS 154.80.128.148:54972  ANY wzb.eu
+  -> REFUSED (outside client, not an override)
+DNS 216.25.90.61:53339  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 85.217.140.8:32853  TXT version.bind
+  -> REFUSED (outside client, not an override)
+DNS 45.135.193.115:45545  ANY dhitc.com
+  -> REFUSED (outside client, not an override)
+DNS 45.135.193.194:53650  ANY uu.nl
+  -> REFUSED (outside client, not an override)

@@ -164888,3 +164888,10 @@ BufferError: Message shorter than its header (1B).
 [2026-11-06 03:07:07.948] HOLE keepalive #100: 2B from :45004 -> 24.68.117.253:3658 (hole quiet 45s)
 [2026-11-06 03:41:53.215] HOLE keepalive #250: 2B from :45001 -> 212.104.215.140:18522 (hole quiet 45s)
 [2026-11-06 03:44:49.707] HOLE keepalive #150: 2B from :45004 -> 24.68.117.253:3658 (hole quiet 45s)
+[2026-11-06 04:58:30.778] GSNAT v3 listening
+[2026-11-06 04:58:30.779]   PORT_ID limit: all  gap: 25 ms
+[2026-11-06 04:58:30.783]   ADDRESS delay: 0 ms  repeat-ping ACKs: on  ADDRESS: sent  even-length datagrams: on
+[2026-11-06 04:58:30.795]   bind: 0.0.0.0  ports: 45000
+[2026-11-06 04:58:30.802]   ubi-gs modules: C:\Users\Administrator\Desktop\GITHUB\scops2_server_revive-gs-Connect\ubi-gs-new
+[2026-11-06 04:58:30.803]   RELAY: joiner ports 3658, 10070, 10071, 10072, 10073, 10074, 10075, 10076, 10077, 10078, 10079, 10080 -> host:3658 from :45000; control 127.0.0.1:45099; idle 300s; dump 300 pkts/dir; fanout 0s; alt host ports off
+[2026-11-06 04:58:30.803]   MULTI-HOLE: 12 holes; one hole per joiner endpoint; the console pings one spare hole, a new link takes it and the next spare is steered; steer also when a sending link finds a hole never opened / host silent >15s (budget 40); 2B keepalives every 45s

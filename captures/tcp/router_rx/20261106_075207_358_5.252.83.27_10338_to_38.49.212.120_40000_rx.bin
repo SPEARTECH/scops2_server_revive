@@ -1,0 +1,4 @@
+OPTIONS * RTSP/1.0
+CSeq: 1
+User-Agent: VLC/3.0.20
+
