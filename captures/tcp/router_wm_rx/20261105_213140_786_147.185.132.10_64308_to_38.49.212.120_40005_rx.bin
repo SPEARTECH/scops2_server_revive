@@ -1,0 +1,5 @@
+GET / HTTP/1.1
+Host: 38.49.212.120:40005
+User-Agent: Hello from Palo Alto Networks, find out more about our scans in https://docs-cortex.paloaltonetworks.com/r/1/Cortex-Xpanse/Scanning-activity
+Accept-Encoding: gzip
+

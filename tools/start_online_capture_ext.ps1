@@ -221,10 +221,18 @@ $ports = @(80,443,40000,40005,44000,44001,44002,45000,6667,6668,27900,27901,2891
 
 Write-Host 'Stopping existing listeners on key ports...' -ForegroundColor Cyan
 $manualUdpPorts = @(3658,4400,41006) + (10070..10080)
+$relayUdpPorts = @()
+if($env:SCCT_RELAY -eq '1') {
+  # UDP relay: the GSNAT v2 responder takes the game ports (joiner side) instead of the udp_log_server.
+  if($env:SCCT_NAT_V2 -ne '1') { Write-Host 'SCCT_RELAY=1 needs SCCT_NAT_V2=1 (relay lives in tools/nat2/udp_reply_server.py); enabling it.' -ForegroundColor Yellow; $env:SCCT_NAT_V2 = '1' }
+  $relayUdpPorts = @(3658) + (10070..10080)
+  $manualUdpPorts = @(4400,41006)
+  Write-Host "SCCT_RELAY=1: relaying joiner traffic on UDP $($relayUdpPorts -join ',') to hosts via 45000 (relay ip: $($env:SCCT_RELAY_IP) / public ip: $($env:SCCT_PUBLIC_IP))" -ForegroundColor Yellow
+}
 $ubiUdpReplyPorts = @(45000,45001)
 if($env:SCCT_NAT_PORTS) { $ubiUdpReplyPorts = @($env:SCCT_NAT_PORTS.Split(',') | ForEach-Object { [int]$_.Trim() }); Write-Host "SCCT_NAT_PORTS: NAT reply ports $($ubiUdpReplyPorts -join ',')" -ForegroundColor Yellow }
 $gamespyUdpEchoPorts = @(27900,27901,28910,29900,29901,29920)
-$udpPorts = @(53,19341) + $manualUdpPorts
+$udpPorts = @(53,19341) + $manualUdpPorts + $relayUdpPorts
 foreach($p in $ubiUdpReplyPorts) { $udpPorts += $p }
 foreach($p in $gamespyUdpEchoPorts) { $udpPorts += $p }
 
@@ -365,12 +373,11 @@ Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -
 # UDP reply service for ubi.com connectivity/NAT
 if($env:SCCT_NAT_V2 -eq '1') {
   Write-Host 'SCCT_NAT_V2=1: using the GSNAT v2 responder (PORT_ID -> ping -> ADDRESS) on UDP 45000.' -ForegroundColor Yellow
-  Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -ArgumentList @(
-    'tools/nat2/udp_reply_server.py',
-    '--bind', $BindIP,
-    '--ports', '45000',
-    '--log-file', 'logs/udp_45000_reply.log'
-  ) | Out-Null
+  $nat2Ports = '45000'
+  if($env:SCCT_NAT_EXTRA_PORTID) { $nat2Ports = '45000,' + $env:SCCT_NAT_EXTRA_PORTID; Write-Host "SCCT_NAT_EXTRA_PORTID=$($env:SCCT_NAT_EXTRA_PORTID): NAT responder also listens on those ports" -ForegroundColor Yellow }
+  $nat2Args = @('tools/nat2/udp_reply_server.py', '--bind', $BindIP, '--ports', $nat2Ports, '--log-file', 'logs/udp_45000_reply.log')
+  if($relayUdpPorts.Count -gt 0) { $nat2Args += @('--relay-ports', ($relayUdpPorts -join ',')) }
+  Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -ArgumentList $nat2Args | Out-Null
 } else {
 Start-Process -WindowStyle Minimized -FilePath $python -WorkingDirectory $root -ArgumentList @(
   'tools/udp_reply_server.py',

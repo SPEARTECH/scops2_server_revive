@@ -25,6 +25,11 @@
       "dp": "SC3PS2US1.0",
       "password": "AAA"
     },
+    "BLACKNIGHT": {
+      "created_ts": 1793864487,
+      "dp": "SC3PS2US1.0",
+      "password": "BLACK99"
+    },
     "BNMA": {
       "created_ts": 1773593029,
       "dp": "SC3PS2US1.0",
@@ -32,6 +37,11 @@
     },
     "CCC": {
       "created_ts": 1773611992,
+      "dp": "SC3PS2US1.0",
+      "password": "AAAAAA"
+    },
+    "COOLDOR": {
+      "created_ts": 1793836506,
       "dp": "SC3PS2US1.0",
       "password": "AAAAAA"
     },
@@ -49,6 +59,11 @@
       "created_ts": 1793804903,
       "dp": "SC3PS2US1.0",
       "password": "123456"
+    },
+    "DORDOR-SLIM": {
+      "created_ts": 1793840095,
+      "dp": "SC3PS2US1.0",
+      "password": "AAAAAA"
     },
     "EEE": {
       "created_ts": 1773612880,
@@ -110,6 +125,11 @@
       "dp": "SC3PS2US1.0",
       "password": "AAAAAA"
     },
+    "KNOCKEDRIVER": {
+      "created_ts": 1793865800,
+      "dp": "SC3PS2US1.0",
+      "password": "123456"
+    },
     "MANOB": {
       "created_ts": 1793806287,
       "dp": "SC3PS2US1.0",
@@ -132,6 +152,11 @@
     },
     "MYZN": {
       "created_ts": 1773761783,
+      "dp": "SC3PS2US1.0",
+      "password": "AAAAAA"
+    },
+    "NEWDOR": {
+      "created_ts": 1793850785,
       "dp": "SC3PS2US1.0",
       "password": "AAAAAA"
     },
@@ -250,6 +275,11 @@
       "dp": "SC3PS2US1.0",
       "password": "AAAAAA"
     },
+    "SNAKE": {
+      "created_ts": 1793935043,
+      "dp": "SC3PS2US1.0",
+      "password": "ABCMNOYZ0"
+    },
     "SNEAKY": {
       "created_ts": 1773583275,
       "dp": "SC3PS2US1.0",
@@ -279,6 +309,11 @@
       "created_ts": 1773710470,
       "dp": "SC3PS2US1.0",
       "password": "AAAAAA"
+    },
+    "TALLY_WHACKER": {
+      "created_ts": 1793864851,
+      "dp": "SC3PS2US1.0",
+      "password": "THUNDER7"
     },
     "TTT": {
       "created_ts": 1773615879,

@@ -1,0 +1,4 @@
+OPTIONS rtsp://38.49.212.120:554 RTSP/1.0
+CSeq: 1
+User-Agent: LibVLC/3.0.20 (LIVE555 Streaming Media v2016.11.28)
+

@@ -1,0 +1,7 @@
+GET / HTTP/1.1
+Host: 38.49.212.120:40000
+User-Agent: Mozilla/5.0 (compatible; Infrawatch/1.0; +https://infrawat.ch/)
+Accept: */*
+Accept-Encoding: gzip
+Connection: close
+
