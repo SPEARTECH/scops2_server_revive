@@ -1,0 +1,4 @@
+GET / HTTP/1.0
+Host: 38.49.212.120
+Connection:Close
+

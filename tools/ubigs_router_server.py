@@ -40,6 +40,7 @@ from ubigs_common import (
 )
 
 from ubigs_userdb import UserDB
+from net_utils import public_ip_for
 
 
 def _load_or_create_fixed_rsa_keypair(path: str, *, log_fp: TextIO | None):
@@ -294,6 +295,114 @@ def _frame_with_b5(frame: bytes, b5: int) -> bytes:
     out[5] = b5 & 0xFF
     return bytes(out)
 
+# ---------------------------------------------------------------------------
+# KE1 reply variant search (SCCT_KE1_VARIANT=auto|N). TEST ONLY.
+# Each new KE1 request gets the next variant; the log shows which one
+# produced a KE2 from the client. state/ke1_variant.txt holds the counter.
+# ---------------------------------------------------------------------------
+_KE1_VARIANTS = [
+    # (description, b5 override or None, b3 OR-mask, send_mode)
+    ("baseline (unchanged)",              None, 0x00, "normal"),
+    ("send split: 6B header, 40ms, rest", None, 0x00, "split6"),
+    ("send in 16B chunks, 10ms apart",    None, 0x00, "chunk16"),
+    ("delay 1000ms then send",            None, 0x00, "delay1000"),
+    ("send reply twice",                  None, 0x00, "dup"),
+    ("header priority bit 0x20",          None, 0x20, "normal"),
+    ("b5=0x24 (S->P, lobby style)",       0x24, 0x00, "normal"),
+    ("b5=0x41",                           0x41, 0x00, "normal"),
+    ("b5=0x28 (S->UNK)",                  0x28, 0x00, "normal"),
+    ("b5=0x82",                           0x82, 0x00, "normal"),
+    ("b5=0x12",                           0x12, 0x00, "normal"),
+    ("b5=0x21",                           0x21, 0x00, "normal"),
+    ("b5=0x00",                           0x00, 0x00, "normal"),
+    ("b5=0x11",                           0x11, 0x00, "normal"),
+    ("b5=0x22",                           0x22, 0x00, "normal"),
+    ("KE1 reply, then type-6 UDPConnectID id=1",     None, 0x00, "normal"),
+    ("KE1 reply, then type-6 UDPConnectID id=12345", None, 0x00, "normal"),
+    ("type-6 UDPConnectID id=1, then KE1 reply",     None, 0x00, "normal"),
+]
+# variant index -> (UDPConnectID value, "after" | "before" the KE1 reply)
+_KE1_UDP = {15: ("1", "after"), 16: ("12345", "after"), 17: ("1", "before")}
+
+
+def _build_type6(b5: int, conn_id: str) -> bytes:
+    """EVENT_UDPCONNECT (type 6) frame: dl = [conn_id]. Format is a guess from the client's ReadUDPConnectID."""
+    ensure_ubigs_importable()
+    import gsm
+    from data import List
+    class _M: pass
+    m = _M()
+    m.header = gsm.GSMessageHeader(bytes([0, 0, 6, 0, 6, b5]))
+    m.dl = None
+    r = gsm.GSMResponse(m)
+    r.header.type = gsm.MESSAGE_TYPE.EVENT_UDPCONNECT
+    r.dl = List([str(conn_id)])
+    out = bytearray(bytes(r))
+    out[5] = b5
+    return bytes(out)
+_KE1_LAST = {}   # id(conn) -> variant index used on that connection
+
+
+def _ke1_variant_pick():
+    spec = os.environ.get("SCCT_KE1_VARIANT", "").strip().lower()
+    if not spec:
+        return None
+    n = len(_KE1_VARIANTS)
+    if spec == "auto":
+        path = pathlib.Path("state/ke1_variant.txt")
+        try:
+            cur = int(path.read_text().strip())
+        except Exception:
+            cur = 0
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(str((cur + 1) % n))
+        except Exception:
+            pass
+        return cur % n
+    try:
+        return int(spec) % n
+    except Exception:
+        return None
+
+
+def _ke1_send_variant(conn, out: bytes, log_fp=None) -> bool:
+    """Send a KE1 reply using the next variant. False = variant mode off."""
+    idx = _ke1_variant_pick()
+    if idx is None:
+        return False
+    desc, b5, b3or, mode = _KE1_VARIANTS[idx]
+    b = bytearray(out)
+    old5 = b[5]
+    if b5 is not None:
+        b[5] = b5
+    b[3] |= b3or
+    data = bytes(b)
+    _KE1_LAST[id(conn)] = idx
+    log_line(f"[{now_ts()}] KE1_VARIANT {idx}/{len(_KE1_VARIANTS)-1}: {desc} (b5 {old5:02x}->{b[5]:02x}, b3={b[3]:02x}, send={mode})", log_fp=log_fp)
+    udp = _KE1_UDP.get(idx)
+    if udp is not None:
+        t6 = _build_type6(data[5], udp[0])
+        log_line(f"[{now_ts()}] KE1_VARIANT type-6 frame len={len(t6)} id={udp[0]} order={udp[1]} hex={t6.hex()}", log_fp=log_fp)
+        if udp[1] == "before":
+            conn.sendall(t6); time.sleep(0.05); conn.sendall(data)
+        else:
+            conn.sendall(data); time.sleep(0.05); conn.sendall(t6)
+        return True
+    if mode == "split6":
+        conn.sendall(data[:6]); time.sleep(0.04); conn.sendall(data[6:])
+    elif mode == "chunk16":
+        for i in range(0, len(data), 16):
+            conn.sendall(data[i:i+16]); time.sleep(0.01)
+    elif mode == "delay1000":
+        time.sleep(1.0); conn.sendall(data)
+    elif mode == "dup":
+        conn.sendall(data); time.sleep(0.05); conn.sendall(data)
+    else:
+        conn.sendall(data)
+    return True
+
+
 def handle_message(
     clt: ClientState,
     msg,
@@ -511,8 +620,19 @@ def handle_message(
                 log_line(f"[{now_ts()}] ROUTER LOGIN REJECT: no username parsed", log_fp=log_fp)
                 login_ok = False
             elif userdb.get_user(username) is None:
-                log_line(f"[{now_ts()}] ROUTER LOGIN REJECT: user={username!r} not found", log_fp=log_fp)
-                login_ok = False
+                # SCCT_AUTO_REGISTER=1: unknown user logging in with a password gets an account on the spot
+                # (fresh server / new VPS without the old state/users.json). Default off: reject as before.
+                if os.environ.get("SCCT_AUTO_REGISTER", "0").strip() == "1" and password:
+                    try:
+                        userdb.upsert_user(username=username, password=password, dp=dp)
+                        userdb.save()
+                        log_line(f"[{now_ts()}] ROUTER LOGIN AUTO-REGISTER: created user={username!r} (SCCT_AUTO_REGISTER=1)", log_fp=log_fp)
+                    except Exception as e:
+                        log_line(f"[{now_ts()}] ROUTER LOGIN AUTO-REGISTER failed for user={username!r}: {e}", log_fp=log_fp)
+                        login_ok = False
+                else:
+                    log_line(f"[{now_ts()}] ROUTER LOGIN REJECT: user={username!r} not found", log_fp=log_fp)
+                    login_ok = False
             elif password is not None and not userdb.check_password(username=username, password=password):
                 log_line(f"[{now_ts()}] ROUTER LOGIN REJECT: wrong password for user={username!r}", log_fp=log_fp)
                 login_ok = False
@@ -715,6 +835,27 @@ def handle_joinwaitmodule(msg, *, wait_module: tuple[str, int], joinwait_format:
     # Dynamic _build_joinwait_success produces different-sized output now
     # (40 bytes vs 38 bytes) which the game can't parse correctly.
     primary = bytes.fromhex("000026002641eb8bd3abafae8a8ca0a0ada28ce3a4a9a1a6d4bab4a039a1a9fde1f5b69ea7a7")
+    # FIX: the captured reply above has the wait-module address baked in
+    # (192.168.0.213:40005). Re-encode it with the real --wm-ip/--wm-port, otherwise the
+    # client's first login attempt dials a dead address and shows
+    # "Cannot access Ubi.Com". Falls back to the captured bytes on any error.
+    try:
+        import gsxor
+        _wip, _wport = wait_module
+        _dl = List([b']', [str(_wip), int(_wport).to_bytes(4, "little")]])
+        _body = bytearray(bytes(_dl))
+        _body.pop(0)
+        _body.pop()
+        _enc = gsxor.encrypt(bytes(_body))
+        _hdr = bytearray(primary[:6])
+        _hdr[2:4] = (6 + len(_enc)).to_bytes(2, "little")
+        _new = bytes(_hdr) + _enc
+        if _wip == "192.168.0.213" and int(_wport) == 40005 and _new != primary:
+            raise ValueError("re-encode self-check mismatch")
+        primary = _new
+        log_line(f"[{now_ts()}] ROUTER JOINWAIT wait-module patched to {_wip}:{_wport}", log_fp=log_fp)
+    except Exception as _e:
+        log_line(f"[{now_ts()}] ROUTER JOINWAIT wait-module patch failed ({_e}); using captured reply", log_fp=log_fp)
     push0 = bytes.fromhex("00000c002641eb8bd38a8c8c")
 
     jwm_extras = [
@@ -795,6 +936,9 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
     conn.settimeout(float(args.idle_timeout))
 
     src_ip, src_port = addr
+    # Outside clients (SCCT_PUBLIC_IP set) must be told the public address, not the LAN one.
+    _wm_ip = public_ip_for(src_ip, str(args.wm_ip))
+    _ct34_host = public_ip_for(src_ip, str(args.ct34_host))
     local_ip, local_port = conn.getsockname()
     log_line(f"\n[{now_ts()}] ROUTER {src_ip}:{src_port} -> {local_ip}:{local_port} CONNECT", log_fp=log_fp)
 
@@ -963,15 +1107,21 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                 res = None
                 extras = []
                 try:
+                    if (msg.header.type == gsm.MESSAGE_TYPE.KEY_EXCHANGE and msg.dl is not None
+                            and str(msg.dl.lst[0]) == "2" and id(conn) in _KE1_LAST):
+                        log_line(f"[{now_ts()}] KE1_VARIANT RESULT: client SENT KE2 after variant {_KE1_LAST[id(conn)]}", log_fp=log_fp)
+                except Exception:
+                    pass
+                try:
                     if msg.header.type == gsm.MESSAGE_TYPE.JOINWAITMODULE:
                         handled = handle_joinwaitmodule(
                             msg,
-                            wait_module=(args.wm_ip, int(args.wm_port)),
+                            wait_module=(_wm_ip, int(args.wm_port)),
                             joinwait_format=str(args.joinwait_format),
                             ct34_enable=bool(args.ct34_enable),
                             ct34_mode=str(args.ct34_mode),
                             ct34_base=str(args.ct34_base),
-                            ct34_host=str(args.ct34_host),
+                            ct34_host=_ct34_host,
                             ct34_port=int(args.ct34_port),
                             ct34_id=int(args.ct34_id),
                             ct34_num_a=int(args.ct34_num_a),
@@ -987,7 +1137,7 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                             clt,
                             msg,
                             frame_bytes=bytes(frame),
-                            wait_module=(args.wm_ip, int(args.wm_port)),
+                            wait_module=(_wm_ip, int(args.wm_port)),
                             keyex2_mode=str(args.keyex2_mode),
                             post_ke2_push=str(args.post_ke2_push),
                             post_ke2_replay_frames=args._post_ke2_replay_frames,
@@ -995,7 +1145,7 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                             ct34_enable=bool(args.ct34_enable),
                             ct34_mode=str(args.ct34_mode),
                             ct34_base=str(args.ct34_base),
-                            ct34_host=str(args.ct34_host),
+                            ct34_host=_ct34_host,
                             ct34_port=int(args.ct34_port),
                             ct34_id=int(args.ct34_id),
                             ct34_num_a=int(args.ct34_num_a),
@@ -1022,6 +1172,13 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                     save_blob(args.save_tx_dir, tx_name, out)
                     log_line(f"[{now_ts()}] ROUTER TX[{tag}] len={len(out)} sha256={sha16(out)}", log_fp=log_fp)
                     log_line(hexdump(out, max_len=int(args.dump_max)), log_fp=log_fp)
+                    try:
+                        _is_ke1 = (tag == "tx" and msg.header.type == gsm.MESSAGE_TYPE.KEY_EXCHANGE
+                                   and msg.dl is not None and str(msg.dl.lst[0]) == "1")
+                    except Exception:
+                        _is_ke1 = False
+                    if _is_ke1 and _ke1_send_variant(conn, out, log_fp):
+                        return
                     conn.sendall(out)
 
                 _send_response(res, "tx")
@@ -1080,7 +1237,7 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
                             fallback_extras.append(
                                 _build_joinwait_success(
                                     msg,
-                                    wait_module=(args.wm_ip, int(args.wm_port)),
+                                    wait_module=(_wm_ip, int(args.wm_port)),
                                     joinwait_format=str(args.joinwait_format),
                                 )
                             )
@@ -1130,7 +1287,9 @@ def client_thread(conn: socket.socket, addr: tuple[str, int], args: argparse.Nam
         # If this Router connection had no meaningful frames (quick disconnect/probe),
         # reset the per-IP connection counter so the next connection from this IP
         # gets correctly routed to Router instead of WM.
-        if stats['frames'] == 0:
+        # Also reset after a completed JOINWAITMODULE: the client is then sent to the WM
+        # port (40005) directly, so no 2nd connection arrives on 40000 to clear the counter.
+        if stats['frames'] == 0 or stats.get('joinwait', 0) > 0:
             try:
                 _ip_conn_reset = getattr(args, '_ip_conn_reset', None)
                 if _ip_conn_reset is not None:
@@ -1350,6 +1509,11 @@ def main(argv: list[str] | None = None) -> int:
             conn, addr = sock.accept()
             client_ip = addr[0]
             conn_num = _ip_conn_increment(client_ip)
+            if os.environ.get("SCCT_KE1_VARIANT", "").strip():
+                # KE1 variant test: every connection is a router connection, so a
+                # retry after a failed attempt is not mistaken for the WM leg.
+                _ip_conn_reset(client_ip)
+                conn_num = 1
 
             log_line(f"[{now_ts()}] ROUTER unified: connection #{conn_num} from {addr[0]}:{addr[1]}", log_fp=log_fp)
 
